@@ -2,10 +2,20 @@
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
-$app->get('/login/{user}/{password}', function (Request $request, Response $response) {
-    $user = new ampuser($request->getAttribute('user'));
-    $res = $user->checkPassword($request->getAttribute('password'));
-    $response->getBody()->write(json_encode(array('result' => $res)));
+/*
+* /login - POST
+* 
+* @param user
+* @param password
+*
+* @return { "success" : true } if authentication is valid
+* @return { "success" : false } otherwise
+*/
+$app->post('/login', function (Request $request, Response $response) {
+    $params = $request->getParsedBody();
+    $user = new ampuser($params['user']);
+    $res = $user->checkPassword($params['password']);
+    $response->withJson(array('success' => $res));
     return $response;
 });
 
