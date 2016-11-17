@@ -15,7 +15,6 @@ $app->post('/login', function (Request $request, Response $response) {
     $params = $request->getParsedBody();
     $user = new ampuser($params['user']);
     $res = $user->checkPassword($params['password']);
-    $response->withJson(array('success' => $res));
-    return $response;
+    return $response->withJson(array('success' => $res));
 });
 

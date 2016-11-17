@@ -11,15 +11,11 @@ require_once '/etc/freepbx.conf';
 
 # Load middleware classess
 require('lib/AuthMiddleware.php');
-require('lib/JsonResponseMiddleware.php');
 
 # Load configuration
 require_once('config.inc.php');
 
 $app = new \Slim\App($config);
-
-# Set JSON output to all response
-$app->add(new JsonResponseMiddleware());
 
 # Add authentication
 $app->add(new AuthMiddleware($config['settings']['secretkey']));

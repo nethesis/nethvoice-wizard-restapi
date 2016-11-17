@@ -20,13 +20,11 @@ class AuthMiddleware
     public function __invoke($request, $response, $next)
     {
         if (!$request->hasHeader('Secretkey')) {
-            $response = $response->withStatus(403);
-            $response->getBody()->write(json_encode(array('result' => 'Forbidden: no secret key given')));
+            $response = $response->withJson(['error' => 'Forbidden: no secret key given'], 403);
         } else {
             $given_secret = $request->getHeaderLine('Secretkey');
             if ($given_secret != $this->secret) {
-                $response = $response->withStatus(403);
-                $response->getBody()->write(json_encode(array('result' => 'Forbidden: wrong secret key')));
+                $response = $response->withJson(['error' => 'Forbidden: wrong secret key'], 403);
             } else {
                 $response = $next($request, $response);
             }
@@ -34,5 +32,4 @@ class AuthMiddleware
 
         return $response;
     }
-
 }

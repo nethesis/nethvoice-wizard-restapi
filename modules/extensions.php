@@ -32,6 +32,6 @@ $app->get('/extensions/list', function ($request, $response, $args) {
         $extensions[$extension['extension']]=$extension;
     }
 
-    $response->getBody()->write(json_encode($extensions));
+    return $response->withJson($extensions);
 });
 
