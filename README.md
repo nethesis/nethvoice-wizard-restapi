@@ -73,3 +73,24 @@ curl -kvL  https://localhost/freepbx/rest/login -H "Content-Type: application/js
 
 ```
 
+## API
+
+Retrieve all users
+
+```GET /users```
+
+Retrieve a specific user by id
+
+```GET /users/{id}```
+
+Retrieve all extensions
+
+```GET /extensions```
+
+Retrieve all virtual extensions
+
+```GET virtualextensions```
+
+Retrieve a virtual extension by its own number
+
+```GET /virtualextensions/{extnumber}```
