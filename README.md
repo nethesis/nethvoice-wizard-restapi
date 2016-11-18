@@ -26,9 +26,9 @@ Javascript example:
 var user = "admin";
 var password = sha1("admin");
 var secret = "1234";
-var secretkey = sha1(user + password + secret);
+var hash = sha1(user + password + secret);
 
-console.log(secretkey);
+console.log("Secretkey: " + hash);
 
 </script>
 
@@ -49,7 +49,7 @@ use \Psr\Http\Message\ResponseInterface as Response;
 
 require_once('/var/www/html/freepbx/admin/modules/_module_/functions.inc.php');
 
-$app->get('/magic/list', function ($request, $response, $args) {
+$app->get('/magic/list', function (Request $request, Response $response, $args) {
     global $db;
     global $astman;
 
