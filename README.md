@@ -89,7 +89,7 @@ Retrieve all extensions
 
 Retrieve all virtual extensions
 
-```GET virtualextensions```
+```GET /virtualextensions```
 
 Retrieve a virtual extension by its own number
 

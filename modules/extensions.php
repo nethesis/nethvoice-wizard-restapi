@@ -2,13 +2,13 @@
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
-$app->get('/extensions/', function ($request, $response, $args) {
+$app->get('/extensions', function ($request, $response, $args) {
     $extensions = FreePBX::create()->Core->getAllUsersByDeviceType();
-    
+
     return $response->withJson($extensions);
 });
 
-$app->get('/virtualextensions/', function ($request, $response, $args) {
+$app->get('/virtualextensions', function ($request, $response, $args) {
     $extensions = FreePBX::create()->Core->getAllUsersByDeviceType('virtual');
     return $response->withJson($extensions);
 });
