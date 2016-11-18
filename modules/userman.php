@@ -13,7 +13,7 @@ function __exists($username) {
     return ($ret === 0);
 }
 
-$app->get('/users', function ($request, $response, $args) {
+$app->get('/users', function (Request $request, Response $response, $args) {
     $users = FreePBX::create()->Userman->getAllUsers();
     return $response->withJson($users);
 });
