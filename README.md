@@ -79,29 +79,60 @@ curl -kvL  https://localhost/freepbx/rest/login -H "Content-Type: application/js
 
 Retrieve all users
 
-```GET /users```
+```
+GET /users
+```
 
 Retrieve a specific user by id
 
-```GET /users/{id}```
+```
+GET /users/{id}
+```
+
+Check if a user exists
+
+```
+GET /users/exists/{username}
+```
+
+Create a new user
+
+```
+PUT /users/create/{username}/{fullname}/{extension}
+```
+
+Set user password
+
+```
+POST /users/setpassword
+
+Parameter: { "username": "myuser", "password": "mypass" }
+```
+
 
 ### Extensions
 
 Retrieve all extensions
 
-```GET /extensions```
+```
+GET /extensions
+```
 
 Retrieve all virtual extensions
 
-```GET /virtualextensions```
+```
+GET /virtualextensions
+```
 
 Retrieve a virtual extension by its own number
 
-```GET /virtualextensions/{extnumber}```
+```
+GET /virtualextensions/{extnumber}
+```
 
 ### Configuration
 
-Check if *Legacy mode` is enabled:
+Check if *Legacy mode* is enabled:
 
 ```
 GET /configuration/islegacy
