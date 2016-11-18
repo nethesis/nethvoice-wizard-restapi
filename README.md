@@ -63,6 +63,7 @@ $app->get('/magic/list', function ($request, $response, $args) {
 ## Login
 
 Example:
+
 - user: admin
 - password: admin
 - secret: 1234
@@ -70,5 +71,5 @@ Example:
 ```
 curl -kvL  https://localhost/freepbx/rest/login -H "Content-Type: application/json" -H "User: admin" -H "Secretkey: 51b3bfeb54d746a8c8989e71dd8be757787d1adc"
 
-````
+```
 
