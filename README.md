@@ -26,9 +26,9 @@ Javascript example:
 var user = "admin";
 var password = sha1("admin");
 var secret = "1234";
-var secret = sha1(user + password + secret);
+var secretkey = sha1(user + password + secret);
 
-console.log(secret);
+console.log(secretkey);
 
 </script>
 
