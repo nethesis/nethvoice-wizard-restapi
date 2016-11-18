@@ -19,11 +19,24 @@ class AuthMiddleware
      */
     public function __invoke($request, $response, $next)
     {
-        if (!$request->hasHeader('Secretkey')) {
-            $response = $response->withJson(['error' => 'Forbidden: no secret key given'], 403);
+        global $db;
+        if (!$request->hasHeader('Secretkey') || !$request->hasHeader('User')) {
+            return $response->withJson(['error' => 'Forbidden: no credentials'], 403);
         } else {
+            $given_user = $request->getHeaderLine('User');
             $given_secret = $request->getHeaderLine('Secretkey');
-            if ($given_secret != $this->secret) {
+
+            $user = sql("SELECT * FROM ampusers WHERE sections='*' AND username = '$given_user'", "getAll", DB_FETCHMODE_ASSOC);
+            $password_sha1 = $user[0]['password_sha1'];
+            $username = $user[0]['username'];
+
+            # check the user is valid and is an admin (sections = *)
+            if ( !$username ) {
+                return $response->withJson(['error' => 'Forbidden: invalid user'], 403);
+            }
+
+            $hash = sha1($username . $password_sha1 . $this->secret);
+            if ($given_secret != $hash) {
                 $response = $response->withJson(['error' => 'Forbidden: wrong secret key'], 403);
             } else {
                 $response = $next($request, $response);

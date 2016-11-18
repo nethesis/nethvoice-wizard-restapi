@@ -5,9 +5,33 @@ This is based on Slim framework: http://www.slimframework.com/docs/
 
 The code must be installed under `/var/www/html/freepbx/rest` directory.
 
-All requests must include the ``Secretkey`` HTTP header, the secret is shared between client and server. Example:
+## Authentication
+
+Eeach request must include 2 HTTP header:
+
+- `User`: must be a valid FreePBX administrator (ampusers table)
+- `Secretkey`: must be a valid hash
+
+The Secretkey must be calculated using the following parameters:
+- user: the same value of `User` header
+- password: password of the user in sha1 hash format
+- secret: shared static secret between client and server; default is: `1234`
+
+Javascript example:
+
 ```
-Secretkey: 1234
+<script type="text/javascript" src="rest/sha1.js"></script>
+<script type="text/javascript">
+
+var user = "admin";
+var password = sha1("admin");
+var secret = "1234";
+var secret = sha1(user + password + secret);
+
+console.log(secret);
+
+</script>
+
 ```
 
 ## Adding modules
