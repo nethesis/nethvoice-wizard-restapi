@@ -60,7 +60,9 @@ $app->get('/magic/list', function (Request $request, Response $response, $args) 
 ```
 
 
-## Login
+## API
+
+### Login
 
 Example:
 
@@ -73,7 +75,7 @@ curl -kvL  https://localhost/freepbx/rest/login -H "Content-Type: application/js
 
 ```
 
-## API
+### Users
 
 Retrieve all users
 
@@ -82,6 +84,8 @@ Retrieve all users
 Retrieve a specific user by id
 
 ```GET /users/{id}```
+
+### Extensions
 
 Retrieve all extensions
 
@@ -94,3 +98,17 @@ Retrieve all virtual extensions
 Retrieve a virtual extension by its own number
 
 ```GET /virtualextensions/{extnumber}```
+
+### Configuration
+
+Check if *Legacy mode` is enabled:
+
+```
+GET /configuration/islegacy
+```
+
+Set legacy mode (install nethserver-directory):
+
+```
+POST /configuration/setlegacy
+```
