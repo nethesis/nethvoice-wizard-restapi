@@ -83,30 +83,32 @@ Retrieve all users
 GET /users
 ```
 
-Retrieve a specific user by id
+Retrieve a specific user by username
 
 ```
 GET /users/{id}
 ```
 
-Check if a user exists
+Create a new user or edit an existing one.
+
+JSON body:
+``{"username" : "myuser", "fullname" : "my full name"}``
 
 ```
-GET /users/exists/{username}
-```
-
-Create a new user
-
-```
-PUT /users/create/{username}/{fullname}/{extension}
+POST /users
 ```
 
 Set user password
 
 ```
-POST /users/setpassword
+POST /users/{username}/password
 
-Parameter: { "username": "myuser", "password": "mypass" }
+Parameter: { "password": "mypass" }
+```
+
+Get user password in clear-text
+```
+GET /users/{username}/password
 ```
 
 
