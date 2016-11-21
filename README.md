@@ -2,6 +2,7 @@
 
 Simple REST API framework for NethVoice.
 This is based on Slim framework: http://www.slimframework.com/docs/
+API design inspired by http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api
 
 The code must be installed under `/var/www/html/freepbx/rest` directory.
 
@@ -33,6 +34,17 @@ console.log("Secretkey: " + hash);
 </script>
 
 ```
+
+Generate the secret key from bash:
+
+```
+user=admin;
+pass=admin;
+secret=$(cat /var/lib/nethserver/secrets/nethvoice); \
+pass=$(echo -n $pass | sha1sum | awk '{print $1}'); \
+echo -n $user$pass$secret | sha1sum | awk '{print $1}'
+```
+
 
 ## Adding modules
 
