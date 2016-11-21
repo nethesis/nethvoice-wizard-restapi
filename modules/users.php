@@ -32,9 +32,16 @@ function setPassword($username, $password) {
 # List all users
 
 $app->get('/users', function (Request $request, Response $response, $args) {
+    $blacklist = ['administrator', 'guest', 'krbtgt'];
     $users = FreePBX::create()->Userman->getAllUsers();
-    for($i = 0; $i < count($users); ++$i) {
-        $users[$i]['password'] = getPassword(getUser($users[$i]['username']));
+    $i = 0;
+    foreach ($users as $user) {
+        if (in_array(strtolower($users[$i]['username']), $blacklist)) {
+            unset($users[$i]);
+        } else {
+            $users[$i]['password'] = getPassword(getUser($users[$i]['username']));
+        }
+        $i++;
     }
     return $response->withJson($users);
 });
