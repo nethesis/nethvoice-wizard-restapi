@@ -18,11 +18,31 @@ function userExists($username) {
     return ($ret === 0);
 }
 
+function getPassword($username) {
+    return sql('SELECT password FROM `rest_user_passwords` WHERE username = "' . getUser($username) . '"', "getOne");
+}
+
+function setPassword($username, $password) {
+    global $db;
+    $sql = 'REPLACE INTO `rest_user_passwords` (`username`, `password`) VALUES ("' . getUser($username) . '","' . $password . '")';
+    $db->query($sql);
+}
+
+
+# List all users
+
 $app->get('/users', function (Request $request, Response $response, $args) {
+    $ret = [];
     $users = FreePBX::create()->Userman->getAllUsers();
-    return $response->withJson($users);
+    foreach ($users as $user) {
+        $user['password'] = getPassword(getUser($user['username']));
+        $ret[] = $user;
+    }
+    return $response->withJson($ret);
 });
 
+
+# Return the selected user
 
 $app->get('/users/{username}', function (Request $request, Response $response, $args) {
     $username = $request->getAttribute('username');
@@ -73,6 +93,7 @@ $app->post('/users/{username}/password', function (Request $request, Response $r
     $params = $request->getParsedBody();
     $username = $request->getAttribute('username');
     $password = $params['password'];
+
     if ( ! userExists($username) ) {
         return $response->withJson(['result' => "$username user doesn't exist"], 422);
     } else {
@@ -80,7 +101,10 @@ $app->post('/users/{username}/password', function (Request $request, Response $r
         file_put_contents($tmp, $password);
 
         exec("/usr/bin/sudo /sbin/e-smith/signal-event password-modify '".getUser($username)."' $tmp", $out, $ret);
-        return $response->withJson(['result' => ($ret === 0)]);
+        if ($ret === 0) {
+            setPassword(getUser($username), $password);
+            return $response->withJson(['result' => true]);
+        }
     }
     return $response->withJson(['result' => false], 422);
 }); 
@@ -91,6 +115,11 @@ $app->post('/users/{username}/password', function (Request $request, Response $r
 $app->get('/users/{username}/password', function (Request $request, Response $response, $args) {
     $params = $request->getParsedBody();
     $username = $request->getAttribute('username');
-    return $response->withJson(['result' => ''], 404);
+    $password = getPassword($username);
+    if ($password) {
+        return $response->withJson(['result' => $password]);
+    } else {
+        return $response->withJson(['result' => ''], 404);
+    }
 });
 
