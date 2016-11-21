@@ -32,13 +32,11 @@ function setPassword($username, $password) {
 # List all users
 
 $app->get('/users', function (Request $request, Response $response, $args) {
-    $ret = [];
     $users = FreePBX::create()->Userman->getAllUsers();
-    foreach ($users as $user) {
-        $user['password'] = getPassword(getUser($user['username']));
-        $ret[] = $user;
+    for($i = 0; $i < count($users); ++$i) {
+        $users[$i]['password'] = getPassword(getUser($users[$i]['username']));
     }
-    return $response->withJson($ret);
+    return $response->withJson($users);
 });
 
 
@@ -47,10 +45,15 @@ $app->get('/users', function (Request $request, Response $response, $args) {
 $app->get('/users/{username}', function (Request $request, Response $response, $args) {
     $username = $request->getAttribute('username');
     if (userExists($username)) {
-        return $response->withJson(['result' => userExists($username)], 200);
-    } else {
-        return $response->withJson(['result' => 'Not found'], 404);
-    }
+        $users = FreePBX::create()->Userman->getAllUsers();
+        foreach ($users as $u) {
+            if ($u['username'] == $username) {
+                $u['password'] = getPassword(getUser($u['username']));
+                return $response->withJson($u);
+            }
+        }
+    } 
+    return $response->withJson(['result' => 'Not found'], 404);
 });
 
 
