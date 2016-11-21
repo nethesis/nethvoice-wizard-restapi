@@ -109,6 +109,39 @@ POST /users/setpassword
 Parameter: { "username": "myuser", "password": "mypass" }
 ```
 
+### Configuration
+
+Check legacy mode status.
+
+Legacy mode is enabled if:
+- nethserver-directory os installed
+- nethvoice{LegacyMode} prop is set to enabled
+
+Result: 
+  - `{'result' => true }` if legacy mode is enabled
+  - `{'result' => false }` if legacy mode is enabled
+  - `{'result' => 'unknown' }` if legacy mode isn't set
+
+```
+GET configuration/legacy
+```
+
+Enable legacy mode:
+
+- set nethvoice{LegacyMode} to enabled
+- install nethserver-directory
+
+Legacy mode can't be reverted
+
+Result: 
+ - `{'result' => true }` on success
+ - `{'result' => false }` on error
+
+```
+POST /configuration/legacy
+
+```
+
 
 ### Extensions
 
@@ -130,16 +163,3 @@ Retrieve a virtual extension by its own number
 GET /virtualextensions/{extnumber}
 ```
 
-### Configuration
-
-Check if *Legacy mode* is enabled:
-
-```
-GET /configuration/islegacy
-```
-
-Set legacy mode (install nethserver-directory):
-
-```
-POST /configuration/setlegacy
-```
