@@ -58,6 +58,10 @@ $app->post('/virtualextensions', function (Request $request, Response $response,
     $data['fmfm']='yes';
     $fpbx->Findmefollow->delUser($extension,false);
     $fpbx->Findmefollow->processQuickCreate($tech, $extension, $data);
+    $fpbx->Findmefollow->addSettingById($extension, 'strategy','ringall');
+    $fpbx->Findmefollow->addSettingById($extension, 'pre_ring','0');
+    $fpbx->Findmefollow->addSettingById($extension, 'grptime','30');
+    $fpbx->Findmefollow->addSettingById($extension, 'postdest','app-blackhole,hangup,1');
 
     return $response->withJson(array("status"=>true),200);
 });
