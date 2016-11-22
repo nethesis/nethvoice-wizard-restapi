@@ -20,7 +20,10 @@ class AuthMiddleware
     public function __invoke($request, $response, $next)
     {
         global $db;
-        if (!$request->hasHeader('Secretkey') || !$request->hasHeader('User')) {
+        if ($request->isOptions()) {
+            $response = $next($request, $response);
+        }
+        else if (!$request->hasHeader('Secretkey') || !$request->hasHeader('User')) {
             return $response->withJson(['error' => 'Forbidden: no credentials'], 403);
         } else {
             $given_user = $request->getHeaderLine('User');
