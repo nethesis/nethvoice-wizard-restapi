@@ -2,17 +2,15 @@
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
-$tech='virtual';
-
 $app->get('/virtualextensions', function (Request $request, Response $response, $args) {
-    $virtualextensions = FreePBX::create()->Core->getAllUsersByDeviceType($tech);
+    $virtualextensions = FreePBX::create()->Core->getAllUsersByDeviceType('virtual');
     return $response->withJson($virtualextensions,200);
 });
 
 $app->get('/virtualextensions/{extension}', function (Request $request, Response $response, $args) {
     $route = $request->getAttribute('route');
     $extension = $route->getArgument('extension');
-    $virtualextensions = FreePBX::create()->Core->getAllUsersByDeviceType($tech);
+    $virtualextensions = FreePBX::create()->Core->getAllUsersByDeviceType('virtual');
     foreach ($virtualextensions as $e) {
         if ($e['extension'] == $extension){
             return $response->withJson($e,200);
@@ -49,7 +47,7 @@ $app->post('/virtualextensions', function (Request $request, Response $response,
     $fpbx->Core->delUser($extension,true);
 
     //create virtual extension
-    $res = $fpbx->Core->processQuickCreate($tech,$extension,$data);
+    $res = $fpbx->Core->processQuickCreate('virtual',$extension,$data);
     if (!$res['status']) {
         return $response->withJson(array('message'=>$res['message']),500);
     }
@@ -57,7 +55,7 @@ $app->post('/virtualextensions', function (Request $request, Response $response,
     //Configure Follow me for the extension
     $data['fmfm']='yes';
     $fpbx->Findmefollow->delUser($extension,false);
-    $fpbx->Findmefollow->processQuickCreate($tech, $extension, $data);
+    $fpbx->Findmefollow->processQuickCreate('virtual', $extension, $data);
     $fpbx->Findmefollow->addSettingById($extension, 'strategy','ringall');
     $fpbx->Findmefollow->addSettingById($extension, 'pre_ring','0');
     $fpbx->Findmefollow->addSettingById($extension, 'grptime','30');
