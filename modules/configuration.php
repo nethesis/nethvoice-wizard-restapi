@@ -19,9 +19,9 @@ $app->get('/configuration/legacy', function (Request $request, Response $respons
     $mode = getLegacyMode();
     exec("/usr/bin/rpm -q nethserver-directory", $out, $ret);
 
-    # return 'uknown' if LegacyMode prop is not set
+    # return 'unknown' if LegacyMode prop is not set
     if ( $mode == "" ) {
-        return $response->withJson(['result' => 'uknown']);
+        return $response->withJson(['result' => 'unknown']);
     }
 
     # return true, if LegacyMode is enabled and nethserver-directory is installed
