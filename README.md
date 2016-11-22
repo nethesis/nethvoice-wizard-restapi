@@ -157,23 +157,38 @@ POST /configuration/legacy
 ```
 
 
-### Extensions
+### Virtual Extensions
 
-Retrieve all extensions
-
-```
-GET /extensions
-```
-
-Retrieve all virtual extensions
+Retrieve all Virtual Extensions
 
 ```
 GET /virtualextensions
 ```
 
-Retrieve a virtual extension by its own number
+Retrieve a Virtual Extension by its own extension number
 
 ```
 GET /virtualextensions/{extnumber}
 ```
 
+Create a new Virtual Extension
+
+```
+POST /virtualextensions
+
+Parameter: { "username": "myuser", "extension": "extnumber"[,"outboundcid" : "outboundcid" ] }
+```
+
+### Configuration
+
+Check if *Legacy mode* is enabled:
+
+```
+GET /configuration/islegacy
+```
+
+Set legacy mode (install nethserver-directory):
+
+```
+POST /configuration/setlegacy
+```
