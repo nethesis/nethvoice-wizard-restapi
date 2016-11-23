@@ -9,36 +9,49 @@ function getLegacyMode() {
     return $out[0];
 }
 
-function setLegacyMode() {
-    exec("/usr/bin/sudo /sbin/e-smith/config setprop nethvoice LegacyMode enabled", $out, $ret);
+function setLegacyMode($value) {
+    exec("/usr/bin/sudo /sbin/e-smith/config setprop nethvoice LegacyMode $value", $out, $ret);
 }
 
 
-# check if legacy mode is enabled
+# get enabled mode
 
-$app->get('/configuration/legacy', function (Request $request, Response $response, $args) {
+$app->get('/configuration/mode', function (Request $request, Response $response, $args) {
     $mode = getLegacyMode();
-    exec("/usr/bin/rpm -q nethserver-directory", $out, $ret);
 
     # return 'unknown' if LegacyMode prop is not set
     if ( $mode == "" ) {
         return $response->withJson(['result' => 'unknown']);
     }
 
+    exec("/usr/bin/rpm -q nethserver-directory", $out, $ret);
+
     # return true, if LegacyMode is enabled and nethserver-directory is installed
     if ($mode == "enabled" && $ret === 0) {
-        return $response->withJson(['result' => true]);
+        return $response->withJson(['result' => "legacy"]);
     }
-    return $response->withJson(['result' => false]);
+    return $response->withJson(['result' => "uc"]);
 });
 
 
-# set legacy mode to enabled
+# set mode to legacy or uc
+#
+# JSON body: { "mode" : <mode> } where <mode> can be: "legacy" or "uc"
+#
 
-$app->post('/configuration/legacy', function (Request $request, Response $response, $args) {
-    setLegacyMode();
-    $st = new SystemTasks();
-    $task = $st->startTask("/usr/bin/sudo /usr/libexec/nethserver/pkgaction --install nethserver-directory");
-    return $response->withJson(['result' => $task]);
+$app->post('/configuration/mode', function (Request $request, Response $response, $args) {
+    $params = $request->getParsedBody();
+
+    if ($params['mode'] == "legacy") {
+        setLegacyMode('enabled');
+        $st = new SystemTasks();
+        $task = $st->startTask("/usr/bin/sudo /usr/libexec/nethserver/pkgaction --install nethserver-directory");
+        return $response->withJson(['result' => $task]);
+    } else if ($params['mode'] == "uc") {
+        setLegacyMode('disabled');
+        return $response->withJson(['result' => 'success'], 200);
+    } else {
+        return $response->withJson(['result' => 'Invalid mode'], 422);
+    }
 });
 

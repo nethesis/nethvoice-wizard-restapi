@@ -153,37 +153,45 @@ GET /users/{username}/password
 
 ### Configuration
 
-Check legacy mode status.
+Check  mode status.
 
 Legacy mode is enabled if:
 - nethserver-directory os installed
 - nethvoice{LegacyMode} prop is set to enabled
 
 Result: 
-  - `{'result' => true }` if legacy mode is enabled
-  - `{'result' => false }` if legacy mode is enabled
-  - `{'result' => 'unknown' }` if legacy mode isn't set
+  - `{'result' => "legacy" }` if legacy mode is enabled
+  - `{'result' => "uc" }` if UC  mode is enabled
+  - `{'result' => 'unknown' }` if mode isn't set
 
 ```
-GET configuration/legacy
+GET configuration/mode
 ```
 
-Enable legacy mode:
+Enable selected `<mode>`.
+Valid modes are:
+- `legacy`: set nethvoice{LegacyMode} to enabled, start nethserver-directory installation using ptrack
+- `uc`: set nethvoice{LegacyMode} to disabled
 
-- set nethvoice{LegacyMode} to enabled
-- start nethserver-directory installation using ptrack
+JSON Body:
+```
+{
+   "mode" : <mode>
+}
+```
 
 Legacy mode can't be reverted.
 
 Result: 
- - `{'result' => >task_id> }`
+ - `{'result' => <task_id> }` if legacy mode is set
+ - `{'result' => "success" }` if uc mode is set
 
 
 The `task_id` is a md5 hash. 
 It can be used to retrieve the task progress using the tasks module.
 
 ```
-POST /configuration/legacy
+POST /configuration/mode
 
 ```
 
