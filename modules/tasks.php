@@ -13,7 +13,7 @@ $app->get('/tasks/{task}', function (Request $request, Response $response, $args
     $st = new SystemTasks();
     $task = $st->getTaskStatus($taskId);
     $ret['action'] = $task['last']['title'];
-    $ret['progess'] = ceil($task['progress'] * 100);
+    $ret['progress'] = ceil($task['progress'] * 100);
 
     # task has reached di end, set progress to 100
     if (isset($task['task_command_line'])) {
