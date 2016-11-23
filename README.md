@@ -71,6 +71,34 @@ $app->get('/magic/list', function (Request $request, Response $response, $args) 
 });
 ```
 
+## Long running processes
+
+You can spawn a long running process using ptrack command.
+
+How it works:
+- the library invokes ptrack along with the command to be executed
+- ptrack creates a new socket, forks in background and executes the command
+- the command must write its own status inside ptrack socket (many NethServer commands already support it)
+- a client can read from ptrack socket the status of the running task
+
+Start a new task:
+```
+require_once("lib/SystemTasks.php");
+
+$st = new SystemTasks();
+$taskId = $st->startTask("/usr/bin/sudo /usr/libexec/nethserver/pkgaction --install nethserver-directory");
+
+```
+
+Read the status of a task:
+```
+require_once("lib/SystemTasks.php");
+
+$st = new SystemTasks();
+$task = $st->getTaskStatus($taskId);
+print_r($task);
+```
+
 
 ## API
 
@@ -143,17 +171,41 @@ GET configuration/legacy
 Enable legacy mode:
 
 - set nethvoice{LegacyMode} to enabled
-- install nethserver-directory
+- start nethserver-directory installation using ptrack
 
-Legacy mode can't be reverted
+Legacy mode can't be reverted.
 
 Result: 
- - `{'result' => true }` on success
- - `{'result' => false }` on error
+ - `{'result' => >task_id> }`
+
+
+The `task_id` is a md5 hash. 
+It can be used to retrieve the task progress using the tasks module.
 
 ```
 POST /configuration/legacy
 
+```
+
+## Tasks
+
+Get the status of the given `task_id`
+
+Result:
+
+- task: the task id
+- action: current executing action
+- progress: total progress
+```
+{
+  "task": "d56c79f9373a2f2f9ccd8a0ac3c46eb4",
+  "action": "S10nethserver-directory-conf",
+  "progess": 59
+}
+```
+
+```
+GET /tasks/{task_id}
 ```
 
 
