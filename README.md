@@ -179,16 +179,23 @@ POST /virtualextensions
 Parameter: { "username": "myuser", "extension": "extnumber"[,"outboundcid" : "outboundcid" ] }
 ```
 
-### Configuration
+### Physical Extensions
 
-Check if *Legacy mode* is enabled:
-
-```
-GET /configuration/islegacy
-```
-
-Set legacy mode (install nethserver-directory):
+Retrieve all Physical Extensions
 
 ```
-POST /configuration/setlegacy
+GET /physicalextensions
 ```
+
+Retrieve a Physical Extension by its own extension number
+
+```
+GET /physicalextensions/{extnumber}
+```
+
+Create a new Physical Extension. If extension number is given, API is going to create/edit the requested extension number, otherwise a new extension with first available extension number between 9[1-7]virtualextnumber.
+
+```
+POST /physicalextensions
+
+Parameter: { "virtualextension": "virtualextnumber" [, "extension": "extensionnumber"]}
