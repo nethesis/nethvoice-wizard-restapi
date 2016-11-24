@@ -238,17 +238,3 @@ POST /virtualextensions
 
 Parameter: { "username": "myuser", "extension": "extnumber"[,"outboundcid" : "outboundcid" ] }
 ```
-
-### Configuration
-
-Check if *Legacy mode* is enabled:
-
-```
-GET /configuration/islegacy
-```
-
-Set legacy mode (install nethserver-directory):
-
-```
-POST /configuration/setlegacy
-```
