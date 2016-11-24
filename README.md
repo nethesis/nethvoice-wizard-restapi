@@ -159,7 +159,7 @@ Legacy mode is enabled if:
 - nethserver-directory os installed
 - nethvoice{LegacyMode} prop is set to enabled
 
-Result: 
+Result:
   - `{'result' => "legacy" }` if legacy mode is enabled
   - `{'result' => "uc" }` if UC  mode is enabled
   - `{'result' => 'unknown' }` if mode isn't set
@@ -182,12 +182,12 @@ JSON Body:
 
 Legacy mode can't be reverted.
 
-Result: 
+Result:
  - `{'result' => <task_id> }` if legacy mode is set
  - `{'result' => "success" }` if uc mode is set
 
 
-The `task_id` is a md5 hash. 
+The `task_id` is a md5 hash.
 It can be used to retrieve the task progress using the tasks module.
 
 ```
@@ -195,7 +195,7 @@ POST /configuration/mode
 
 ```
 
-## Tasks
+### Tasks
 
 Get the status of the given `task_id`
 
@@ -235,6 +235,32 @@ Create a new Virtual Extension
 
 ```
 POST /virtualextensions
+```
 
+```
 Parameter: { "username": "myuser", "extension": "extnumber"[,"outboundcid" : "outboundcid" ] }
+```
+
+### Physical Extensions
+
+Retrieve all Physical Extensions
+
+```
+GET /physicalextensions
+```
+
+Retrieve a Physical Extension by its own extension number
+
+```
+GET /physicalextensions/{extnumber}
+```
+
+Create a new Physical Extension. If extension number is given, API is going to create/edit the requested extension number, otherwise a new extension with first available extension number between 9[1-7] virtualextnumber.
+
+```
+POST /physicalextensions
+```
+
+```
+Parameter: { "virtualextension": "virtualextnumber" [, "extension": "extensionnumber"]}
 ```
