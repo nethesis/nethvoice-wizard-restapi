@@ -28,13 +28,10 @@ $app->post('/virtualextensions', function (Request $request, Response $response,
 
     //Update user to add this extension as default extension
     //get uid
-    $users = $fpbx->Userman->getAllUsers();
-    foreach ($users as $u) {
-        if ($u['username'] == $username){
-            $uid = $u['id'];
-            $data['name'] = $u['displayname'];
-        }
-    }
+    $user = $fpbx->Userman->getUserByUsername($username);
+    $uid = $user['id'];
+    $data['name'] = $user['displayname'];
+
     if (!isset($uid)){
         return $response->withJson(array('message'=>'User not found' ),500);
     }
