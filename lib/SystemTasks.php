@@ -24,8 +24,8 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 
 class SystemTasks
 {
-    const PTRACK_PATH_TEMPLATE = '/var/run/asterisk/%s.sock';
-    const PTRACK_DUMP_PATH = '/var/run/asterisk/%.16s.dump';
+    const PTRACK_PATH_TEMPLATE = '/run/nethvoice/%s.sock';
+    const PTRACK_DUMP_PATH = '/run/nethvoice/%.16s.dump';
     const TY_DECLARE = 0x01;
     const TY_DONE = 0x02;
     const TY_QUERY = 0x03;
