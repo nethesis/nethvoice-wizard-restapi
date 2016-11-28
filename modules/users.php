@@ -3,7 +3,6 @@ use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
 function getUser($username) {
-
     # add domain part if needed
     if (strpos($username, '@') === false) {
         exec('/usr/bin/hostname -d', $out, $ret);
@@ -14,8 +13,14 @@ function getUser($username) {
 }
 
 function userExists($username) {
-    exec("/usr/bin/getent passwd '".getUser($username)."'", $out, $ret);
-    return ($ret === 0);
+    $needle = getUser($username);
+    $users = shell_exec("/usr/bin/sudo /usr/libexec/nethserver/ldap-list-users");
+    foreach (json_decode($users) as $user => $props) {
+        if ($user == $needle) {
+            return true;
+        }
+    }
+    return false;
 }
 
 function getPassword($username) {
@@ -28,6 +33,11 @@ function setPassword($username, $password) {
     $db->query($sql);
 }
 
+function sync() {
+    $userman = FreePBX::create()->Userman;
+    $auth = $userman->getAuthObject();
+    $auth->sync($output);
+}
 
 # List all users
 
@@ -52,6 +62,7 @@ $app->get('/users', function (Request $request, Response $response, $args) {
 $app->get('/users/{username}', function (Request $request, Response $response, $args) {
     $username = $request->getAttribute('username');
     if (userExists($username)) {
+        sync(); // force FreePBX user sync
         $users = FreePBX::create()->Userman->getAllUsers();
         foreach ($users as $u) {
             if ($u['username'] == $username) {
@@ -131,5 +142,15 @@ $app->get('/users/{username}/password', function (Request $request, Response $re
     } else {
         return $response->withJson(['result' => ''], 404);
     }
+});
+
+
+#
+# Sync users from user provider to FreePBX db.
+#
+
+$app->post('/users/sync', function (Request $request, Response $response, $args) {
+    sync();
+    return $response->withJson(['result' => 'success']);
 });
 

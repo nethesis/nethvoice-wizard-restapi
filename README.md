@@ -151,6 +151,11 @@ Get user password in clear-text
 GET /users/{username}/password
 ```
 
+Force user synchronization
+```
+POST /users/sync
+```
+
 ### Configuration
 
 Check  mode status.
