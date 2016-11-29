@@ -161,7 +161,7 @@ POST /users/sync
 Check  mode status.
 
 Legacy mode is enabled if:
-- nethserver-directory os installed
+- nethserver-directory is installed
 - nethvoice{LegacyMode} prop is set to enabled
 
 Result:
