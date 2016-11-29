@@ -76,7 +76,7 @@ class SystemTasks
         $errno = 0;
         $errstr = "";
 
-        $socket = fsockopen('unix://' . $socketPath, -1, $errno, $errstr);
+        $socket = @fsockopen('unix://' . $socketPath, -1, $errno, $errstr);
 
         if ($socket === FALSE) {
             $socketPathExists = $errno != 2;
