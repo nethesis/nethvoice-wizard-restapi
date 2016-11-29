@@ -2,6 +2,14 @@
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
+function nethvoice_handler($exception) {
+  header('Content-type: application/json');
+  echo json_encode(['error' => $exception->getMessage()]);
+  exit(0);
+}
+
+set_exception_handler('nethvoice_handler');
+
 require 'vendor/autoload.php';
 
 # Initialize FreePBX environment
