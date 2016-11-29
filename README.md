@@ -200,6 +200,14 @@ POST /configuration/mode
 
 ```
 
+
+```
+GET /configuration/networks
+```
+
+Return green ip addresses and their netmasks
+
+
 ### Tasks
 
 Get the status of the given `task_id`
