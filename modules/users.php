@@ -43,6 +43,7 @@ function sync() {
 
 $app->get('/users', function (Request $request, Response $response, $args) {
     $blacklist = ['administrator', 'guest', 'krbtgt'];
+    sync(); // force FreePBX user sync
     $users = FreePBX::create()->Userman->getAllUsers();
     $i = 0;
     foreach ($users as $user) {
@@ -62,7 +63,6 @@ $app->get('/users', function (Request $request, Response $response, $args) {
 $app->get('/users/{username}', function (Request $request, Response $response, $args) {
     $username = $request->getAttribute('username');
     if (userExists($username)) {
-        sync(); // force FreePBX user sync
         $users = FreePBX::create()->Userman->getAllUsers();
         foreach ($users as $u) {
             if ($u['username'] == $username) {
