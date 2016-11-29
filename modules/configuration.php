@@ -55,3 +55,24 @@ $app->post('/configuration/mode', function (Request $request, Response $response
     }
 });
 
+
+# 
+# GET /configuration/networks return green ip address and netmasks
+#
+
+$app->get('/configuration/networks', function (Request $request, Response $response, $args) {
+    exec('/bin/sudo /sbin/e-smith/db networks getjson', $out, $ret);
+    if ($ret!==0)    {
+        return $response->withJson($out,500);
+    }
+    $networkDB = json_decode($out[0],true);
+    $networks = array();
+    foreach ($networkDB as $key){
+        if($key['props']['role'] === 'green')
+        {
+            $networks[$key['name']] = array("ip"=>$key['props']['ipaddr'],"netmask"=>$key['props']['netmask']);
+        }
+    }
+    return $response->withJson($networks,200);
+});
+
