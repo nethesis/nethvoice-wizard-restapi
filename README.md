@@ -277,3 +277,33 @@ POST /physicalextensions
 ```
 Parameter: { "virtualextension": "virtualextnumber" [, "extension": "extensionnumber"]}
 ```
+
+### Trunks
+
+Retrieve all Trunks
+
+```
+GET /trunks
+```
+
+Result:
+
+```
+[
+  {
+    "trunkid":"1",
+    "name":"2001",
+    "tech":"dahdi",
+    "outcid":"",
+    "keepcid":"off",
+    "maxchans":"",
+    "failscript":"",
+    "dialoutprefix":"",
+    "channelid":"g0",
+    "usercontext":"notneeded",
+    "provider":"",
+    "disabled":"off",
+    "continue":"off"
+  }
+]
+```
