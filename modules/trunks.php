@@ -11,3 +11,18 @@ $app->get('/trunks', function (Request $request, Response $response, $args) {
     }
     return $response->withJson($result,200);
 });
+
+# returns trunks by tech
+$app->get('/trunks/{tech}', function (Request $request, Response $response, $args) {
+    $result = array();
+    $trunks = FreePBX::Core()->listTrunks();
+    $tech = $request->getAttribute('tech');
+    $tech = strtolower($tech);
+
+    foreach($trunks as $trunk) {
+        if (strtolower($trunk['tech']) == $tech) {
+            array_push($result, $trunk);
+        }
+    }
+    return $response->withJson($result);
+});

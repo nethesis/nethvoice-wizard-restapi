@@ -307,3 +307,31 @@ Result:
   }
 ]
 ```
+
+Retrieve all Trunks by used technology (e.g. "sip", "dahdi", ...)
+
+```
+GET /trunks/{tech}
+```
+
+Result:
+
+```
+[
+  {
+    "trunkid":"1",
+    "name":"2001",
+    "tech":"dahdi",
+    "outcid":"",
+    "keepcid":"off",
+    "maxchans":"",
+    "failscript":"",
+    "dialoutprefix":"",
+    "channelid":"g0",
+    "usercontext":"notneeded",
+    "provider":"",
+    "disabled":"off",
+    "continue":"off"
+  }
+]
+```
