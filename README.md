@@ -290,3 +290,16 @@ POST /devices/scan
 Parameter: { "network": "192.168.0.0/24"}
 ```
 
+### Routes
+
+Retrieve inbound routes
+
+```
+GET /inboundroutes
+```
+
+Retrieve outbound routes
+
+```
+GET /outboundroutes
+```
