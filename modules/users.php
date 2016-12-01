@@ -42,7 +42,7 @@ function sync() {
 # List all users
 
 $app->get('/users', function (Request $request, Response $response, $args) {
-    $blacklist = ['administrator', 'guest', 'krbtgt'];
+    $blacklist = ['admin', 'administrator', 'guest', 'krbtgt'];
     sync(); // force FreePBX user sync
     $users = FreePBX::create()->Userman->getAllUsers();
     $i = 0;
