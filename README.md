@@ -290,6 +290,24 @@ POST /devices/scan
 Parameter: { "network": "192.168.0.0/24"}
 ```
 
+Get phones scanned from specific network
+
+```
+GET /devices/phones/list/{id}
+```
+
+{id} is md5(NETWORK) where NETWORK is the network in cidr format (example: 192.168.1.0/24)
+
+
+Get gateways scanned from specific network
+
+```
+GET /devices/gateways/list/{id}
+```
+
+{id} is md5(NETWORK) where NETWORK is the network in cidr format (example: 192.168.1.0/24)
+
+
 ### Routes
 
 Retrieve inbound routes

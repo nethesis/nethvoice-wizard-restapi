@@ -20,3 +20,27 @@ $app->post('/devices/scan', function (Request $request, Response $response, $arg
     return $response->withJson(['result' => $taskId], 200);
 });
 
+$app->get('/devices/phones/list/{id}', function (Request $request, Response $response, $args) {
+    $route = $request->getAttribute('route');
+    $id = $route->getArgument('id');
+    $basedir='/var/run/nethvoice';
+    $res=array();
+    $filename = "$basedir/$id.phones.scan";
+    if (!file_exists($filename)){
+       return $response->withJson(array("status"=>"Scan for network $id doesn't exist!"),400);
+    }
+    return $response->write(file_get_contents($filename),200);
+});
+
+$app->get('/devices/gateways/list/{id}', function (Request $request, Response $response, $args) {
+    $route = $request->getAttribute('route');
+    $id = $route->getArgument('id');
+    $basedir='/var/run/nethvoice';
+    $res=array();
+    $filename = "$basedir/$id.gateways.scan";
+    if (!file_exists($filename)){
+       return $response->withJson(array("status"=>"Scan for network $id doesn't exist!"),400);
+    }
+    return $response->write(file_get_contents($filename),200);
+});
+
