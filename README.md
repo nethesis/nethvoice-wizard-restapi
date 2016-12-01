@@ -277,3 +277,16 @@ POST /physicalextensions
 ```
 Parameter: { "virtualextension": "virtualextnumber" [, "extension": "extensionnumber"]}
 ```
+
+### Devices
+
+Launch a network scan creating two files: MD5.phones.scan and MD5.gateways.scan in /var/run/nethvoice, where MD5 is the MD5 hash of given network. Return long run process id
+
+```
+POST /devices/scan
+```
+
+```
+Parameter: { "network": "192.168.0.0/24"}
+```
+
