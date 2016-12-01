@@ -20,3 +20,18 @@ $app->post('/devices/scan', function (Request $request, Response $response, $arg
     return $response->withJson($taskId, 200);
 });
 
+$app->get('/devices/phones/list', function (Request $request, Response $response, $args) {
+    $basedir='/var/run/nethvoice';
+    $files = scandir($basedir);
+    $res=array();
+    foreach ($files as $file){
+        if (preg_match('/\.phones\.scan$/', $file)) {
+            foreach(json_decode(file_get_contents($basedir."/".$file)) as $element)
+            {
+                $res[]=$element;
+            }
+        }
+    }
+    return $response->withJson($res,200);
+});
+
