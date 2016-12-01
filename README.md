@@ -290,11 +290,20 @@ POST /devices/scan
 Parameter: { "network": "192.168.0.0/24"}
 ```
 
+
 Get phones scanned from all netwotks
 
 ```
 GET /devices/phones/list
 ```
+
+
+Get gateways scanned from all netwotks
+
+```
+GET /devices/gateways/list
+```
+
 
 Get phones scanned from specific network
 
@@ -303,6 +312,7 @@ GET /devices/phones/list/{id}
 ```
 
 {id} is md5(NETWORK) where NETWORK is the network in cidr format (example: 192.168.1.0/24)
+
 
 
 Get gateways scanned from specific network
@@ -326,4 +336,5 @@ Retrieve outbound routes
 
 ```
 GET /outboundroutes
+
 
