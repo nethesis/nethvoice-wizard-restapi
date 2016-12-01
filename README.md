@@ -303,3 +303,25 @@ Retrieve outbound routes
 ```
 GET /outboundroutes
 ```
+
+### Providers
+
+Retrieve all providers
+
+```
+GET /providers
+```
+
+Result:
+
+```
+[
+  {
+    "descrizione": "Eutelia",
+    "dettpeer": "disallow=all↵allow...",
+    "dettuser": "allow=CODECS↵conte...",
+    "provider": "eutelia",
+    "registration": "USERNAME:PASSW..."
+  }
+]
+```
