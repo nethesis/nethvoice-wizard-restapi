@@ -290,3 +290,9 @@ POST /devices/scan
 Parameter: { "network": "192.168.0.0/24"}
 ```
 
+
+Get gateways scanned from all netwotks
+
+```
+GET /devices/gateways/list
+```
