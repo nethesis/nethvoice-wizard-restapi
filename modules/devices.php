@@ -56,7 +56,7 @@ $app->get('/devices/phones/list', function (Request $request, Response $response
             }
         }
     }
-    return $response->withJson($res,200);
+    return $response->withJson(array_unique($res,SORT_REGULAR),200);
 });
 
 $app->get('/devices/gateways/list', function (Request $request, Response $response, $args) {
@@ -71,5 +71,23 @@ $app->get('/devices/gateways/list', function (Request $request, Response $respon
             }
         }
     }
+    return $response->withJson(array_unique($res,SORT_REGULAR),200);
+});
+
+$app->get('/devices/phones/manufacturers', function (Request $request, Response $response, $args) {
+   $file='/var/www/html/freepbx/rest/lib/phone_model_map.json';
+   $map=file_get_contents($file);
+   return $response->write($map,200);
+});
+
+$app->get('/devices/gateways/manufacturers', function (Request $request, Response $response, $args) {
+    $dbh = FreePBX::Database();
+    $sql = "SELECT * FROM gateway_models";
+    $models = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC);
+    $res=array();
+    foreach ($models as $model){
+        $res[$model['model']]=$model;
+    }
     return $response->withJson($res,200);
 });
+
