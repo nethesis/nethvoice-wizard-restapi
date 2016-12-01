@@ -46,7 +46,7 @@ $app->post('/configuration/mode', function (Request $request, Response $response
         setLegacyMode('enabled');
         $st = new SystemTasks();
         $task = $st->startTask("/usr/bin/sudo /usr/libexec/nethserver/pkgaction --install nethserver-directory");
-        return $response->withJson(['result' => $task]);
+        return $response->withJson(['result' => $task], 200);
     } else if ($params['mode'] == "uc") {
         setLegacyMode('disabled');
         return $response->withJson(['result' => 'success'], 200);

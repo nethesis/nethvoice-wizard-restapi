@@ -17,6 +17,6 @@ $app->post('/devices/scan', function (Request $request, Response $response, $arg
     //launch long running process
     $st = new SystemTasks();
     $taskId = $st->startTask("/usr/bin/sudo /var/www/html/freepbx/rest/lib/scanHelper.py ".escapeshellarg($network));
-    return $response->withJson($taskId, 200);
+    return $response->withJson(['result' => $taskId], 200);
 });
 
