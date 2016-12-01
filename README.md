@@ -290,6 +290,12 @@ POST /devices/scan
 Parameter: { "network": "192.168.0.0/24"}
 ```
 
+Get phones scanned from all netwotks
+
+```
+GET /devices/phones/list
+```
+
 Get phones scanned from specific network
 
 ```
@@ -320,4 +326,4 @@ Retrieve outbound routes
 
 ```
 GET /outboundroutes
-```
+

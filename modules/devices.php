@@ -44,3 +44,18 @@ $app->get('/devices/gateways/list/{id}', function (Request $request, Response $r
     return $response->write(file_get_contents($filename),200);
 });
 
+$app->get('/devices/phones/list', function (Request $request, Response $response, $args) {
+    $basedir='/var/run/nethvoice';
+    $files = scandir($basedir);
+    $res=array();
+    foreach ($files as $file){
+        if (preg_match('/\.phones\.scan$/', $file)) {
+            foreach(json_decode(file_get_contents($basedir."/".$file)) as $element)
+            {
+                $res[]=$element;
+            }
+        }
+    }
+    return $response->withJson($res,200);
+});
+
