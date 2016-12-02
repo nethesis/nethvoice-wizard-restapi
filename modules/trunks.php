@@ -35,7 +35,7 @@ $app->get('/trunks/{tech}', function (Request $request, Response $response, $arg
                 array_push($result, $trunk);
             }
         }
-        return $response->withJson($result);
+        return $response->withJson($result,200);
     }
     catch (Exception $e) {
       error_log($e->getMessage());
