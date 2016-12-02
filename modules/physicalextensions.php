@@ -25,7 +25,7 @@ $app->get('/physicalextensions/{extension}', function (Request $request, Respons
             return $response->withJson($e,200);
         }
     }
-    return $response->withJson(array(),404);
+    return $response->withStatus(404);
 });
 
 $app->post('/physicalextensions', function (Request $request, Response $response, $args) {

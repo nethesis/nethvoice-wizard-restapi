@@ -21,16 +21,16 @@ $app->get('/configuration/mode', function (Request $request, Response $response,
 
     # return 'unknown' if LegacyMode prop is not set
     if ( $mode == "" ) {
-        return $response->withJson(['result' => 'unknown']);
+        return $response->withJson(['result' => 'unknown'],200);
     }
 
     exec("/usr/bin/rpm -q nethserver-directory", $out, $ret);
 
     # return true, if LegacyMode is enabled and nethserver-directory is installed
     if ($mode == "enabled" && $ret === 0) {
-        return $response->withJson(['result' => "legacy"]);
+        return $response->withJson(['result' => "legacy"],200);
     }
-    return $response->withJson(['result' => "uc"]);
+    return $response->withJson(['result' => "uc"],200);
 });
 
 
@@ -56,7 +56,7 @@ $app->post('/configuration/mode', function (Request $request, Response $response
 });
 
 
-# 
+#
 # GET /configuration/networks return green ip address and netmasks
 #
 

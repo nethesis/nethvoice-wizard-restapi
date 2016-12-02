@@ -24,7 +24,7 @@ $app->get('/tasks/{task}', function (Request $request, Response $response, $args
             $code = 500;
         }
     }
-    
+
     return $response->withJson($ret, $code);
 });
 

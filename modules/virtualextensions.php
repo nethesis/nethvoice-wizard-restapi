@@ -16,7 +16,7 @@ $app->get('/virtualextensions/{extension}', function (Request $request, Response
             return $response->withJson($e,200);
         }
     }
-    return $response->withJson(array(),404);
+    return $response->withStatus(404);
 });
 
 $app->post('/virtualextensions', function (Request $request, Response $response, $args) {
@@ -33,7 +33,7 @@ $app->post('/virtualextensions', function (Request $request, Response $response,
     $data['name'] = $user['displayname'];
 
     if (!isset($uid)){
-        return $response->withJson(array('message'=>'User not found' ),500);
+        return $response->withJson(array('message'=>'User not found' ),404);
     }
 
     //update user with $extension as default extension
@@ -59,5 +59,5 @@ $app->post('/virtualextensions', function (Request $request, Response $response,
     $fpbx->Findmefollow->addSettingById($extension, 'dring','<http://www.notused >;info=ring2');
     $fpbx->Findmefollow->addSettingById($extension, 'postdest','app-blackhole,hangup,1');
 
-    return $response->withJson(array("status"=>true),200);
+    return $response->withStatus(201);
 });
