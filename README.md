@@ -324,6 +324,19 @@ GET /devices/gateways/list/{id}
 {id} is md5(NETWORK) where NETWORK is the network in cidr format (example: 192.168.1.0/24)
 
 
+Get supported phones
+
+```
+GET /devices/phones/manufacturers
+```
+
+
+Get supported gateways
+
+```
+GET /devices/gateways/manufacturers
+```
+
 ### Routes
 
 Retrieve inbound routes

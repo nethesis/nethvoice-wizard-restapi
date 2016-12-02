@@ -18,11 +18,11 @@ except:
 
 net = sys.argv[1]
 
-with open('/var/www/html/freepbx/rest/lib/macaddress_map.json', 'r') as macfile:
+with open('/var/www/html/freepbx/rest/lib/macAddressMap.json', 'r') as macfile:
     macdata=macfile.read().replace('\n', '')
 manufacturer = json.loads(macdata)
 
-with open('/var/www/html/freepbx/rest/lib/type_map.json', 'r') as typefile:
+with open('/var/www/html/freepbx/rest/lib/typeMap.json', 'r') as typefile:
     typedata = typefile.read().replace('\n', '')
 types = json.loads(typedata)
 
@@ -48,7 +48,7 @@ for host in nm.all_hosts():
         row['manufacturer'] = manufacturer[identifier]
     except KeyError, IndexError:
         continue
-    
+
     #find device type
     try :
         row['type'] = types[manufacturer[identifier]]
