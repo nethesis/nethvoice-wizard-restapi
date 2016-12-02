@@ -13,7 +13,6 @@ function setLegacyMode($value) {
     exec("/usr/bin/sudo /sbin/e-smith/config setprop nethvoice LegacyMode $value", $out, $ret);
 }
 
-
 # get enabled mode
 
 $app->get('/configuration/mode', function (Request $request, Response $response, $args) {
@@ -70,7 +69,11 @@ $app->get('/configuration/networks', function (Request $request, Response $respo
     foreach ($networkDB as $key){
         if($key['props']['role'] === 'green')
         {
-            $networks[$key['name']] = array("ip"=>$key['props']['ipaddr'],"netmask"=>$key['props']['netmask']);
+            $networks[$key['name']] = array(
+                "network"=>long2ip(ip2long($key['props']['ipaddr']) & ip2long($key['props']['netmask'])),
+                "ip"=>$key['props']['ipaddr'],
+                "netmask"=>$key['props']['netmask']
+            );
         }
     }
     return $response->withJson($networks,200);
