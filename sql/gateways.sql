@@ -2,7 +2,7 @@ USE asterisk;
 DROP TABLE IF EXISTS `gateway_models`;
 CREATE TABLE IF NOT EXISTS `gateway_models` (
   `id` bigint AUTO_INCREMENT NOT NULL PRIMARY KEY,
-  `model` varchar(100) NOT NULL default '' UNIQUE,
+  `model` varchar(100) NOT NULL default '',
   `manufacturer` varchar(20) default NULL,
   `tech` varchar(20) default NULL,
   `n_pri_trunks` int(11) default '0',
@@ -14,62 +14,28 @@ CREATE TABLE IF NOT EXISTS `gateway_models` (
 
 LOCK TABLES `gateway_models` WRITE;
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4552','Patton','isdn',0,1,0,0,'PATTON ISDN 1 Porta');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4552','Patton','isdn',0,1,0,0,'PATTON ISDN 1 Porta');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4552','Patton','isdn',0,1,0,0,'PATTON ISDN 1 Porta (+ 1 TE)');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4552','Patton','isdn',0,1,0,0,'PATTON ISDN 1 Porta (+ 1 TE)');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4554','Patton','isdn',0,2,0,0,'PATTON ISDN 2 Porte');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4554','Patton','isdn',0,2,0,0,'PATTON ISDN 2 Porte');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4554','Patton','isdn',0,2,0,0,'PATTON ISDN 2 Porte');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4554','Patton','isdn',0,2,0,0,'PATTON ISDN 2 Porte');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4554','Patton','isdn',0,2,0,0,'PATTON ISDN 2 Porte');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4554','Patton','isdn',0,2,0,0,'PATTON ISDN 2 Porte');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4638','Patton','isdn',0,4,0,0,'PATTON ISDN 4 Porte (4 chiamate voip)');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4638','Patton','isdn',0,4,0,0,'PATTON ISDN 4 Porte (4 chiamate voip)');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4638','Patton','isdn',0,4,0,0,'PATTON ISDN 4 Porte (4 chiamate voip)');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4638','Patton','isdn',0,4,0,0,'PATTON ISDN 4 Porte');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4638','Patton','isdn',0,4,0,0,'PATTON ISDN 4 Porte');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4638','Patton','isdn',0,4,0,0,'PATTON ISDN 4 Porte');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4661','Patton','isdn',0,8,0,0,'PATTON ISDN 8 Porte (8 chiamate voip)');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4661','Patton','isdn',0,8,0,0,'PATTON ISDN 8 Porte (8 chiamate voip)');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4661','Patton','isdn',0,8,0,0,'PATTON ISDN 8 Porte (16 chiamate voip)');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4661','Patton','isdn',0,8,0,0,'PATTON ISDN 8 Porte (16 chiamate voip)');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4112fxs','Patton','fxs',0,0,0,2,'PATTON Analogico 2 Porte FXS');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4112fxs','Patton','fxs',0,0,0,2,'PATTON Analogico 2 Porte FXS');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4112fxo','Patton','fxo',0,0,2,0,'PATTON Analogico 2 Porte FXO');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4112fxo','Patton','fxo',0,0,2,0,'PATTON Analogico 2 Porte FXO');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4114fxs_fxo','Patton','fxo_fxs',0,0,2,2,'PATTON Analogico 2 Porte FXS + 2 Porte FXO');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4114fxs_fxo','Patton','fxo_fxs',0,0,2,2,'PATTON Analogico 2 Porte FXS + 2 Porte FXO');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4114fxs_fxo','Patton','fxo_fxs',0,0,2,2,'PATTON Analogico 2 Porte FXS + 2 Porte FXO');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4114fxs','Patton','fxs',0,0,0,4,'PATTON Analogico 4 Porte FXS');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4114fxs','Patton','fxs',0,0,0,4,'PATTON Analogico 4 Porte FXS');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4114fxo','Patton','fxo',0,0,4,0,'PATTON Analogico 4 Porte FXO');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4526fxs','Patton','fxs',0,0,0,6,'PATTON Analogico 6 Porte FXS');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4118fxs','Patton','fxs',0,0,0,8,'PATTON Analogico 8 Porte FXS');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4118fxs','Patton','fxs',0,0,0,8,'PATTON Analogico 8 Porte FXS');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4118fxs','Patton','fxs',0,0,0,8,'PATTON Analogico 8 Porte FXS');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4116fxs4_fxo2','Patton','fxo_fxs',0,0,2,4,'PATTON Analogico 4 Porte FXS + 2 Porte FXO');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4116fxs4_fxo2','Patton','fxo_fxs',0,0,2,4,'PATTON Analogico 4 Porte FXS + 2 Porte FXO');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4118fxs_fxo','Patton','fxo_fxs',0,0,4,4,'PATTON Analogico 4 Porte FXS + 4 Porte FXO');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4118fxs_fxo','Patton','fxo_fxs',0,0,4,4,'PATTON Analogico 4 Porte FXS + 4 Porte FXO');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4118fxs_fxo','Patton','fxo_fxs',0,0,4,4,'PATTON Analogico 4 Porte FXS + 4 Porte FXO');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4661fxs4_fxo4_isdn4','Patton','fxo_fxs_isdn',0,4,4,4,'PATTON Analogico 4 Porte FXS + 4 Porte FXO + 4 Porte ISDN');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4661fxs4_isdn2','Patton','fxs_isdn',0,2,0,4,'PATTON Analogico 4 Porte FXS + 2 Porte ISDN');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4661fxs4_isdn4','Patton','fxs_isdn',0,4,0,4,'PATTON Analogico 4 Porte FXS + 4 Porte ISDN');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4661fxs2_fxo2_isdn2','Patton','fxo_fxs_isdn',0,2,2,2,'PATTON Analogico 2 Porte FXS + 2 Porte FXO + 2 Porte ISDN');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4661fxs4_fxo4_isdn4','Patton','fxo_fxs_isdn',0,4,4,4,'PATTON Analogico 4 Porte FXS + 4 Porte FXO + 4 Porte ISDN');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4661fxs4_isdn2','Patton','fxs_isdn',0,2,0,4,'PATTON Analogico 4 Porte FXS + 2 Porte ISDN');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4661fxs4_isdn8','Patton','fxs_isdn',0,8,0,4,'PATTON Analogico 4 Porte FXS + 8 Porte ISDN');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4671fxs8_isdn4','Patton','fxs_isdn',0,4,0,8,'PATTON Analogico 8 Porte FXS + 4 Porte ISDN');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4970','Patton','pri',1,0,0,0,'PATTON PRI 1 Porta');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4970','Patton','pri',1,0,0,0,'PATTON PRI 1 Porta');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4970','Patton','pri',1,0,0,0,'PATTON PRI 1 Porta');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4970_4','Patton','pri',4,0,0,0,'PATTON PRI 4 Porte');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4970_4','Patton','pri',4,0,0,0,'PATTON PRI 4 Porte');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4970_4','Patton','pri',4,0,0,0,'PATTON PRI 4 Porte');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4970_4','Patton','pri',4,0,0,0,'PATTON PRI 4 Porte');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4970_4','Patton','pri',4,0,0,0,'PATTON PRI 4 Porte');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4970_4','Patton','pri',4,0,0,0,'PATTON PRI 4 Porte');
-INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4970_4','Patton','pri',4,0,0,0,'PATTON PRI 4 Porte');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4970_4','Patton','pri',4,0,0,0,'PATTON PRI 4 Porte');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('TRI_ISDN_1','Patton','isdn',0,1,0,0, 'PATTON TRINITY ISDN 1 Porta');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('TRI_ISDN_2','Patton','isdn',0,2,0,0, 'PATTON TRINITY ISDN 2 Porte');
