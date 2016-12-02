@@ -54,7 +54,7 @@ $app->get('/users', function (Request $request, Response $response, $args) {
         }
         $i++;
     }
-    return $response->withJson($users);
+    return $response->withJson($users,200);
 });
 
 
@@ -70,8 +70,8 @@ $app->get('/users/{username}', function (Request $request, Response $response, $
                 return $response->withJson($u);
             }
         }
-    } 
-    return $response->withJson(['result' => 'Not found'], 404);
+    }
+    return $response->withStatus(404);
 });
 
 
@@ -96,9 +96,9 @@ $app->post('/users', function (Request $request, Response $response, $args) {
         exec("/usr/bin/sudo /sbin/e-smith/signal-event user-create '$username' '$fullname' '/bin/false'", $out, $ret);
     }
     if ( $ret === 0 ) {
-        return $response->withJson(['result' => true], 201);
+        return $response->withStatus(201);
     } else {
-        return $response->withJson(['result' => false], 422);
+        return $response->withStatus(422);
     }
 });
 
@@ -124,11 +124,11 @@ $app->post('/users/{username}/password', function (Request $request, Response $r
         exec("/usr/bin/sudo /sbin/e-smith/signal-event password-modify '".getUser($username)."' $tmp", $out, $ret);
         if ($ret === 0) {
             setPassword(getUser($username), $password);
-            return $response->withJson(['result' => true]);
+            return $response->withStatus(201);
         }
     }
-    return $response->withJson(['result' => false], 422);
-}); 
+    return $response->withStatus(422);
+});
 
 # Return the password givent user in clear text
 # Should be used only in legacy mode.
@@ -140,7 +140,7 @@ $app->get('/users/{username}/password', function (Request $request, Response $re
     if ($password) {
         return $response->withJson(['result' => $password]);
     } else {
-        return $response->withJson(['result' => ''], 404);
+        return $response->withStatus(404);
     }
 });
 
@@ -151,6 +151,6 @@ $app->get('/users/{username}/password', function (Request $request, Response $re
 
 $app->post('/users/sync', function (Request $request, Response $response, $args) {
     sync();
-    return $response->withJson(['result' => 'success']);
+    return $response->withStatus(200);
 });
 
