@@ -21,27 +21,37 @@ $app->post('/devices/scan', function (Request $request, Response $response, $arg
 });
 
 $app->get('/devices/phones/list/{id}', function (Request $request, Response $response, $args) {
-    $route = $request->getAttribute('route');
-    $id = $route->getArgument('id');
-    $basedir='/var/run/nethvoice';
-    $res=array();
-    $filename = "$basedir/$id.phones.scan";
-    if (!file_exists($filename)){
-       return $response->withJson(array("status"=>"Scan for network $id doesn't exist!"),404);
+    try {
+        $route = $request->getAttribute('route');
+        $id = $route->getArgument('id');
+        $basedir='/var/run/nethvoice';
+        $res=array();
+        $filename = "$basedir/$id.phones.scan";
+        if (!file_exists($filename)){
+           return $response->withJson(array("status"=>"Scan for network $id doesn't exist!"),404);
+        }
+        return $response->write(file_get_contents($filename),200);
+    } catch(Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
     }
-    return $response->write(file_get_contents($filename),200);
 });
 
 $app->get('/devices/gateways/list/{id}', function (Request $request, Response $response, $args) {
-    $route = $request->getAttribute('route');
-    $id = $route->getArgument('id');
-    $basedir='/var/run/nethvoice';
-    $res=array();
-    $filename = "$basedir/$id.gateways.scan";
-    if (!file_exists($filename)){
-       return $response->withJson(array("status"=>"Scan for network $id doesn't exist!"),404);
+    try {
+        $route = $request->getAttribute('route');
+        $id = $route->getArgument('id');
+        $basedir='/var/run/nethvoice';
+        $res=array();
+        $filename = "$basedir/$id.gateways.scan";
+        if (!file_exists($filename)){
+           return $response->withJson(array("status"=>"Scan for network $id doesn't exist!"),404);
+        }
+        return $response->write(file_get_contents($filename),200);
+    } catch(Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
     }
-    return $response->write(file_get_contents($filename),200);
 });
 
 $app->get('/devices/phones/list', function (Request $request, Response $response, $args) {
