@@ -1,6 +1,7 @@
 USE asterisk;
 DROP TABLE IF EXISTS `gateway_models`;
 CREATE TABLE IF NOT EXISTS `gateway_models` (
+  `id` bigint AUTO_INCREMENT NOT NULL PRIMARY KEY,
   `model` varchar(100) NOT NULL default '' UNIQUE,
   `manufacturer` varchar(20) default NULL,
   `tech` varchar(20) default NULL,
@@ -9,7 +10,7 @@ CREATE TABLE IF NOT EXISTS `gateway_models` (
   `n_fxo_trunks` int(11) default '0',
   `n_fxs_ext` int(11) default '0',
   `description` varchar(50) default NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 LOCK TABLES `gateway_models` WRITE;
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4552','Patton','isdn',0,1,0,0,'PATTON ISDN 1 Porta');
@@ -46,7 +47,7 @@ INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_tru
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4118fxs','Patton','fxs',0,0,0,8,'PATTON Analogico 8 Porte FXS');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4118fxs','Patton','fxs',0,0,0,8,'PATTON Analogico 8 Porte FXS');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4118fxs','Patton','fxs',0,0,0,8,'PATTON Analogico 8 Porte FXS');
-INSERT IGNORE INTO `gateway_models` (`model`,  `manufacturer`,`tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4116fxs4_fxo2','Patton','fxo_fxs',0,0,2,4,'PATTON Analogico 4 Porte FXS + 2 Porte FXO');
+INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4116fxs4_fxo2','Patton','fxo_fxs',0,0,2,4,'PATTON Analogico 4 Porte FXS + 2 Porte FXO');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4116fxs4_fxo2','Patton','fxo_fxs',0,0,2,4,'PATTON Analogico 4 Porte FXS + 2 Porte FXO');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4118fxs_fxo','Patton','fxo_fxs',0,0,4,4,'PATTON Analogico 4 Porte FXS + 4 Porte FXO');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('4118fxs_fxo','Patton','fxo_fxs',0,0,4,4,'PATTON Analogico 4 Porte FXS + 4 Porte FXO');
