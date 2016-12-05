@@ -36,7 +36,9 @@ $app->post('/mobiles', function (Request $request, Response $response, $args) {
         $dbh->sql($sql);
         $sql = "INSERT INTO `rest_mobiles` (`username`,`mobile`) VALUES (?,?)";
         $stmt = $dbh->prepare($sql);
-        if ($res = $stmt->execute(array($params['username'],$params['mobile']))) {
+        $mobile = preg_replace('/^\+/','00',$params['mobile']);
+        $mobile = preg_replace('/[^0-9]/','',$mobile);
+        if ($res = $stmt->execute(array($params['username'],$mobile))) {
             return $response->withJson(array("status"=>true),200);
         } else {
             return $response->withJson(array("status"=>"Unknown error"),500);
