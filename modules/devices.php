@@ -116,7 +116,10 @@ $app->get('/devices/gateways/manufacturers', function (Request $request, Respons
     $models = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC);
     $res=array();
     foreach ($models as $model){
-        $res[$model['model']]=$model;
+        if (!array_key_exists($model['manufacturer'], $res)) {
+            $res[$model['manufacturer']] = array();
+        }
+        array_push($res[$model['manufacturer']], $model);
     }
     return $response->withJson($res,200);
 });
