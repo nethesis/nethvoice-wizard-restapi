@@ -377,6 +377,12 @@ POST /outboundroutes
 Parameter: { "name": "<string>", "outcid": "<string>", "outcid_mode": "<val>", "password": "<string>", "emergency_route": "YES | NO", "intracompany_route": "YES | NO", "mohclass" : "", "time_group_id" : "<val>", "patterns" : [ "prepend", "prefix", "prepone", "cid", ... ], "trunks": [ <trunk id>, <trunk id>, ... ], "seq": "<string>", "dest": <string> }
 ```
 
+Delete outbound routes
+
+```
+DELETE /outboundroutes/{id}
+```
+
 ### Trunks
 
 Retrieve all Trunks

@@ -78,7 +78,7 @@ $app->delete('/inboundroutes/{id}', function (Request $request, Response $respon
  /**
  * @api {post} /outboundroutes  Create an outbound routes (incoming)
  */
-$app->post('/outboundroutes', function (Request $request, Response $response, $args) {
+ $app->post('/outboundroutes', function (Request $request, Response $response, $args) {
     $params = $request->getParsedBody();
 
     try {
@@ -102,3 +102,25 @@ $app->post('/outboundroutes', function (Request $request, Response $response, $a
 
     return $response->withStatus(200);
 });
+
+ /**
+  * @api {delete} /outboundroutes/:id Delete an outbound route
+  */
+ $app->delete('/outboundroutes/{id}', function (Request $request, Response $response, $args) {
+   $route = $request->getAttribute('route');
+   $id = $route->getArgument('id');
+
+   try {
+     $res = FreePBX::Core()->getRoute($id);
+
+     if ($res === false)
+       return $response->withStatus(404);
+
+     FreePBX::Core()->delRoute($id);
+   } catch (Exception $e) {
+     error_log($e->getMessage());
+     return $response->withJson('An error occurred', 500);
+   }
+
+   return $response;
+ });
