@@ -72,7 +72,8 @@ $app->get('/configuration/networks', function (Request $request, Response $respo
             $networks[$key['name']] = array(
                 "network"=>long2ip(ip2long($key['props']['ipaddr']) & ip2long($key['props']['netmask'])),
                 "ip"=>$key['props']['ipaddr'],
-                "netmask"=>$key['props']['netmask']
+                "netmask"=>$key['props']['netmask'],
+                "gateway"=>$key['props']['gateway']
             );
         }
     }
