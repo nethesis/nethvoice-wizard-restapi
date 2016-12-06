@@ -278,6 +278,30 @@ POST /physicalextensions
 Parameter: { "virtualextension": "virtualextnumber" [, "extension": "extensionnumber"]}
 ```
 
+### Voicemail
+
+Retrieve list of all voicemails
+
+```
+GET /voicemails
+```
+
+
+Retrieve voicemail for a specific extension (Virtualextension)
+
+```
+GET /voicemails/{extension}
+```
+
+
+Enable voicemail for an extension
+
+```
+POST /voicemails
+```
+
+Parameters: {"extension":"virtualextension"}
+
 ### Devices
 
 Launch a network scan creating two files: MD5.phones.scan and MD5.gateways.scan in /var/run/nethvoice, where MD5 is the MD5 hash of given network. Return long run process id
@@ -367,6 +391,8 @@ Retrieve outbound routes
 GET /outboundroutes
 ```
 
+Create an outbound route
+
 ```
 POST /outboundroutes
 ```
@@ -401,8 +427,9 @@ Create or edit mobile phone for a user
 POST /mobiles
 ```
 
+```
 Parameters: {"username": "username", "mobile": "mobile"} mobile is the phone number of user
-``
+```
 
 ### Trunks
 
@@ -483,3 +510,4 @@ Result:
   }
 ]
 ```
+
