@@ -11,12 +11,13 @@ require_once(__DIR__. '/../../admin/modules/core/functions.inc.php');
 $app->get('/inboundroutes', function (Request $request, Response $response, $args) {
     try {
       $routes = FreePBX::Core()->getAllDIDs('extension');
+      $destinations = FreePBX::Modules()->getDestinations();
     } catch (Exception $e) {
       error_log($e->getMessage());
       return $response->withJson('An error occurred', 500);
     }
 
-    return $response->withJson($routes, 200);
+    return $response->withJson(array("destinations" => $destinations, "routes" => $routes), 200);
 });
 
 /**
