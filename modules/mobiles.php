@@ -21,6 +21,9 @@ $app->get('/mobiles/{username}', function (Request $request, Response $response,
         $dbh = FreePBX::Database();
         $sql = "SELECT `mobile` FROM `rest_mobiles` WHERE username='$username'";
         $mobile = $dbh->sql($sql,"getOne",\PDO::FETCH_ASSOC);
+	if ($mobile==false){
+            return $response->withJson($mobile,404);
+        }
         return $response->withJson($mobile,200);
     } catch (Exception $e){
         error_log($e->getMessage());
