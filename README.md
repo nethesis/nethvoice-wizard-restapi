@@ -345,6 +345,16 @@ Retrieve inbound routes
 GET /inboundroutes
 ```
 
+Create an inbound routes
+
+```
+POST /inboundroutes
+```
+
+```
+Parameter: { "cidnum": "cidnumber", "extension": "extensionnumber", "mohclass": "default" [, "destination": "<val>", "faxexten": "<val>", "faxemail": "<val>", "answer": "<val>", "wait": "<val>", "privacyman": "<val>", "alertinfo": "<val>", "ringing": "<val>", "description": "<val>", "grppre": "<val>", "delay_answer": "<val>", "pricid": "<val>", "pmmaxretries": "<val>", "pmminlength": "<val>", "reversal": "<val>" ] }
+```
+
 Retrieve outbound routes
 
 ```
