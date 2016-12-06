@@ -348,10 +348,15 @@ GET /inboundroutes
 Retrieve outbound routes
 
 ```
-GET /outboundroutes
+POST /outboundroutes
+```
 
+Create an outbound routes
 
-=======
+```
+Parameter: { "name": "<string>", "outcid": "<string>", "outcid_mode": "<val>", "password": "<string>", "emergency_route": "YES | NO", "intracompany_route": "YES | NO", "mohclass" : "", "time_group_id" : "<val>", "patterns" : [ "prepend", "prefix", "prepone", "cid", ... ], "trunks": [ <trunk id>, <trunk id>, ... ], "seq": "<string>", "dest": <string> }
+```
+
 ### Trunks
 
 Retrieve all Trunks
