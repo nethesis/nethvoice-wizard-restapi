@@ -111,12 +111,12 @@ $app->delete('/inboundroutes/{id}', function (Request $request, Response $respon
    $id = $route->getArgument('id');
 
    try {
-     $res = FreePBX::Core()->getRoute($id);
+     $res = core_routing_get($id);
 
      if ($res === false)
        return $response->withStatus(404);
 
-     FreePBX::Core()->delRoute($id);
+     core_routing_delbyid($id);
    } catch (Exception $e) {
      error_log($e->getMessage());
      return $response->withJson('An error occurred', 500);
