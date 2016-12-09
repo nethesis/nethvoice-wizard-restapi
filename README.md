@@ -379,14 +379,14 @@ Delete outbound routes
 
 ```
 DELETE /outboundroutes/{id}
-`
+```
 
 ### Mobiles
 
 Retrieve list of all mobile phones and associated users
 
 ```
-GET /mobiles 
+GET /mobiles
 ```
 
 Retrieve mobile phone for a specific user
@@ -398,7 +398,7 @@ GET /mobiles/username
 Create or edit mobile phone for a user
 
 ```
-POST /mobiles 
+POST /mobiles
 ```
 
 Parameters: {"username": "username", "mobile": "mobile"} mobile is the phone number of user
