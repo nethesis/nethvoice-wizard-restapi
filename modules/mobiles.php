@@ -10,7 +10,7 @@ $app->get('/mobiles', function (Request $request, Response $response, $args) {
         return $response->withJson($mobiles,200);
     } catch (Exception $e){
         error_log($e->getMessage());
-        return $response->withJson(array("status"=>$e->getMessage()),500);
+        return $response->withStatus(500);
     }
 });
 
@@ -27,7 +27,7 @@ $app->get('/mobiles/{username}', function (Request $request, Response $response,
         return $response->withJson($mobile,200);
     } catch (Exception $e){
         error_log($e->getMessage());
-        return $response->withJson(array("status"=>$e->getMessage()),500);
+        return $response->withStatus(500);
     }
 });
 
@@ -35,20 +35,18 @@ $app->post('/mobiles', function (Request $request, Response $response, $args) {
     try {
         $params = $request->getParsedBody();
         $dbh = FreePBX::Database();
-        $sql = "DELETE FROM `rest_mobiles` WHERE `username` = '".$params['username']."'";
-        $dbh->sql($sql);
-        $sql = "INSERT INTO `rest_mobiles` (`username`,`mobile`) VALUES (?,?)";
+        $sql = "REPLACE INTO `rest_mobiles` (`username`,`mobile`) VALUES (?,?)";
         $stmt = $dbh->prepare($sql);
         $mobile = preg_replace('/^\+/','00',$params['mobile']);
         $mobile = preg_replace('/[^0-9]/','',$mobile);
         if ($res = $stmt->execute(array($params['username'],$mobile))) {
-            return $response->withJson(array("status"=>true),200);
+            return $response->withStatus(200);
         } else {
-            return $response->withJson(array("status"=>"Unknown error"),500);
+            return $response->withStatus(500);
         }
     } catch (Exception $e){
         error_log($e->getMessage());
-        return $response->withJson(array("status"=>$e->getMessage()),500);
+        return $response->withStatus(500);
     }
 });
 
