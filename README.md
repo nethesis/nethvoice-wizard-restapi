@@ -489,6 +489,23 @@ Result:
 ]
 ```
 
+Create a new trunk
+
+```
+POST /trunks
+```
+
+```
+Parameters: { "provider": "<provider>",
+  "name": "<name>",
+  "username": "<username>",
+  "password": "<password>",
+  "phone": "<phone number>",
+  "codec": "<codec1>,<codec2>,...",
+  "forceCodec": <true | false>
+}
+```
+
 ### Providers
 
 Retrieve all providers
