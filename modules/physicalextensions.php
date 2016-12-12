@@ -31,6 +31,7 @@ $app->get('/physicalextensions/{extension}', function (Request $request, Respons
 $app->post('/physicalextensions', function (Request $request, Response $response, $args) {
     $params = $request->getParsedBody();
     $virtualextensionnumber = $params['virtualextension'];
+    $mac = $params['mac'];
     $fpbx = FreePBX::create();
 
     //get associated virtual extension
@@ -85,5 +86,15 @@ $app->post('/physicalextensions', function (Request $request, Response $response
     $grouplist[] = $extension;
     $fpbx->Findmefollow->addSettingById($virtualextensionnumber, 'grplist',$grouplist);
 
-    return $response->withJson(array("status"=>true),200);
+    // insert created physical extension
+    $created_extension = $res['ext'];
+    $created_extension_secret = sql('SELECT data FROM `sip` WHERE id = "' . $created_extension . '" AND keyword="secret"', "getOne");
+    $dbh = FreePBX::Database();
+    $sql = 'UPDATE `rest_devices_phones` SET `virtualextension`= ?, `extension`= ?, `secret`= ? WHERE mac = "'.$mac.'"';
+    $stmt = $dbh->prepare($sql);
+    if ($res = $stmt->execute(array($virtualextensionnumber,$created_extension,$created_extension_secret))) {
+        return $response->withStatus(200);
+    } else {
+        return $response->withStatus(500);
+    }
 });

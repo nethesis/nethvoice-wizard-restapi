@@ -30,7 +30,12 @@ $app->get('/devices/phones/list/{id}', function (Request $request, Response $res
         if (!file_exists($filename)){
            return $response->withJson(array("status"=>"Scan for network $id doesn't exist!"),404);
         }
-        return $response->write(file_get_contents($filename),200);
+
+        $phones = json_decode(file_get_contents($filename), true);
+        foreach ($phones as $key => $value) {
+            $phones[$key]['model'] = sql('SELECT model FROM `rest_devices_phones` WHERE mac = "' . $phones[$key]['mac'] . '"', "getOne");
+        }
+        return $response->withJson($phones,200);
     } catch(Exception $e) {
         error_log($e->getMessage());
         return $response->withStatus(500);
@@ -62,10 +67,12 @@ $app->get('/devices/phones/list', function (Request $request, Response $response
         foreach ($files as $file){
             if (preg_match('/\.phones\.scan$/', $file)) {
                 if (file_exists($basedir."/".$file)){
-                    $decoded = json_decode(file_get_contents($basedir."/".$file));
-                    foreach($decoded as $element)
-                    {
-                        $res[]=$element;
+                    $phones = json_decode(file_get_contents($basedir."/".$file),true);
+                    foreach ($phones as $key => $value) {
+                        $phones[$key]['model'] = sql('SELECT model FROM `rest_devices_phones` WHERE mac = "' . $phones[$key]['mac'] . '"', "getOne");
+                        if($phones[$key]['model']) {
+                            $res[]=$phones[$key];
+                        }
                     }
                 }
             }
@@ -122,5 +129,26 @@ $app->get('/devices/gateways/manufacturers', function (Request $request, Respons
         array_push($res[$model['manufacturer']], $model);
     }
     return $response->withJson($res,200);
+});
+
+$app->post('/devices/phones/model', function (Request $request, Response $response, $args) {
+    try {
+        $params = $request->getParsedBody();
+        $mac = $params['mac'];
+        $vendor = $params['vendor'];
+        $model = $params['model'];
+
+        $dbh = FreePBX::Database();
+        $sql = 'REPLACE INTO `rest_devices_phones` (`mac`,`vendor`, `model`) VALUES (?,?,?)';
+        $stmt = $dbh->prepare($sql);
+        if ($res = $stmt->execute(array($mac,$vendor,$model))) {
+            return $response->withStatus(200);
+        } else {
+            return $response->withStatus(500);
+        }
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
 });
 
