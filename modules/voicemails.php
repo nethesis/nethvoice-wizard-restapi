@@ -49,22 +49,20 @@ $app->post('/voicemails', function (Request $request, Response $response, $args)
             return $response->withJson(array('status' => 'Extension '.$params['extension']." doesn't exist"), 400);
         }
 
-        $allUsers = FreePBX::create()->Userman->getAllUsers();
-        foreach ($allUsers as $u) {
-            if ($u['default_extension'] = $extension['extension']) {
-                $user = $u;
-            }
-            break;
+        if($params['state'] == 'yes') {
+            $user = FreePBX::create()->Userman->getUserByDefaultExtension($extension['extension']);
+            $tech = $extension['tech'];
+            $data = array();
+            $data['name'] = $extension['name'];
+            $data['vmpwd'] = rand(0, 9).rand(0, 9).rand(0, 9).rand(0, 9);
+            $data['email'] = $user['email'];
+            $data['vm'] = 'yes';
+            FreePBX::create()->Voicemail->processQuickCreate($tech, $extension['extension'], $data);
+            $sql = 'UPDATE `rest_user_passwords` SET `voicemail_password`="'.$data['vmpwd'].'" WHERE `username`="'.$user['username'].'"';
+            $db->query($sql);
+        } else {
+            FreePBX::create()->Voicemail->delMailbox($extension['extension']);
         }
-        $tech = $extension['tech'];
-        $data = array();
-        $data['name'] = $extension['name'];
-        $data['vmpwd'] = rand(0, 9).rand(0, 9).rand(0, 9).rand(0, 9);
-        $data['email'] = $user['email'];
-        $data['vm'] = 'yes';
-        FreePBX::create()->Voicemail->processQuickCreate($tech, $extension['extension'], $data);
-        $sql = 'UPDATE `rest_user_passwords` SET `voicemail_password`="'.$data['vmpwd'].'" WHERE `username`="'.$user['username'].'"';
-        $db->query($sql);
 
         return $response->withJson(array('status' => true), 200);
     } catch (Exception $e) {
