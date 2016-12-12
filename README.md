@@ -314,6 +314,14 @@ POST /devices/scan
 Parameter: { "network": "192.168.0.0/24"}
 ```
 
+Set phone model
+```
+POST /devices/phones/model
+```
+```
+Parameter: { mac: "C4:64:13:3D:15:F7", vendor: "Cisco/Linksys", model: "ATA186" }
+```
+
 
 Get phones scanned from all netwotks
 
