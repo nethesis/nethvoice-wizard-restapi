@@ -45,6 +45,7 @@ $app->get('/users', function (Request $request, Response $response, $args) {
     $blacklist = ['admin', 'administrator', 'guest', 'krbtgt'];
     sync(); // force FreePBX user sync
     $users = FreePBX::create()->Userman->getAllUsers();
+    $dbh = FreePBX::Database();
     $i = 0;
     foreach ($users as $user) {
         if (in_array(strtolower($users[$i]['username']), $blacklist)) {
@@ -52,6 +53,7 @@ $app->get('/users', function (Request $request, Response $response, $args) {
         } else {
             $users[$i]['password'] = getPassword(getUser($users[$i]['username']));
         }
+        $users[$i]['devices'] = $dbh->sql('SELECT * FROM `rest_devices_phones` WHERE virtualextension = "' . $users[$i]['default_extension'] . '"',"getAll",\PDO::FETCH_ASSOC);
         $i++;
     }
     return $response->withJson($users,200);
