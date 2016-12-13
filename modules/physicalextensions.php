@@ -98,3 +98,23 @@ $app->post('/physicalextensions', function (Request $request, Response $response
         return $response->withStatus(500);
     }
 });
+
+$app->post('/physicalextensions/unlink', function (Request $request, Response $response, $args) {
+    $params = $request->getParsedBody();
+    $mac = $params['mac'];
+    $dbh = FreePBX::Database();
+
+    // clean extension
+    $extension_to_delete = sql('SELECT extension FROM `rest_devices_phones` WHERE mac = "' . $mac . '"', "getOne");
+    sql('DELETE FROM devices WHERE id =' . $extension_to_delete);
+    sql('DELETE FROM sip WHERE id =' . $extension_to_delete);
+    sql('DELETE FROM users WHERE extension =' . $extension_to_delete);
+
+    $sql = 'UPDATE `rest_devices_phones` SET `virtualextension`= "", `extension`= "", `secret`= "" WHERE mac = "'.$mac.'"';
+    $stmt = $dbh->prepare($sql);
+    if ($res = $stmt->execute()) {
+        return $response->withStatus(200);
+    } else {
+        return $response->withStatus(500);
+    }
+});
