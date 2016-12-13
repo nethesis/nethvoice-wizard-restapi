@@ -70,6 +70,8 @@ $app->get('/devices/phones/list', function (Request $request, Response $response
                     $phones = json_decode(file_get_contents($basedir."/".$file),true);
                     foreach ($phones as $key => $value) {
                         $phones[$key]['model'] = sql('SELECT model FROM `rest_devices_phones` WHERE mac = "' . $phones[$key]['mac'] . '"', "getOne");
+                        $phones[$key]['virtualextension'] = sql('SELECT virtualextension FROM `rest_devices_phones` WHERE mac = "' . $phones[$key]['mac'] . '"', "getOne");
+                        $phones[$key]['extension'] = sql('SELECT extension FROM `rest_devices_phones` WHERE mac = "' . $phones[$key]['mac'] . '"', "getOne");
                         if($phones[$key]['model']) {
                             $res[]=$phones[$key];
                         }
