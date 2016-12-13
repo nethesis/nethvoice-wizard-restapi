@@ -369,6 +369,34 @@ Get supported gateways
 GET /devices/gateways/manufacturers
 ```
 
+
+Create/Update configuration for a gateway 
+
+```
+POST /devices/gateways
+```
+
+Parameters: { ... }
+
+
+Create configuration in tftp and push it to gateway
+
+```
+POST /devices/gateways/push
+```
+
+Parameters: {"name": "name"}
+
+
+Delete configuration for a device 
+
+```
+DELETE /devices/gateways
+``` 
+
+Parameters: {"name": "name"}
+
+
 ### Routes
 
 Retrieve inbound routes

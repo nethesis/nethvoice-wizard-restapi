@@ -98,7 +98,7 @@ $app->get('/devices/gateways/list', function (Request $request, Response $respon
             if (preg_match('/\.gateways\.scan$/', $file)) {
                 if (file_exists($basedir."/".$file)){
                     $decoded = json_decode(file_get_contents($basedir."/".$file));
-                    foreach($decoded as $element)
+                    foreach ($decoded as $element)
                     {
                         $res[]=$element;
                     }
@@ -154,6 +154,139 @@ $app->post('/devices/phones/model', function (Request $request, Response $respon
     } catch (Exception $e) {
         error_log($e->getMessage());
         return $response->withStatus(500);
+    }
+});
+
+/*
+* Create or update a gateway configuration
+*/
+
+$app->post('/devices/gateways', function (Request $request, Response $response, $args) {
+    try{
+        $fpbx = FreePBX::create();
+        $params = $request->getParsedBody();
+        $dbh = FreePBX::Database();
+        /*Check if config exists*/
+        $sql = "SELECT `id` FROM `gateway_config` WHERE `name` = ?";
+        $sth = FreePBX::Database()->prepare($sql);
+        $sth->execute(array($params['name']));
+        $res = $sth->fetch(\PDO::FETCH_ASSOC);
+        if ($res !== false){
+            /*Configuration exists, delete it*/
+            $id = $res['id'];
+            $sqls = array();
+            $sqls[] = "DELETE IGNORE FROM `gateway_config` WHERE `id` = ?";
+            $sqls[] = "DELETE IGNORE FROM `gateway_config_fxo` WHERE `config_id` = ?";
+            $sqls[] = "DELETE IGNORE FROM `gateway_config_fxs` WHERE `config_id` = ?";
+            $sqls[] = "DELETE IGNORE FROM `gateway_config_isdn` WHERE `config_id` = ?";
+            $sqls[] = "DELETE IGNORE FROM `gateway_config_pri` WHERE `config_id` = ?";
+            foreach ($sqls as $sql) {
+                $sth = FreePBX::Database()->prepare($sql);
+                $sth->execute(array($id));
+            }
+        }
+        /*Create configuration*/
+        $sql = "INSERT INTO `gateway_config` (`model_id`,`name`,`ipv4`,`ipv4_new`,`gateway`,`mac`) VALUES (?,?,?,?,?,?)";
+        $sth = FreePBX::Database()->prepare($sql);
+        $sth->execute(array($params['model'],$params['name'],$params['ipv4'],$params['ipv4_new'],$params['gateway'],$params['mac']));
+        /*get id*/
+        $sql = "SELECT `id` FROM `gateway_config` WHERE `name` = ?";
+        $sth = FreePBX::Database()->prepare($sql);
+        $sth->execute(array($params['name']));
+        $res = $sth->fetch(\PDO::FETCH_ASSOC);
+        if ($res === false){
+            return $response->withJson(array("status"=>"Failed to create configuration"),500);
+        }
+        $id = $res['id'];
+        /*Save trunk specific configuration*/
+        if (isset($params['trunks_isdn'])){
+            /*Save isdn trunks parameters*/
+            foreach ($params['trunks_isdn'] as $trunk){
+                $sql = "INSERT INTO `gateway_config_isdn` (`config_id`,`trunk`,`protocol`) VALUES (?,?,?)";
+                $sth = FreePBX::Database()->prepare($sql);
+                $sth->execute(array($id,$trunk['name'],$trunk['type']));
+            }
+        }
+        if (isset($params['trunks_pri'])){
+            /*Save pri trunks parameters*/
+            foreach ($params['trunks_pri'] as $trunk){
+                $sql = "INSERT INTO `gateway_config_pri` (`config_id`,`trunk`) VALUES (?,?)";
+                $sth = FreePBX::Database()->prepare($sql);
+                $sth->execute(array($id,$trunk['linked_trunk']));
+            }
+        }
+        if (isset($params['trunks_fxo'])){
+            /*Save fxo trunks parameters*/
+            foreach ($params['trunks_fxo'] as $trunk){
+                $sql = "INSERT INTO `gateway_config_fxo` (`config_id`,`trunk`,`number`) VALUES (?,?,?)";
+                $sth = FreePBX::Database()->prepare($sql);
+                $sth->execute(array($id,$trunk['linked_trunk'],$trunk['number']));
+            }
+        }
+        return $response->withJson(array('status' => true), 200);
+    } catch (Exception $e){
+        error_log($e->getMessage());
+        return $response->withJson(array("status"=>$e->getMessage()),500);
+    }
+});
+
+/*
+* Send gateway configuration to the device
+*/
+
+$app->post('/devices/gateways/push', function (Request $request, Response $response, $args) {
+    try{
+        #create configuration files
+        $params = $request->getParsedBody();
+        $name = $params['name'];
+
+        #Create configuration
+        system("/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/tftpGenerateConfig.php ".escapeshellarg($name),$ret);
+        if ($ret === 0 ) {
+            #Launch configuration push
+            system("/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/tftpPushConfig.php ".escapeshellarg($name));
+            return $response->withJson(array('status'=>true), 200);
+        } else {
+            throw new Exception('Error generating configuration');
+        }
+    } catch (Exception $e){
+        error_log($e->getMessage());
+        return $response->withJson(array("status"=>$e->getMessage()),500);
+    }
+});
+
+
+/*
+* Delete a gateway configuration
+*/
+
+$app->delete('/devices/gateways', function (Request $request, Response $response, $args) {
+    try{
+        $params = $request->getParsedBody();
+        $name = $params['name'];
+        system("/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/tftpDeleteConfig.php ".escapeshellarg($name),$ret);
+        $sql = "SELECT `id` FROM `gateway_config` WHERE `name` = ?";
+        $sth = FreePBX::Database()->prepare($sql);
+        $sth->execute(array($params['name']));
+        $res = $sth->fetch(\PDO::FETCH_ASSOC);
+        if ($res !== false){
+            $id = $res['id'];
+            /*Configuration exists, delete it*/
+            $sqls = array();
+            $sqls[] = "DELETE IGNORE FROM `gateway_config` WHERE `id` = ?";
+            $sqls[] = "DELETE IGNORE FROM `gateway_config_fxo` WHERE `config_id` = ?";
+            $sqls[] = "DELETE IGNORE FROM `gateway_config_fxs` WHERE `config_id` = ?";
+            $sqls[] = "DELETE IGNORE FROM `gateway_config_isdn` WHERE `config_id` = ?";
+            $sqls[] = "DELETE IGNORE FROM `gateway_config_pri` WHERE `config_id` = ?";
+            foreach ($sqls as $sql) {
+                $sth = FreePBX::Database()->prepare($sql);
+                $sth->execute(array($id));
+            }
+        }
+        return $response->withJson(array('status' => true), 200);
+    } catch (Exception $e){
+        error_log($e->getMessage());
+        return $response->withJson(array("status"=>$e->getMessage()),500);
     }
 });
 

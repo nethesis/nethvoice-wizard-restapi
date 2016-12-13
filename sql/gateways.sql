@@ -1,14 +1,14 @@
 USE asterisk;
 DROP TABLE IF EXISTS `gateway_models`;
 CREATE TABLE IF NOT EXISTS `gateway_models` (
-  `id` bigint AUTO_INCREMENT NOT NULL PRIMARY KEY,
+  `id` INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
   `model` varchar(100) NOT NULL default '',
   `manufacturer` varchar(20) default NULL,
   `tech` varchar(20) default NULL,
-  `n_pri_trunks` int(11) default '0',
-  `n_isdn_trunks` int(11) default '0',
-  `n_fxo_trunks` int(11) default '0',
-  `n_fxs_ext` int(11) default '0',
+  `n_pri_trunks` INT UNSIGNED default '0',
+  `n_isdn_trunks` INT UNSIGNED default '0',
+  `n_fxo_trunks` INT UNSIGNED default '0',
+  `n_fxs_ext` INT UNSIGNED default '0',
   `description` varchar(50) default NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -55,3 +55,46 @@ INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_tru
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('M4404','Mediatrix','isdn',0,4,0,0, 'MEDIATRIX 4404 ISDN 4 Porte');
 
 UNLOCK TABLES;
+
+CREATE TABLE IF NOT EXISTS `gateway_config` (
+  `id` INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
+  `model_id` INT UNSIGNED NOT NULL default 0,
+  `name` varchar(100) default NULL,
+  `ipv4` varchar(20) default NULL,
+  `ipv4_new` varchar(20) default NULL,
+  `gateway` varchar(20) default NULL,
+  `mac` char(18) default NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `gateway_config_fxo` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `config_id` INT UNSIGNED NOT NULL default '0',
+  `trunk` INT UNSIGNED default NULL,
+  `number` varchar(100) default NULL,
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `gateway_config_isdn` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `config_id` INT UNSIGNED NOT NULL default '0',
+  `trunk` INT UNSIGNED default NULL,
+  `protocol` varchar(100) default NULL,
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `gateway_config_pri` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `config_id` INT UNSIGNED NOT NULL default '0',
+  `trunk` INT UNSIGNED default NULL,
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `gateway_config_fxs` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `config_id` INT UNSIGNED NOT NULL default '0',
+  `extension` varchar(100) default NULL,
+  `secret` varchar(100) default NULL,
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
