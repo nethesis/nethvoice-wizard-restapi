@@ -388,7 +388,7 @@ Create/Update configuration for a gateway
 POST /devices/gateways
 ```
 
-Parameters: { ... }
+Parameters: {"name":"Patton 1234", "mac": "00:A0:BA:0B:1C:DA","ipv4": "192.168.5.245","ipv4_new":"192.168.5.213", "manufacturer": "Patton","gateway": "192.168.1.1","model": "8","trunks_isdn": [{"name": 2005,"type": "pp"},{ "name": 2006,"type": "pmp"}],"trunks_pri": [{"linked_trunk": 2005}],"trunks_fxo":[{"number": "072112345","linked_trunk": 2005}, {"number": "072112346", "linked_trunk": 2006}],"users_fxs": [ { "linked_user": "stefanof"}]}
 
 
 Create configuration in tftp and push it to gateway
