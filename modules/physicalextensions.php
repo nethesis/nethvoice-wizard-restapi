@@ -30,26 +30,26 @@ $app->get('/physicalextensions/{extension}', function (Request $request, Respons
 
 $app->post('/physicalextensions', function (Request $request, Response $response, $args) {
     $params = $request->getParsedBody();
-    $virtualextensionnumber = $params['virtualextension'];
+    $mainextensionnumber = $params['mainextension'];
     $mac = $params['mac'];
     $fpbx = FreePBX::create();
 
     //get associated virtual extension
-    $virtualextensions = $fpbx->Core->getAllUsersByDeviceType('virtual');
-    foreach ($virtualextensions as $ve) {
-        if ($ve['extension'] == $virtualextensionnumber){
-	    $virtualextension = $ve;
+    $mainextensions = $fpbx->Core->getAllUsersByDeviceType('virtual');
+    foreach ($mainextensions as $ve) {
+        if ($ve['extension'] == $mainextensionnumber){
+	    $mainextension = $ve;
             break;
         }
     }
     //error if virtual extension number doesn't exist
-    if (!isset($virtualextension)){
-        return $response->withJson(array("status"=>"Virtual extension ".$virtualextensionnumber." doesn't exist"),400);
+    if (!isset($mainextension)){
+        return $response->withJson(array("status"=>"Virtual extension ".$mainextensionnumber." doesn't exist"),400);
     }
 
     if (isset($params['extension'])){
        //use given extension number
-       if (!preg_match('/9[1-7]'.$virtualextensionnumber.'/', $params['extension'])){
+       if (!preg_match('/9[1-7]'.$mainextensionnumber.'/', $params['extension'])){
            return $response->withJson(array("status"=>"Wrong physical extension number supplied"),400);
        } else {
            $extension = $params['extension'];
@@ -58,8 +58,8 @@ $app->post('/physicalextensions', function (Request $request, Response $response
         //get first free physical extension number for this virtual extension
         $extensions = $fpbx->Core->getAllUsersByDeviceType();
         for ($i=91; $i<=97; $i++){
-            if (!extensionExists($i.$virtualextensionnumber,$extensions)){
-                $extension = $i.$virtualextensionnumber;
+            if (!extensionExists($i.$mainextensionnumber,$extensions)){
+                $extension = $i.$mainextensionnumber;
                 break;
             }
         }
@@ -74,25 +74,25 @@ $app->post('/physicalextensions', function (Request $request, Response $response
     $fpbx->Core->delUser($extension,true);
 
     //create physical extension
-    $data['name'] = $virtualextension['name'];
+    $data['name'] = $mainextension['name'];
     $res = $fpbx->Core->processQuickCreate('pjsip',$extension,$data);
     if (!$res['status']) {
         return $response->withJson(array('message'=>$res['message']),500);
     }
 
     //Configure Follow me for the extension
-    $followmeconfig = $fpbx->Findmefollow->getSettingsById($virtualextensionnumber);
+    $followmeconfig = $fpbx->Findmefollow->getSettingsById($mainextensionnumber);
     $grouplist = explode("-",$followmeconfig['grplist']);
     $grouplist[] = $extension;
-    $fpbx->Findmefollow->addSettingById($virtualextensionnumber, 'grplist',$grouplist);
+    $fpbx->Findmefollow->addSettingById($mainextensionnumber, 'grplist',$grouplist);
 
     // insert created physical extension
     $created_extension = $res['ext'];
     $created_extension_secret = sql('SELECT data FROM `sip` WHERE id = "' . $created_extension . '" AND keyword="secret"', "getOne");
     $dbh = FreePBX::Database();
-    $sql = 'UPDATE `rest_devices_phones` SET `virtualextension`= ?, `extension`= ?, `secret`= ? WHERE mac = "'.$mac.'"';
+    $sql = 'UPDATE `rest_devices_phones` SET `mainextension`= ?, `extension`= ?, `secret`= ? WHERE mac = "'.$mac.'"';
     $stmt = $dbh->prepare($sql);
-    if ($res = $stmt->execute(array($virtualextensionnumber,$created_extension,$created_extension_secret))) {
+    if ($res = $stmt->execute(array($mainextensionnumber,$created_extension,$created_extension_secret))) {
         return $response->withStatus(200);
     } else {
         return $response->withStatus(500);
@@ -110,7 +110,7 @@ $app->post('/physicalextensions/unlink', function (Request $request, Response $r
     sql('DELETE FROM sip WHERE id =' . $extension_to_delete);
     sql('DELETE FROM users WHERE extension =' . $extension_to_delete);
 
-    $sql = 'UPDATE `rest_devices_phones` SET `virtualextension`= "", `extension`= "", `secret`= "" WHERE mac = "'.$mac.'"';
+    $sql = 'UPDATE `rest_devices_phones` SET `mainextension`= "", `extension`= "", `secret`= "" WHERE mac = "'.$mac.'"';
     $stmt = $dbh->prepare($sql);
     if ($res = $stmt->execute()) {
         return $response->withStatus(200);

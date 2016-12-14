@@ -235,19 +235,19 @@ GET /tasks/{task_id}
 Retrieve all Virtual Extensions
 
 ```
-GET /virtualextensions
+GET /mainextensions
 ```
 
 Retrieve a Virtual Extension by its own extension number
 
 ```
-GET /virtualextensions/{extnumber}
+GET /mainextensions/{extnumber}
 ```
 
 Create a new Virtual Extension
 
 ```
-POST /virtualextensions
+POST /mainextensions
 ```
 
 ```
@@ -275,7 +275,7 @@ POST /physicalextensions
 ```
 
 ```
-Parameter: { "virtualextension": "virtualextnumber" [, "extension": "extensionnumber"]}
+Parameter: { "mainextension": "virtualextnumber" [, "extension": "extensionnumber"]}
 ```
 
 ### Voicemail
@@ -300,7 +300,7 @@ Enable voicemail for an extension
 POST /voicemails
 ```
 
-Parameters: {"extension":"virtualextension"}
+Parameters: {"extension":"mainextension"}
 
 ### Devices
 

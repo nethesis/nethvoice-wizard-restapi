@@ -53,7 +53,7 @@ $app->get('/users', function (Request $request, Response $response, $args) {
         } else {
             $users[$i]['password'] = getPassword(getUser($users[$i]['username']));
         }
-        $users[$i]['devices'] = $dbh->sql('SELECT * FROM `rest_devices_phones` WHERE virtualextension = "' . $users[$i]['default_extension'] . '"',"getAll",\PDO::FETCH_ASSOC);
+        $users[$i]['devices'] = $dbh->sql('SELECT * FROM `rest_devices_phones` WHERE mainextension = "' . $users[$i]['default_extension'] . '"',"getAll",\PDO::FETCH_ASSOC);
         $i++;
     }
     return $response->withJson($users,200);

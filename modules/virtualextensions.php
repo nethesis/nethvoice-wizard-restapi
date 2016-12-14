@@ -2,16 +2,16 @@
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
-$app->get('/virtualextensions', function (Request $request, Response $response, $args) {
-    $virtualextensions = FreePBX::create()->Core->getAllUsersByDeviceType('virtual');
-    return $response->withJson($virtualextensions,200);
+$app->get('/mainextensions', function (Request $request, Response $response, $args) {
+    $mainextensions = FreePBX::create()->Core->getAllUsersByDeviceType('virtual');
+    return $response->withJson($mainextensions,200);
 });
 
-$app->get('/virtualextensions/{extension}', function (Request $request, Response $response, $args) {
+$app->get('/mainextensions/{extension}', function (Request $request, Response $response, $args) {
     $route = $request->getAttribute('route');
     $extension = $route->getArgument('extension');
-    $virtualextensions = FreePBX::create()->Core->getAllUsersByDeviceType('virtual');
-    foreach ($virtualextensions as $e) {
+    $mainextensions = FreePBX::create()->Core->getAllUsersByDeviceType('virtual');
+    foreach ($mainextensions as $e) {
         if ($e['extension'] == $extension){
             return $response->withJson($e,200);
         }
@@ -19,7 +19,7 @@ $app->get('/virtualextensions/{extension}', function (Request $request, Response
     return $response->withStatus(404);
 });
 
-$app->post('/virtualextensions', function (Request $request, Response $response, $args) {
+$app->post('/mainextensions', function (Request $request, Response $response, $args) {
     $params = $request->getParsedBody();
     $username = $params['username'];
     $extension = $params['extension'];
