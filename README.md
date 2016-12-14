@@ -1,8 +1,6 @@
 # REST API
 
-Simple REST API framework for NethVoice.
-This is based on Slim framework: http://www.slimframework.com/docs/
-API design inspired by http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api
+Simple REST API framework for NethVoice. This is based on Slim framework: <http://www.slimframework.com/docs/> API design inspired by <http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api>
 
 The code must be installed under `/var/www/html/freepbx/rest` directory.
 
@@ -14,6 +12,7 @@ Eeach request must include 2 HTTP header:
 - `Secretkey`: must be a valid hash
 
 The Secretkey must be calculated using the following parameters:
+
 - user: the same value of `User` header
 - password: password of the user in sha1 hash format
 - secret: shared static secret between client and server; default is: `1234`
@@ -32,7 +31,6 @@ var hash = sha1(user + password + secret);
 console.log("Secretkey: " + hash);
 
 </script>
-
 ```
 
 Generate the secret key from bash:
@@ -45,12 +43,9 @@ pass=$(echo -n $pass | sha1sum | awk '{print $1}'); \
 echo -n $user$pass$secret | sha1sum | awk '{print $1}'
 ```
 
-
 ## Adding modules
 
-To add a new module, create a php file inside the `modules` directory.
-All modules automatically have access to all FreePBX variables
-like `$db` and `$astman`.
+To add a new module, create a php file inside the `modules` directory. All modules automatically have access to all FreePBX variables like `$db` and `$astman`.
 
 Example:
 
@@ -76,21 +71,23 @@ $app->get('/magic/list', function (Request $request, Response $response, $args) 
 You can spawn a long running process using ptrack command.
 
 How it works:
+
 - the library invokes ptrack along with the command to be executed
 - ptrack creates a new socket, forks in background and executes the command
 - the command must write its own status inside ptrack socket (many NethServer commands already support it)
 - a client can read from ptrack socket the status of the running task
 
 Start a new task:
+
 ```
 require_once("lib/SystemTasks.php");
 
 $st = new SystemTasks();
 $taskId = $st->startTask("/usr/bin/sudo /usr/libexec/nethserver/pkgaction --install nethserver-directory");
-
 ```
 
 Read the status of a task:
+
 ```
 require_once("lib/SystemTasks.php");
 
@@ -98,7 +95,6 @@ $st = new SystemTasks();
 $task = $st->getTaskStatus($taskId);
 print_r($task);
 ```
-
 
 ## API
 
@@ -112,7 +108,6 @@ Example:
 
 ```
 curl -kvL  https://localhost/freepbx/rest/login -H "Content-Type: application/json" -H "User: admin" -H "Secretkey: 51b3bfeb54d746a8c8989e71dd8be757787d1adc"
-
 ```
 
 ### Users
@@ -131,8 +126,7 @@ GET /users/{id}
 
 Create a new user or edit an existing one.
 
-JSON body:
-``{"username" : "myuser", "fullname" : "my full name"}``
+JSON body: `{"username" : "myuser", "fullname" : "my full name"}`
 
 ```
 POST /users
@@ -147,38 +141,43 @@ Parameter: { "password": "mypass" }
 ```
 
 Get user password in clear-text
+
 ```
 GET /users/{username}/password
 ```
 
 Force user synchronization
+
 ```
 POST /users/sync
 ```
 
 ### Configuration
 
-Check  mode status.
+Check mode status.
 
 Legacy mode is enabled if:
+
 - nethserver-directory is installed
 - nethvoice{LegacyMode} prop is set to enabled
 
 Result:
-  - `{'result' => "legacy" }` if legacy mode is enabled
-  - `{'result' => "uc" }` if UC  mode is enabled
-  - `{'result' => 'unknown' }` if mode isn't set
+
+- `{'result' => "legacy" }` if legacy mode is enabled
+- `{'result' => "uc" }` if UC mode is enabled
+- `{'result' => 'unknown' }` if mode isn't set
 
 ```
 GET configuration/mode
 ```
 
-Enable selected `<mode>`.
-Valid modes are:
+Enable selected `<mode>`. Valid modes are:
+
 - `legacy`: set nethvoice{LegacyMode} to enabled, start nethserver-directory installation using ptrack
 - `uc`: set nethvoice{LegacyMode} to disabled
 
 JSON Body:
+
 ```
 {
    "mode" : <mode>
@@ -188,25 +187,21 @@ JSON Body:
 Legacy mode can't be reverted.
 
 Result:
- - `{'result' => <task_id> }` if legacy mode is set
- - `{'result' => "success" }` if uc mode is set
 
+- `{'result' => <task_id> }` if legacy mode is set
+- `{'result' => "success" }` if uc mode is set
 
-The `task_id` is a md5 hash.
-It can be used to retrieve the task progress using the tasks module.
+The `task_id` is a md5 hash. It can be used to retrieve the task progress using the tasks module.
 
 ```
 POST /configuration/mode
-
 ```
-
 
 ```
 GET /configuration/networks
 ```
 
 Return green ip addresses and their netmasks
-
 
 ### Tasks
 
@@ -217,20 +212,20 @@ Result:
 - task: the task id
 - action: current executing action
 - progress: total progress
-```
-{
+
+  ```
+  {
   "task": "d56c79f9373a2f2f9ccd8a0ac3c46eb4",
   "action": "S10nethserver-directory-conf",
   "progess": 59
-}
-```
+  }
+  ```
 
 ```
 GET /tasks/{task_id}
 ```
 
-
-### Main Extensions
+### Virtual Extensions
 
 Retrieve all Main Extensions
 
@@ -298,13 +293,11 @@ Retrieve list of all voicemails
 GET /voicemails
 ```
 
-
 Retrieve voicemail for a specific extension (Mainextension)
 
 ```
 GET /voicemails/{extension}
 ```
-
 
 Enable voicemail for an extension
 
@@ -327,13 +320,14 @@ Parameter: { "network": "192.168.0.0/24"}
 ```
 
 Set phone model
+
 ```
 POST /devices/phones/model
 ```
+
 ```
 Parameter: { mac: "C4:64:13:3D:15:F7", vendor: "Cisco/Linksys", model: "ATA186" }
 ```
-
 
 Get phones scanned from all netwotks
 
@@ -341,13 +335,11 @@ Get phones scanned from all netwotks
 GET /devices/phones/list
 ```
 
-
 Get gateways scanned from all netwotks
 
 ```
 GET /devices/gateways/list
 ```
-
 
 Get phones scanned from specific network
 
@@ -357,8 +349,6 @@ GET /devices/phones/list/{id}
 
 {id} is md5(NETWORK) where NETWORK is the network in cidr format (example: 192.168.1.0/24)
 
-
-
 Get gateways scanned from specific network
 
 ```
@@ -367,13 +357,11 @@ GET /devices/gateways/list/{id}
 
 {id} is md5(NETWORK) where NETWORK is the network in cidr format (example: 192.168.1.0/24)
 
-
 Get supported phones
 
 ```
 GET /devices/phones/manufacturers
 ```
-
 
 Get supported gateways
 
@@ -381,15 +369,44 @@ Get supported gateways
 GET /devices/gateways/manufacturers
 ```
 
-
-Create/Update configuration for a gateway 
+Create/Update configuration for a gateway
 
 ```
 POST /devices/gateways
 ```
 
-Parameters: {"name":"Patton 1234", "mac": "00:A0:BA:0B:1C:DA","ipv4": "192.168.5.245","ipv4_new":"192.168.5.213", "manufacturer": "Patton","gateway": "192.168.1.1","model": "8","trunks_isdn": [{"name": 2005,"type": "pp"},{ "name": 2006,"type": "pmp"}],"trunks_pri": [{"linked_trunk": 2005}],"trunks_fxo":[{"number": "072112345","linked_trunk": 2005}, {"number": "072112346", "linked_trunk": 2006}],"users_fxs": [ { "linked_user": "stefanof"}]}
-
+```
+Parameters:
+{
+    "name": "Patton 1234",
+    "mac": "00:A0:BA:0B:1C:DA",
+    "ipv4": "192.168.5.245",
+    "ipv4_new": "192.168.5.213",
+    "manufacturer": "Patton",
+    "gateway": "192.168.1.1",
+    "model": "8",
+    "trunks_isdn": [{
+        "name": 2005,
+        "type": "pp"
+    }, {
+        "name": 2006,
+        "type": "pmp"
+    }],
+    "trunks_pri": [{
+        "linked_trunk": 2005
+    }],
+    "trunks_fxo": [{
+        "number": "072112345",
+        "linked_trunk": 2005
+    }, {
+        "number": "072112346",
+        "linked_trunk": 2006
+    }],
+    "users_fxs": [{
+        "linked_user": "stefanof"
+    }]
+}
+```
 
 Create configuration in tftp and push it to gateway
 
@@ -399,15 +416,13 @@ POST /devices/gateways/push
 
 Parameters: {"name": "name"}
 
-
-Delete configuration for a device 
+Delete configuration for a device
 
 ```
 DELETE /devices/gateways
-``` 
+```
 
 Parameters: {"name": "name"}
-
 
 ### Routes
 
@@ -575,4 +590,3 @@ Result:
   }
 ]
 ```
-
