@@ -56,7 +56,7 @@ $app->get('/users', function (Request $request, Response $response, $args) {
         }
         $i++;
     }
-    return $response->withJson($users,200);
+    return $response->withJson(array_values($users),200);
 });
 
 
