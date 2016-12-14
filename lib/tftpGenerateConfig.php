@@ -21,22 +21,22 @@ function gateway_get_configuration($name){
         $sql = "SELECT `trunk`,`protocol` FROM `gateway_config_isdn` WHERE `config_id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($config['id']));
-        $config['trunks_isdn'] = $sth->fetch(\PDO::FETCH_ASSOC);
+        $config['trunks_isdn'][] = $sth->fetch(\PDO::FETCH_ASSOC);
 
         $sql = "SELECT `trunk` FROM `gateway_config_pri` WHERE `config_id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($config['id']));
-        $config['trunks_pri'] = $sth->fetch(\PDO::FETCH_ASSOC);
+        $config['trunks_pri'][] = $sth->fetch(\PDO::FETCH_ASSOC);
 
         $sql = "SELECT `trunk`,`number` FROM `gateway_config_fxo` WHERE `config_id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($config['id']));
-        $config['trunks_fxo'] = $sth->fetch(\PDO::FETCH_ASSOC);
+        $config['trunks_fxo'][] = $sth->fetch(\PDO::FETCH_ASSOC);
 
         $sql = "SELECT `extension`,`secret` FROM `gateway_config_fxs` WHERE `config_id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($config['id']));
-        $config['trunks_fxs'] = $sth->fetch(\PDO::FETCH_ASSOC);
+        $config['trunks_fxs'][] = $sth->fetch(\PDO::FETCH_ASSOC);
 
         return $config;
     } catch (Exception $e){
@@ -157,7 +157,7 @@ try {
         $config['mac'] = 'AAAAAAAAAAAA';
     }
     if ($config['manufacturer'] == 'Sangoma'){
-        $filename = preg_replace('/:/','',$config['mac']).".config.txt";
+        $filename = preg_replace('/:/','',$config['mac'])."config.txt";
         $scriptname = preg_replace('/:/','',$config['mac'])."script.txt";
         copy("/var/www/html/freepbx/rest/lib/gateway/templates/Sangoma/script.txt","$tftpdir/$scriptname");
     } else {
