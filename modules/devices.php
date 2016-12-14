@@ -223,7 +223,12 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
                 $sth->execute(array($id,$trunk['linked_trunk'],$trunk['number']));
             }
         }
-        return $response->withJson(array('status' => true), 200);
+        system("/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/tftpGenerateConfig.php ".escapeshellarg($params['name']),$ret);
+        if ($ret === 0 ) {
+             return $response->withJson(array('status'=>true), 200);
+        } else {
+            throw new Exception('Error generating configuration');
+        }
     } catch (Exception $e){
         error_log($e->getMessage());
         return $response->withJson(array("status"=>$e->getMessage()),500);
@@ -233,22 +238,15 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
 /*
 * Send gateway configuration to the device
 */
-
 $app->post('/devices/gateways/push', function (Request $request, Response $response, $args) {
     try{
         #create configuration files
         $params = $request->getParsedBody();
         $name = $params['name'];
 
-        #Create configuration
-        system("/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/tftpGenerateConfig.php ".escapeshellarg($name),$ret);
-        if ($ret === 0 ) {
-            #Launch configuration push
-            system("/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/tftpPushConfig.php ".escapeshellarg($name));
-            return $response->withJson(array('status'=>true), 200);
-        } else {
-            throw new Exception('Error generating configuration');
-        }
+        #Launch configuration push
+        system("/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/tftpPushConfig.php ".escapeshellarg($name));
+        return $response->withJson(array('status'=>true), 200);
     } catch (Exception $e){
         error_log($e->getMessage());
         return $response->withJson(array("status"=>$e->getMessage()),500);
