@@ -30,7 +30,11 @@ $app->post('/mainextensions', function (Request $request, Response $response, $a
     //get uid
     $user = $fpbx->Userman->getUserByUsername($username);
     $uid = $user['id'];
-    $data['name'] = $user['displayname'];
+    if (isset($user['displayname']) && $user['displayname'] != ''){
+        $data['name'] = $user['displayname'];
+    } else {
+        $data['name'] = $user['username'];
+    }
 
     if (!isset($uid)){
         return $response->withJson(array('message'=>'User not found' ),404);
