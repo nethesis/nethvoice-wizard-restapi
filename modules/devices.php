@@ -70,10 +70,10 @@ $app->get('/devices/phones/list', function (Request $request, Response $response
                 if (file_exists($basedir."/".$file)){
                     $phones = json_decode(file_get_contents($basedir."/".$file),true);
                     foreach ($phones as $key => $value) {
-                        $sql = 'SELECT model,virtualextension,extension FROM `rest_devices_phones` WHERE mac = "' . $phones[$key]['mac'] . '"';
+                        $sql = 'SELECT model,mainextension,extension FROM `rest_devices_phones` WHERE mac = "' . $phones[$key]['mac'] . '"';
                         $obj = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC)[0];
                         $phones[$key]['model'] = $obj['model'];
-                        $phones[$key]['virtualextension'] = $obj['virtualextension'];
+                        $phones[$key]['mainextension'] = $obj['mainextension'];
                         $phones[$key]['extension'] = $obj['extension'];
                         if($phones[$key]['model']) {
                             $res[]=$phones[$key];

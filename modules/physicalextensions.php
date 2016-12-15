@@ -30,36 +30,36 @@ $app->get('/physicalextensions/{extension}', function (Request $request, Respons
 
 $app->post('/physicalextensions', function (Request $request, Response $response, $args) {
     $params = $request->getParsedBody();
-    $virtualextensionnumber = $params['virtualextension'];
+    $mainextensionnumber = $params['mainextension'];
     $mac = $params['mac'];
     $fpbx = FreePBX::create();
 
-    //get associated virtual extension
-    $virtualextensions = $fpbx->Core->getAllUsersByDeviceType('virtual');
-    foreach ($virtualextensions as $ve) {
-        if ($ve['extension'] == $virtualextensionnumber){
-	    $virtualextension = $ve;
+    //get associated main extension
+    $mainextensions = $fpbx->Core->getAllUsers();
+    foreach ($mainextensions as $ve) {
+        if ($ve['extension'] == $mainextensionnumber){
+	    $mainextension = $ve;
             break;
         }
     }
-    //error if virtual extension number doesn't exist
-    if (!isset($virtualextension)){
-        return $response->withJson(array("status"=>"Virtual extension ".$virtualextensionnumber." doesn't exist"),400);
+    //error if main extension number doesn't exist
+    if (!isset($mainextension)){
+        return $response->withJson(array("status"=>"Main extension ".$mainextensionnumber." doesn't exist"),400);
     }
 
     if (isset($params['extension'])){
        //use given extension number
-       if (!preg_match('/9[1-7]'.$virtualextensionnumber.'/', $params['extension'])){
+       if (!preg_match('/9[1-7]'.$mainextensionnumber.'/', $params['extension'])){
            return $response->withJson(array("status"=>"Wrong physical extension number supplied"),400);
        } else {
            $extension = $params['extension'];
        }
     } else {
-        //get first free physical extension number for this virtual extension
+        //get first free physical extension number for this main extension
         $extensions = $fpbx->Core->getAllUsersByDeviceType();
         for ($i=91; $i<=97; $i++){
-            if (!extensionExists($i.$virtualextensionnumber,$extensions)){
-                $extension = $i.$virtualextensionnumber;
+            if (!extensionExists($i.$mainextensionnumber,$extensions)){
+                $extension = $i.$mainextensionnumber;
                 break;
             }
         }
@@ -74,47 +74,65 @@ $app->post('/physicalextensions', function (Request $request, Response $response
     $fpbx->Core->delUser($extension,true);
 
     //create physical extension
-    $data['name'] = $virtualextension['name'];
+    $data['name'] = $mainextension['name'];
     $res = $fpbx->Core->processQuickCreate('pjsip',$extension,$data);
     if (!$res['status']) {
         return $response->withJson(array('message'=>$res['message']),500);
     }
 
-    //Configure Follow me for the extension
-    $followmeconfig = $fpbx->Findmefollow->getSettingsById($virtualextensionnumber);
-    $grouplist = explode("-",$followmeconfig['grplist']);
-    $grouplist[] = $extension;
-    $fpbx->Findmefollow->addSettingById($virtualextensionnumber, 'grplist',$grouplist);
-
-    // insert created physical extension
+    //Add device to main extension
+    global $astman;
+    $existingdevices = $astman->database_get("AMPUSER",$mainextensionnumber."/device");
+    if (empty($existingdevices)) {
+        $astman->database_put("AMPUSER",$mainextensionnumber."/device",$extension);
+    } else {
+        $existingdevices_array = explode('&',$existingdevices);
+        if (!in_array($extension, $existingdevices_array)) {
+            $existingdevices_array[]=$extension;
+            $existingdevices = implode('&',$existingdevices_array);
+            $astman->database_put("AMPUSER",$mainextensionnumber."/device",$existingdevices);
+        }
+    }
+    // insert created physical extension in password table
     $created_extension = $res['ext'];
     $created_extension_secret = sql('SELECT data FROM `sip` WHERE id = "' . $created_extension . '" AND keyword="secret"', "getOne");
     $dbh = FreePBX::Database();
-    $sql = 'UPDATE `rest_devices_phones` SET `virtualextension`= ?, `extension`= ?, `secret`= ? WHERE mac = "'.$mac.'"';
+    $sql = 'UPDATE `rest_devices_phones` SET `mainextension`= ?, `extension`= ?, `secret`= ? WHERE mac = "'.$mac.'"';
     $stmt = $dbh->prepare($sql);
-    if ($res = $stmt->execute(array($virtualextensionnumber,$created_extension,$created_extension_secret))) {
-        return $response->withStatus(200);
+    if ($res = $stmt->execute(array($mainextensionnumber,$created_extension,$created_extension_secret))) {
+        return $response->withJson(array('extension'=>$created_extension),200);
     } else {
         return $response->withStatus(500);
     }
 });
 
-$app->post('/physicalextensions/unlink', function (Request $request, Response $response, $args) {
-    $params = $request->getParsedBody();
-    $mac = $params['mac'];
-    $dbh = FreePBX::Database();
+$app->delete('/physicalextensions/{extension}', function (Request $request, Response $response, $args) {
+    try{
+        global $astman;
+        $route = $request->getAttribute('route');
+        $extension = $route->getArgument('extension');
+        $mainextensions = substr($extension,2);
+        $dbh = FreePBX::Database();
+        // clean extension
+        $fpbx = FreePBX::create();
+        $fpbx->Core->delUser($extension);
+        $fpbx->Core->delDevice($extension);
+        $sql = 'UPDATE `rest_devices_phones` SET `mainextension`= "", `extension`= "", `secret`= "" WHERE `extension`= ?';
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute(array($extension));
 
-    // clean extension
-    $extension_to_delete = sql('SELECT extension FROM `rest_devices_phones` WHERE mac = "' . $mac . '"', "getOne");
-    sql('DELETE FROM devices WHERE id =' . $extension_to_delete);
-    sql('DELETE FROM sip WHERE id =' . $extension_to_delete);
-    sql('DELETE FROM users WHERE extension =' . $extension_to_delete);
-
-    $sql = 'UPDATE `rest_devices_phones` SET `virtualextension`= "", `extension`= "", `secret`= "" WHERE mac = "'.$mac.'"';
-    $stmt = $dbh->prepare($sql);
-    if ($res = $stmt->execute()) {
+        //Remove device from main extension
+        $existingdevices = $astman->database_get("AMPUSER",$mainextension."/device");
+        if (!empty($existingdevices)) {
+            $existingdevices_array = explode('&',$existingdevices);
+            unset($existingdevices_array[$extension]);
+            $existingdevices = implode('&',$existingdevices_array);
+            $astman->database_put("AMPUSER",$mainextension."/device",$existingdevices);
+        }
         return $response->withStatus(200);
-    } else {
+    } catch (Exception $e) {
+        error_log($e->getMessage());
         return $response->withStatus(500);
     }
 });
+
