@@ -63,8 +63,11 @@ $app->get('/devices/gateways/list/{id}', function (Request $request, Response $r
         }
 
         // Retrieve configured gateways
-        $query = 'SELECT `gateway_config`.*, `gateway_config`.model_id AS model'.
-          ' FROM `gateway_config`';
+        $query = 'SELECT `gateway_config`.*,'.
+          ' `gateway_config`.model_id AS model,'.
+          ' `gateway_models`.manufacturer'.
+          ' FROM `gateway_config`'.
+          ' LEFT JOIN `gateway_models` ON `gateway_models`.id = `gateway_config`.model_id';
         $res = sql($query, "getAll", \PDO::FETCH_ASSOC);
 
         if ($res) {
