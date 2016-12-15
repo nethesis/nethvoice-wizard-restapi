@@ -230,21 +230,21 @@ GET /tasks/{task_id}
 ```
 
 
-### Virtual Extensions
+### Main Extensions
 
-Retrieve all Virtual Extensions
+Retrieve all Main Extensions
 
 ```
 GET /mainextensions
 ```
 
-Retrieve a Virtual Extension by its own extension number
+Retrieve a Main Extension by its own extension number
 
 ```
 GET /mainextensions/{extnumber}
 ```
 
-Create a new Virtual Extension
+Create a new Main Extension
 
 ```
 POST /mainextensions
@@ -252,6 +252,12 @@ POST /mainextensions
 
 ```
 Parameter: { "username": "myuser", "extension": "extnumber"[,"outboundcid" : "outboundcid" ] }
+```
+
+Delete main extension and all associated extensions
+
+```
+DELETE /mainextensions/{extension}
 ```
 
 ### Physical Extensions
@@ -268,14 +274,20 @@ Retrieve a Physical Extension by its own extension number
 GET /physicalextensions/{extnumber}
 ```
 
-Create a new Physical Extension. If extension number is given, API is going to create/edit the requested extension number, otherwise a new extension with first available extension number between 9[1-7] virtualextnumber.
+Create a new Physical Extension. If extension number is given, API is going to create/edit the requested extension number, otherwise a new extension with first available extension number between 9[1-7] mainextnumber.
 
 ```
 POST /physicalextensions
 ```
 
 ```
-Parameter: { "mainextension": "virtualextnumber" [, "extension": "extensionnumber"]}
+Parameter: { "mainextension": "mainextnumber" [, "extension": "extensionnumber"]}
+```
+
+Delete physical extension
+
+```
+DELETE /physicalextensions/{extension}
 ```
 
 ### Voicemail
@@ -287,7 +299,7 @@ GET /voicemails
 ```
 
 
-Retrieve voicemail for a specific extension (Virtualextension)
+Retrieve voicemail for a specific extension (Mainextension)
 
 ```
 GET /voicemails/{extension}

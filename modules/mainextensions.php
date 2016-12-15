@@ -43,21 +43,54 @@ $app->post('/mainextensions', function (Request $request, Response $response, $a
     $fpbx->Core->delDevice($extension,true);
     $fpbx->Core->delUser($extension,true);
 
-    //create virtual extension
-    $res = $fpbx->Core->processQuickCreate('virtual',$extension,$data);
+    //create main extension
+    $res = $fpbx->Core->processQuickCreate('pjsip',$extension,$data);
     if (!$res['status']) {
         return $response->withJson(array('message'=>$res['message']),500);
     }
 
     //Configure Follow me for the extension
     $data['fmfm']='yes';
-    $fpbx->Findmefollow->delUser($extension,false);
-    $fpbx->Findmefollow->processQuickCreate('virtual', $extension, $data);
-    $fpbx->Findmefollow->addSettingById($extension, 'strategy','ringall');
+    $fpbx->Findmefollow->processQuickCreate('pjsip',$extension, $data);
+    $fpbx->Findmefollow->addSettingById($extension, 'strategy',$fpbx->Config->get('FOLLOWME_RG_STRATEGY'));
     $fpbx->Findmefollow->addSettingById($extension, 'pre_ring','0');
-    $fpbx->Findmefollow->addSettingById($extension, 'grptime','30');
+    $fpbx->Findmefollow->addSettingById($extension, 'grptime',$fpbx->Config->get('FOLLOWME_TIME'));
     $fpbx->Findmefollow->addSettingById($extension, 'dring','<http://www.notused >;info=ring2');
     $fpbx->Findmefollow->addSettingById($extension, 'postdest','app-blackhole,hangup,1');
 
     return $response->withStatus(201);
 });
+
+$app->delete('/mainextensions/{extension}', function (Request $request, Response $response, $args) {
+    try{
+        global $astman;
+        $route = $request->getAttribute('route');
+        $mainextension = $route->getArgument('extension');
+        $fpbx = FreePBX::create();
+
+        $ext_to_del = array();
+        $ext_to_del[] = $mainextension;
+        //Get all associated extensions
+        $all_extensions = $fpbx->Core->getAllUsers();
+        foreach ($fpbx->Core->getAllUsers() as $ext){
+            if (substr($ext['extension'],2) === $mainextension){
+                $ext_to_del[] = $ext['extension'];
+            }
+        }
+
+        $dbh = FreePBX::Database();
+        // clean extension and associated extensions
+        foreach ($ext_to_del as $extension){
+            $fpbx->Core->delUser($extension);
+            $fpbx->Core->delDevice($extension);
+            $sql = 'UPDATE `rest_devices_phones` SET `mainextension`= "", `extension`= "", `secret`= "" WHERE `extension`= ?';
+            $stmt = $dbh->prepare($sql);
+            $stmt->execute(array($extension));
+        }
+        return $response->withStatus(200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
