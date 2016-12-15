@@ -80,12 +80,6 @@ $app->post('/physicalextensions', function (Request $request, Response $response
         return $response->withJson(array('message'=>$res['message']),500);
     }
 
-    //Configure Follow me for the extension
-    $followmeconfig = $fpbx->Findmefollow->getSettingsById($mainextensionnumber);
-    $grouplist = explode("-",$followmeconfig['grplist']);
-    $grouplist[] = $extension;
-    $fpbx->Findmefollow->addSettingById($mainextensionnumber, 'grplist',$grouplist);
-
     //Add device to main extension
     global $astman;
     $existingdevices = $astman->database_get("AMPUSER",$mainextensionnumber."/device");
