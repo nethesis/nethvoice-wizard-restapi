@@ -57,7 +57,7 @@ $app->get('/devices/gateways/list/{id}', function (Request $request, Response $r
 
         // Extract details for each gateways
         foreach ($gateways as $key => $value) {
-          $sql = 'SELECT `gateway_config`.* FROM `gateway_config`'.
+          $sql = 'SELECT `gateway_config`.*, `gateway_config`.model_id AS model FROM `gateway_config`'.
             ' WHERE mac = "' . $gateways[$key]['mac'] . '"';
           $obj = sql($sql, "getAll", \PDO::FETCH_ASSOC)[0];
 
@@ -68,16 +68,15 @@ $app->get('/devices/gateways/list/{id}', function (Request $request, Response $r
 
             // Add trunks info
             $trunksMeta = array(
-              'fxo' => array('`trunks`.trunkid AS linked_trunk', '`gateway_config_fxo`.number'),
-              'pri' => array('`trunks`.trunkid AS linked_trunk'),
-              'isdn' => array('`trunks`.trunkid AS name', '`gateway_config_isdn`.protocol AS type'),
+              'fxo' => array('`gateway_config_fxo`.trunk AS linked_trunk', '`gateway_config_fxo`.number'),
+              'pri' => array('`gateway_config_pri`.trunk AS linked_trunk'),
+              'isdn' => array('`gateway_config_isdn`.trunk AS name', '`gateway_config_isdn`.protocol AS type'),
             );
 
             foreach($trunksMeta as $trunkPrefix=>$trunkAttr) {
               $sql = 'SELECT '. implode(',', $trunksMeta[$trunkPrefix]).
                 ' FROM `gateway_config`'.
                 ' JOIN `gateway_config_'. $trunkPrefix. '` ON `gateway_config_'. $trunkPrefix. '`.config_id = `gateway_config`.id'.
-                ' JOIN `trunks` ON `gateway_config_'. $trunkPrefix. '`.trunk = `trunks`.trunkid'.
                 ' WHERE `gateway_config`.mac = "' . $gateways[$key]['mac'] . '"';
               $obj = sql($sql, "getAll", \PDO::FETCH_ASSOC);
 
@@ -222,7 +221,7 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
             }
         }
         /*Create configuration*/
-        $sql = "INSERT INTO `gateway_config` (`model_id`,`name`,`ipv4`,`ipv4_new`,`gateway`,`mac`) VALUES (?,?,?,?,?,?)";
+        $sql = "REPLACE INTO `gateway_config` (`model_id`,`name`,`ipv4`,`ipv4_new`,`gateway`,`mac`) VALUES (?,?,?,?,?,?)";
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($params['model'],$params['name'],$params['ipv4'],$params['ipv4_new'],$params['gateway'],$params['mac']));
         /*get id*/
@@ -238,7 +237,7 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
         if (isset($params['trunks_isdn'])){
             /*Save isdn trunks parameters*/
             foreach ($params['trunks_isdn'] as $trunk){
-                $sql = "INSERT INTO `gateway_config_isdn` (`config_id`,`trunk`,`protocol`) VALUES (?,?,?)";
+                $sql = "REPLACE INTO `gateway_config_isdn` (`config_id`,`trunk`,`protocol`) VALUES (?,?,?)";
                 $sth = FreePBX::Database()->prepare($sql);
                 $sth->execute(array($id,$trunk['name'],$trunk['type']));
             }
@@ -246,7 +245,7 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
         if (isset($params['trunks_pri'])){
             /*Save pri trunks parameters*/
             foreach ($params['trunks_pri'] as $trunk){
-                $sql = "INSERT INTO `gateway_config_pri` (`config_id`,`trunk`) VALUES (?,?)";
+                $sql = "REPLACE INTO `gateway_config_pri` (`config_id`,`trunk`) VALUES (?,?)";
                 $sth = FreePBX::Database()->prepare($sql);
                 $sth->execute(array($id,$trunk['linked_trunk']));
             }
@@ -254,7 +253,7 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
         if (isset($params['trunks_fxo'])){
             /*Save fxo trunks parameters*/
             foreach ($params['trunks_fxo'] as $trunk){
-                $sql = "INSERT INTO `gateway_config_fxo` (`config_id`,`trunk`,`number`) VALUES (?,?,?)";
+                $sql = "REPLACE INTO `gateway_config_fxo` (`config_id`,`trunk`,`number`) VALUES (?,?,?)";
                 $sth = FreePBX::Database()->prepare($sql);
                 $sth->execute(array($id,$trunk['linked_trunk'],$trunk['number']));
             }

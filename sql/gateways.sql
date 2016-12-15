@@ -56,6 +56,7 @@ INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_tru
 
 UNLOCK TABLES;
 
+DROP TABLE IF EXISTS `gateway_config`;
 CREATE TABLE IF NOT EXISTS `gateway_config` (
   `id` INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
   `model_id` INT UNSIGNED NOT NULL default 0,
@@ -63,38 +64,55 @@ CREATE TABLE IF NOT EXISTS `gateway_config` (
   `ipv4` varchar(20) default NULL,
   `ipv4_new` varchar(20) default NULL,
   `gateway` varchar(20) default NULL,
-  `mac` char(18) default NULL
+  `mac` char(18) default NULL,
+  UNIQUE `mac_key` (`mac`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+DROP TABLE IF EXISTS `gateway_config_fxo`;
 CREATE TABLE IF NOT EXISTS `gateway_config_fxo` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `config_id` INT UNSIGNED NOT NULL default '0',
   `trunk` INT UNSIGNED default NULL,
   `number` varchar(100) default NULL,
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY  (`id`),
+  FOREIGN KEY (`config_id`) REFERENCES `gateway_config`(`id`)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+DROP TABLE IF EXISTS `gateway_config_isdn`;
 CREATE TABLE IF NOT EXISTS `gateway_config_isdn` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `config_id` INT UNSIGNED NOT NULL default '0',
   `trunk` INT UNSIGNED default NULL,
   `protocol` varchar(100) default NULL,
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY  (`id`),
+  FOREIGN KEY (`config_id`) REFERENCES `gateway_config`(`id`)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+DROP TABLE IF EXISTS `gateway_config_pri`;
 CREATE TABLE IF NOT EXISTS `gateway_config_pri` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `config_id` INT UNSIGNED NOT NULL default '0',
   `trunk` INT UNSIGNED default NULL,
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY  (`id`),
+  FOREIGN KEY (`config_id`) REFERENCES `gateway_config`(`id`)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+DROP TABLE IF EXISTS `gateway_config_fxs`;
 CREATE TABLE IF NOT EXISTS `gateway_config_fxs` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `config_id` INT UNSIGNED NOT NULL default '0',
   `extension` varchar(100) default NULL,
   `secret` varchar(100) default NULL,
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY  (`id`),
+  FOREIGN KEY (`config_id`) REFERENCES `gateway_config`(`id`)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
