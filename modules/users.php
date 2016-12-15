@@ -39,6 +39,22 @@ function sync() {
     $auth->sync($output);
 }
 
+# Count all users
+
+$app->get('/users/count', function (Request $request, Response $response, $args) {
+    $blacklist = ['admin', 'administrator', 'guest', 'krbtgt'];
+    $users = FreePBX::create()->Userman->getAllUsers();
+    $dbh = FreePBX::Database();
+    $i = 0;
+    foreach ($users as $user) {
+        if (in_array(strtolower($users[$i]['username']), $blacklist)) {
+            unset($users[$i]);
+        }
+        $i++;
+    }
+    return $response->withJson(count(array_values($users)),200);
+});
+
 # List all users
 
 $app->get('/users', function (Request $request, Response $response, $args) {
