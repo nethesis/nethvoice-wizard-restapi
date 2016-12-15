@@ -114,5 +114,6 @@ $app->post('/trunks', function (Request $request, Response $response, $args) {
     return $response->withStatus(500);
   }
 
+  needreload();
   return $response->withStatus(200);
 });

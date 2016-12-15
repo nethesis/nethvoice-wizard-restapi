@@ -64,6 +64,7 @@ $app->post('/voicemails', function (Request $request, Response $response, $args)
             FreePBX::create()->Voicemail->delMailbox($extension['extension']);
         }
 
+        needreload();
         return $response->withJson(array('status' => true), 200);
     } catch (Exception $e) {
         error_log($e->getMessage());

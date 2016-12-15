@@ -48,6 +48,7 @@ $app->post('/inboundroutes', function (Request $request, Response $response, $ar
       return $response->withJson('An error occurred', 500);
     }
 
+    needreload();
     return $response->withStatus(200);
 });
 
@@ -73,6 +74,7 @@ $app->delete('/inboundroutes/{id}', function (Request $request, Response $respon
     return $response->withJson('An error occurred', 500);
   }
 
+  needreload();
   return $response;
 });
 
@@ -129,6 +131,7 @@ $app->get('/outboundroutes/count', function (Request $request, Response $respons
       return $response->withJson('An error occurred', 500);
     }
 
+    needreload();
     return $response->withStatus(200);
 });
 
@@ -151,5 +154,6 @@ $app->get('/outboundroutes/count', function (Request $request, Response $respons
      return $response->withJson('An error occurred', 500);
    }
 
+   needreload();
    return $response;
  });
