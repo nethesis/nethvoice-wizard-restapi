@@ -3,6 +3,24 @@ use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
 /**
+ * @api {get} /trunks/count  Retrieve count of all trunks
+ */
+$app->get('/trunks/count', function (Request $request, Response $response, $args) {
+    try {
+        $result = array();
+        $trunks = FreePBX::Core()->listTrunks();
+        foreach($trunks as $trunk) {
+            array_push($result, $trunk);
+        }
+        return $response->withJson(count($result),200);
+    }
+    catch (Exception $e) {
+      error_log($e->getMessage());
+      return $response->withJson('An error occurred', 500);
+    }
+});
+
+/**
  * @api {get} /trunks  Retrieve all trunks
  */
 $app->get('/trunks', function (Request $request, Response $response, $args) {

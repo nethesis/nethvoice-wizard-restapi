@@ -6,6 +6,21 @@ use \Psr\Http\Message\ResponseInterface as Response;
 require_once(__DIR__. '/../../admin/modules/core/functions.inc.php');
 
 /**
+ * @api {get} /inboundroutes/count  Retrieve inbound routes (incoming) count
+ */
+$app->get('/inboundroutes/count', function (Request $request, Response $response, $args) {
+    try {
+      $routes = FreePBX::Core()->getAllDIDs('extension');
+      $destinations = FreePBX::Modules()->getDestinations();
+    } catch (Exception $e) {
+      error_log($e->getMessage());
+      return $response->withJson('An error occurred', 500);
+    }
+
+    return $response->withJson(count($routes), 200);
+});
+
+/**
  * @api {get} /inboundroutes  Retrieve inbound routes (incoming)
  */
 $app->get('/inboundroutes', function (Request $request, Response $response, $args) {
@@ -59,6 +74,20 @@ $app->delete('/inboundroutes/{id}', function (Request $request, Response $respon
   }
 
   return $response;
+});
+
+/**
+ * @api {get} /outboundroutes/count  Retrieve inbound routes (incoming) count
+ */
+$app->get('/outboundroutes/count', function (Request $request, Response $response, $args) {
+    try {
+      $routes = FreePBX::Core()->getAllRoutes();
+    } catch (Exception $e) {
+      error_log($e->getMessage());
+      return $response->withJson('An error occurred', 500);
+    }
+
+    return $response->withJson(count($routes), 200);
 });
 
 /**
