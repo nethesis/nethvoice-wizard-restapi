@@ -75,6 +75,8 @@ $app->post('/physicalextensions', function (Request $request, Response $response
 
     //create physical extension
     $data['name'] = $mainextension['name'];
+    $mainextdata = $fpbx->Core->getUser($mainextension['extension']);
+    $data['outboundcid'] = $mainextdata['outboundcid'];
     $res = $fpbx->Core->processQuickCreate('pjsip',$extension,$data);
     if (!$res['status']) {
         return $response->withJson(array('message'=>$res['message']),500);
