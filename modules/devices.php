@@ -46,25 +46,30 @@ $app->get('/devices/gateways/list/{id}', function (Request $request, Response $r
     try {
         $route = $request->getAttribute('route');
         $id = $route->getArgument('id');
+
+        $gateways = array();
+
+        // Retrieve scanned gateways
         $basedir='/var/run/nethvoice';
         $res=array();
         $filename = "$basedir/$id.gateways.scan";
-        if (!file_exists($filename)){
-           return $response->withJson(array("status"=>"Scan for network $id doesn't exist!"),404);
+        if (file_exists($filename)) {
+          $scannedGateways = json_decode(file_get_contents($filename), true);
+          foreach ($scannedGateways as $val) {
+            $val['isConnected'] = true;
+            $val['isConfigured'] = false;
+            $gateways[$val['mac']] = $val;
+          }
         }
 
-        $gateways = json_decode(file_get_contents($filename), true);
+        // Retrieve configured gateways
+        $query = 'SELECT `gateway_config`.*, `gateway_config`.model_id AS model'.
+          ' FROM `gateway_config`';
+        $res = sql($query, "getAll", \PDO::FETCH_ASSOC);
 
-        // Extract details for each gateways
-        foreach ($gateways as $key => $value) {
-          $sql = 'SELECT `gateway_config`.*, `gateway_config`.model_id AS model FROM `gateway_config`'.
-            ' WHERE mac = "' . $gateways[$key]['mac'] . '"';
-          $obj = sql($sql, "getAll", \PDO::FETCH_ASSOC)[0];
-
-          // Merge details
-          if ($obj) {
-            $gateways[$key] = array_merge($gateways[$key], $obj);
-            $gateways[$key]['isConfigured'] = 'true';
+        if ($res) {
+          foreach ($res as $gateway) {
+            $gateway['isConfigured'] = true;
 
             // Add trunks info
             $trunksMeta = array(
@@ -77,17 +82,23 @@ $app->get('/devices/gateways/list/{id}', function (Request $request, Response $r
               $sql = 'SELECT '. implode(',', $trunksMeta[$trunkPrefix]).
                 ' FROM `gateway_config`'.
                 ' JOIN `gateway_config_'. $trunkPrefix. '` ON `gateway_config_'. $trunkPrefix. '`.config_id = `gateway_config`.id'.
-                ' WHERE `gateway_config`.mac = "' . $gateways[$key]['mac'] . '"';
+                ' WHERE `gateway_config`.mac = "' . $gateway['mac'] . '"';
               $obj = sql($sql, "getAll", \PDO::FETCH_ASSOC);
 
-              if ($obj) {
-                $gateways[$key]['trunks_'. $trunkPrefix] = $obj;
-              }
+              if ($obj)
+                $gateway['trunks_'. $trunkPrefix] = $obj;
             }
+
+            $gateway['isConnected'] = array_key_exists($gateway['mac'], $gateways);
+
+            // Merge results in list
+            $gateways[$gateway['mac']] = $gateway['isConnected'] ?
+              array_merge($gateways[$gateway['mac']], $gateway) :
+              $gateway;
           }
         }
 
-        return $response->withJson($gateways, 200);
+        return $response->withJson(array_values($gateways), 200);
     } catch(Exception $e) {
         error_log($e->getMessage());
         return $response->withStatus(500);
