@@ -52,7 +52,43 @@ $app->get('/devices/gateways/list/{id}', function (Request $request, Response $r
         if (!file_exists($filename)){
            return $response->withJson(array("status"=>"Scan for network $id doesn't exist!"),404);
         }
-        return $response->write(file_get_contents($filename),200);
+
+        $gateways = json_decode(file_get_contents($filename), true);
+
+        // Extract details for each gateways
+        foreach ($gateways as $key => $value) {
+          $sql = 'SELECT `gateway_config`.* FROM `gateway_config`'.
+            ' WHERE mac = "' . $gateways[$key]['mac'] . '"';
+          $obj = sql($sql, "getAll", \PDO::FETCH_ASSOC)[0];
+
+          // Merge details
+          if ($obj) {
+            $gateways[$key] = array_merge($gateways[$key], $obj);
+            $gateways[$key]['isConfigured'] = 'true';
+
+            // Add trunks info
+            $trunksMeta = array(
+              'fxo' => array('`trunks`.trunkid AS linked_trunk', '`gateway_config_fxo`.number'),
+              'pri' => array('`trunks`.trunkid AS linked_trunk'),
+              'isdn' => array('`trunks`.trunkid AS name', '`gateway_config_isdn`.protocol AS type'),
+            );
+
+            foreach($trunksMeta as $trunkPrefix=>$trunkAttr) {
+              $sql = 'SELECT '. implode(',', $trunksMeta[$trunkPrefix]).
+                ' FROM `gateway_config`'.
+                ' JOIN `gateway_config_'. $trunkPrefix. '` ON `gateway_config_'. $trunkPrefix. '`.config_id = `gateway_config`.id'.
+                ' JOIN `trunks` ON `gateway_config_'. $trunkPrefix. '`.trunk = `trunks`.trunkid'.
+                ' WHERE `gateway_config`.mac = "' . $gateways[$key]['mac'] . '"';
+              $obj = sql($sql, "getAll", \PDO::FETCH_ASSOC);
+
+              if ($obj) {
+                $gateways[$key]['trunks_'. $trunkPrefix] = $obj;
+              }
+            }
+          }
+        }
+
+        return $response->withJson($gateways, 200);
     } catch(Exception $e) {
         error_log($e->getMessage());
         return $response->withStatus(500);
