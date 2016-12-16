@@ -62,6 +62,7 @@ $app->post('/mainextensions', function (Request $request, Response $response, $a
     $fpbx->Findmefollow->addSettingById($extension, 'dring','<http://www.notused >;info=ring2');
     $fpbx->Findmefollow->addSettingById($extension, 'postdest','app-blackhole,hangup,1');
 
+    needreload();
     return $response->withStatus(201);
 });
 
@@ -91,6 +92,7 @@ $app->delete('/mainextensions/{extension}', function (Request $request, Response
             $stmt = $dbh->prepare($sql);
             $stmt->execute(array($extension));
         }
+        needreload();
         return $response->withStatus(200);
     } catch (Exception $e) {
         error_log($e->getMessage());

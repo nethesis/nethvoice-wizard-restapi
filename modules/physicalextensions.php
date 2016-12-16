@@ -102,6 +102,7 @@ $app->post('/physicalextensions', function (Request $request, Response $response
     $sql = 'UPDATE `rest_devices_phones` SET `mainextension`= ?, `extension`= ?, `secret`= ? WHERE mac = "'.$mac.'"';
     $stmt = $dbh->prepare($sql);
     if ($res = $stmt->execute(array($mainextensionnumber,$created_extension,$created_extension_secret))) {
+        needreload();
         return $response->withJson(array('extension'=>$created_extension),200);
     } else {
         return $response->withStatus(500);
@@ -131,6 +132,7 @@ $app->delete('/physicalextensions/{extension}', function (Request $request, Resp
             $existingdevices = implode('&',$existingdevices_array);
             $astman->database_put("AMPUSER",$mainextension."/device",$existingdevices);
         }
+        needreload();
         return $response->withStatus(200);
     } catch (Exception $e) {
         error_log($e->getMessage());
