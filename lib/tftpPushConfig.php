@@ -43,7 +43,7 @@ try{
         $devicePassword = 'administrator';
     }
     
-    $cmd='/var/www/html/freepbx/rest/lib/gateway/pushtftp/'.$script.' '.escapeshellarg($config['ipv4']).' \''.$config['ipv4_green'].'\' '.escapeshellarg($filename).' '.escapeshellarg($deviceUsername).' '.escapeshellarg($devicePassword);
+    $cmd='/var/www/html/freepbx/rest/lib/gateway/pushtftp/'.$script.' '.escapeshellarg($config['ipv4']).' '.escapeshellarg($config['ipv4_green']).' '.escapeshellarg($filename).' '.escapeshellarg($deviceUsername).' '.escapeshellarg($devicePassword);
     exec($cmd,$return);
 } catch (Exception $e){
     error_log($e->getMessage());
