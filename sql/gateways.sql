@@ -64,6 +64,8 @@ CREATE TABLE IF NOT EXISTS `gateway_config` (
   `ipv4` varchar(20) default NULL,
   `ipv4_new` varchar(20) default NULL,
   `gateway` varchar(20) default NULL,
+  `ipv4_green` varchar(20) default NULL,
+  `netmask_green` varchar(20) default NULL,
   `mac` char(18) default NULL,
   UNIQUE `mac_key` (`mac`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

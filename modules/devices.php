@@ -235,9 +235,9 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
             }
         }
         /*Create configuration*/
-        $sql = "REPLACE INTO `gateway_config` (`model_id`,`name`,`ipv4`,`ipv4_new`,`gateway`,`mac`) VALUES (?,?,?,?,?,?)";
+        $sql = "INSERT INTO `gateway_config` (`model_id`,`name`,`ipv4`,`ipv4_new`,`gateway`,`ipv4_green`,`netmask_green`,`mac`) VALUES (?,?,?,?,?,?,?,?)";
         $sth = FreePBX::Database()->prepare($sql);
-        $sth->execute(array($params['model'],$params['name'],$params['ipv4'],$params['ipv4_new'],$params['gateway'],$params['mac']));
+        $sth->execute(array($params['model'],$params['name'],$params['ipv4'],$params['ipv4_new'],$params['gateway'],$params['ipv4_green'],$params['netmask_green'],$params['mac']));
         /*get id*/
         $sql = "SELECT `id` FROM `gateway_config` WHERE `name` = ?";
         $sth = FreePBX::Database()->prepare($sql);

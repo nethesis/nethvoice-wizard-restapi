@@ -3,7 +3,7 @@ function gateway_get_configuration($name){
     try{
         $dbh = FreePBX::Database();
         /*Check if config exists*/
-        $sql = "SELECT `id`,`model_id`,`ipv4`,`ipv4_new`,`gateway`,`mac` FROM `gateway_config` WHERE `name` = ?";
+        $sql = "SELECT `id`,`model_id`,`ipv4`,`ipv4_new`,`gateway`,`ipv4_green`,`netmask_green`,`mac` FROM `gateway_config` WHERE `name` = ?";
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($name));
         $config = $sth->fetch(\PDO::FETCH_ASSOC);
@@ -21,22 +21,29 @@ function gateway_get_configuration($name){
         $sql = "SELECT `trunk`,`protocol` FROM `gateway_config_isdn` WHERE `config_id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($config['id']));
-        $config['trunks_isdn'] = $sth->fetch(\PDO::FETCH_ASSOC);
+        while ($row = $sth->fetch(\PDO::FETCH_ASSOC)){
+            $config['trunks_isdn'][] = $row;
+        }
 
         $sql = "SELECT `trunk` FROM `gateway_config_pri` WHERE `config_id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($config['id']));
-        $config['trunks_pri'] = $sth->fetch(\PDO::FETCH_ASSOC);
+        while ($row = $sth->fetch(\PDO::FETCH_ASSOC)){
+            $config['trunks_pri'][] = $row;
+        }
 
         $sql = "SELECT `trunk`,`number` FROM `gateway_config_fxo` WHERE `config_id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($config['id']));
-        $config['trunks_fxo'] = $sth->fetch(\PDO::FETCH_ASSOC);
-
+        while ($row = $sth->fetch(\PDO::FETCH_ASSOC)){
+            $config['trunks_fxo'][] = $row;
+        }
         $sql = "SELECT `extension`,`secret` FROM `gateway_config_fxs` WHERE `config_id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($config['id']));
-        $config['trunks_fxs'] = $sth->fetch(\PDO::FETCH_ASSOC);
+        while ($config['trunks_fxs'][] = $sth->fetch(\PDO::FETCH_ASSOC)){
+            $config['trunks_fxs'][] = $row;
+        }
 
         return $config;
     } catch (Exception $e){
@@ -65,15 +72,10 @@ function gateway_generate_configuration_file($name){
             return false;
         }
         # replace variables in template
-        $output = str_replace("ASTERISKIP",$amp_conf['AMPWEBADDRESS'],$output);
+        $output = str_replace("ASTERISKIP",$config['ipv4_green'],$output);
         $output = str_replace("GATEWAYIP",$config['ipv4_new'],$output);
         $output = str_replace("DEFGATEWAY",$config['gateway'],$output);
-        if (isset($amp_conf['NETMASK'])){
-            $netmask=$amp_conf['NETMASK'];
-        } else {
-            $netmask="255.255.255.0";
-        }
-        $output = str_replace("NETMASK",$netmask,$output);
+        $output = str_replace("NETMASK",$config['netmask_green'],$output);
         $output = str_replace("DATE",date ('d/m/Y G:i:s'),$output);
 
         #Generate trunks config
@@ -157,7 +159,7 @@ try {
         $config['mac'] = 'AAAAAAAAAAAA';
     }
     if ($config['manufacturer'] == 'Sangoma'){
-        $filename = preg_replace('/:/','',$config['mac']).".config.txt";
+        $filename = preg_replace('/:/','',$config['mac'])."config.txt";
         $scriptname = preg_replace('/:/','',$config['mac'])."script.txt";
         copy("/var/www/html/freepbx/rest/lib/gateway/templates/Sangoma/script.txt","$tftpdir/$scriptname");
     } else {
