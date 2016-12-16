@@ -104,7 +104,7 @@ function gateway_generate_configuration_file($name){
                     } elseif ($config['manufacturer'] == 'Mediatrix') {
                         $output = str_replace("PROTOCOLTYPE$i","PointToPoint",$output);
                     } elseif ($config['manufacturer'] == 'Patton') {
-                        str_replace("PROTOCOLTYPE$i","protocol pp",$output);
+                        $output = str_replace("PROTOCOLTYPE$i","protocol pp",$output);
                     }
                 } elseif ($trunk['protocol']=="pmp") {
                     if ($config['manufacturer'] == 'Sangoma') {
