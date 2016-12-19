@@ -273,8 +273,61 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
             }
         }
         system("/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/tftpGenerateConfig.php ".escapeshellarg($params['name']),$ret);
+
         if ($ret === 0 ) {
-             return $response->withJson(array('status'=>true), 200);
+          // Create trunks
+          $sql = "SELECT `manufacturer` FROM `gateway_models` WHERE `id` = ?";
+          $sth = FreePBX::Database()->prepare($sql);
+          $sth->execute(array($params['model']));
+          $res = $sth->fetch(\PDO::FETCH_ASSOC);
+
+          // Create unique smart name
+          $vendor = $res['manufacturer'];
+          $uid = strtolower(substr(str_replace(':', '', $params['mac']), -6, 6));
+          $port = (strtolower($res['manufacturer']) === 'patton' ? 0 : 1);
+
+          $trunksByTypes = array(
+            'isdn' => $params['trunks_isdn'],
+            'pri' => $params['trunks_pri'],
+            'fxo' => $params['trunks_fxo']
+          );
+
+          foreach ($trunksByTypes as $type=>$trunks) {
+            foreach ($trunks as $trunk) {
+              $trunkName = $vendor. '_'. $uid. '_'. $type. '_'. $port;
+
+              $peerdetails = 'context=from-pstn'. "\n".
+                'host=dynamic'. "\n".
+                'insecure=very'. "\n".
+                'qualify=yes'. "\n".
+                'secret='. $trunkName. "\n".
+                'type=friend'. "\n".
+                'username='. $trunkName;
+
+              core_trunks_add(
+                'pjsip', // tech
+                $trunkName, // channelid as trunk name
+                $dialoutprefix, // dialoutprefix TODO
+                null, // maxchans
+                null, // outcid
+                $peerdetails, // peerdetails
+                'from-pstn', // usercontext
+                null, // userconfig
+                null, // register
+                'off', // keepcid
+                null, // failtrunk
+                'off', // disabletrunk
+                $trunkName, // name
+                null, // provider
+                'off', // continue
+                false   // dialopts
+              );
+
+              $port++;
+            }
+          }
+
+          return $response->withJson(array('status'=>true), 200);
         } else {
             throw new Exception('Error generating configuration');
         }
