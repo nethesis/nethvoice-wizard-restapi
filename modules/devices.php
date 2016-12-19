@@ -370,9 +370,9 @@ $app->delete('/devices/gateways/{id}', function (Request $request, Response $res
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($id,$id,$id));
         while ($row = $sth->fetch(\PDO::FETCH_ASSOC)){
-            core_trunks_del($id);
-            core_trunks_delete_dialrules($id);
-            core_routing_trunk_delbyid($id);
+            core_trunks_del($row['trunk']);
+            core_trunks_delete_dialrules($row['trunk']);
+            core_routing_trunk_delbyid($row['trunk']);
             needreload();
         }
         $sqls = array();
