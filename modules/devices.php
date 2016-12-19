@@ -360,39 +360,35 @@ $app->post('/devices/gateways/push', function (Request $request, Response $respo
 * Delete a gateway configuration
 */
 
-$app->delete('/devices/gateways', function (Request $request, Response $response, $args) {
+$app->delete('/devices/gateways/{id}', function (Request $request, Response $response, $args) {
     try{
-        $params = $request->getParsedBody();
-        $name = $params['name'];
-        system("/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/tftpDeleteConfig.php ".escapeshellarg($name),$ret);
-        $sql = "SELECT `id` FROM `gateway_config` WHERE `name` = ?";
+        $route = $request->getAttribute('route');
+        $id = $route->getArgument('id');
+        $sql = "SELECT `name` FROM `gateway_config` WHERE `id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
-        $sth->execute(array($params['name']));
+        $sth->execute(array($id));
         $res = $sth->fetch(\PDO::FETCH_ASSOC);
-        if ($res !== false){
-            $id = $res['id'];
-            /*Configuration exists, delete it*/
-            require_once(__DIR__. '/../../admin/modules/core/functions.inc.php');
-            //get all trunks for this gateway
-            $sql = "SELECT `trunk` FROM `gateway_config_fxo` WHERE `config_id` = ? UNION SELECT `trunk` FROM `gateway_config_isdn` WHERE `config_id` = ? UNION SELECT `trunk` FROM `gateway_config_pri` WHERE `config_id` = ?";
+        system("/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/tftpDeleteConfig.php ".escapeshellarg($res['name']),$ret);
+        require_once(__DIR__. '/../../admin/modules/core/functions.inc.php');
+        //get all trunks for this gateway
+        $sql = "SELECT `trunk` FROM `gateway_config_fxo` WHERE `config_id` = ? UNION SELECT `trunk` FROM `gateway_config_isdn` WHERE `config_id` = ? UNION SELECT `trunk` FROM `gateway_config_pri` WHERE `config_id` = ?";
+        $sth = FreePBX::Database()->prepare($sql);
+        $sth->execute(array($id,$id,$id));
+        while ($row = $sth->fetch(\PDO::FETCH_ASSOC)){
+            core_trunks_del($id);
+            core_trunks_delete_dialrules($id);
+            core_routing_trunk_delbyid($id);
+            needreload();
+        }
+        $sqls = array();
+        $sqls[] = "DELETE IGNORE FROM `gateway_config_fxo` WHERE `config_id` = ?";
+        $sqls[] = "DELETE IGNORE FROM `gateway_config_fxs` WHERE `config_id` = ?";
+        $sqls[] = "DELETE IGNORE FROM `gateway_config_isdn` WHERE `config_id` = ?";
+        $sqls[] = "DELETE IGNORE FROM `gateway_config_pri` WHERE `config_id` = ?";
+        $sqls[] = "DELETE IGNORE FROM `gateway_config` WHERE `id` = ?";
+        foreach ($sqls as $sql) {
             $sth = FreePBX::Database()->prepare($sql);
-            $sth->execute(array($id,$id,$id));
-            while ($row = $sth->fetch(\PDO::FETCH_ASSOC)){
-                core_trunks_del($id);
-                core_trunks_delete_dialrules($id);
-                core_routing_trunk_delbyid($id);
-                needreload();
-            }
-            $sqls = array();
-            $sqls[] = "DELETE IGNORE FROM `gateway_config_fxo` WHERE `config_id` = ?";
-            $sqls[] = "DELETE IGNORE FROM `gateway_config_fxs` WHERE `config_id` = ?";
-            $sqls[] = "DELETE IGNORE FROM `gateway_config_isdn` WHERE `config_id` = ?";
-            $sqls[] = "DELETE IGNORE FROM `gateway_config_pri` WHERE `config_id` = ?";
-            $sqls[] = "DELETE IGNORE FROM `gateway_config` WHERE `id` = ?";
-            foreach ($sqls as $sql) {
-                $sth = FreePBX::Database()->prepare($sql);
-                $sth->execute(array($id));
-            }
+            $sth->execute(array($id));
         }
         return $response->withJson(array('status' => true), 200);
     } catch (Exception $e){
