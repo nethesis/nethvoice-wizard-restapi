@@ -79,6 +79,11 @@ function gateway_generate_configuration_file($name){
         $output = str_replace("DATE",date ('d/m/Y G:i:s'),$output);
 
         #Generate trunks config
+        /*trunk number:
+        * isdn = 1 + id
+        * pri  = 2 + id
+        * fxo  = 3 + id
+        */
         if (!empty($config['trunks_fxo'])){
             $i = 1;
             $n_trunks = count($config['trunks_isdn']);
@@ -89,7 +94,7 @@ function gateway_generate_configuration_file($name){
             }
             foreach ($config['trunks_fxo'] as $trunk){
                 $output = str_replace("LINENUMBER$i",$trunk['number'],$output);
-                $output = str_replace("TRUNKNUMBER$j",$trunk['trunk'],$output);
+                $output = str_replace("TRUNKNUMBER$j","3".$trunk['id'],$output);
                 $i++;
                 $j++;
             }
@@ -97,7 +102,7 @@ function gateway_generate_configuration_file($name){
         if (!empty($config['trunks_isdn'])){
             $i = 1;
             foreach ($config['trunks_isdn'] as $trunk) {
-                $output = str_replace("TRUNKNUMBER$i",$trunk['trunk'],$output);
+                $output = str_replace("TRUNKNUMBER$i","1".$trunk['id'],$output);
                 if ($trunk['protocol']=="pp") {
                     if ($config['manufacturer'] == 'Sangoma') {
                         $output = str_replace("PROTOCOLTYPE$i","pp",$output);
@@ -123,7 +128,7 @@ function gateway_generate_configuration_file($name){
         if (!empty($config['trunks_pri'])){
             $i = 1;
             foreach ($config['trunks_pri'] as $trunk){
-                $output = str_replace("TRUNKNUMBER$i",$trunk['trunk'],$output);
+                $output = str_replace("TRUNKNUMBER$i","2".$trunk['id'],$output);
                 $i++;
             }
         }
