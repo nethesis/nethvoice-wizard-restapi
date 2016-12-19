@@ -327,7 +327,7 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
             }
           }
 
-          return $response->withJson(array('status'=>true), 200);
+          return $response->withJson(array('id'=>$id), 200);
         } else {
             throw new Exception('Error generating configuration');
         }
