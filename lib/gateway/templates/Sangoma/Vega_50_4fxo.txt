@@ -1221,28 +1221,28 @@
    purge .sip.auth.user
    cp .sip.auth.user.1
     set .sip.auth.user.1.enable="1"
-    set .sip.auth.user.1.password="TRUNKNUMBER1"
+    set .sip.auth.user.1.password="TRUNKSECRET1"
     set .sip.auth.user.1.resource_priority="routine"
     set .sip.auth.user.1.sip_profile="1"
     set .sip.auth.user.1.subscriber="IF:0201"
     set .sip.auth.user.1.username="TRUNKNUMBER1"
    cp .sip.auth.user.2
     set .sip.auth.user.2.enable="1"
-    set .sip.auth.user.2.password="TRUNKNUMBER2"
+    set .sip.auth.user.2.password="TRUNKSECRET2"
     set .sip.auth.user.2.resource_priority="routine"
     set .sip.auth.user.2.sip_profile="1"
     set .sip.auth.user.2.subscriber="IF:0202"
     set .sip.auth.user.2.username="TRUNKNUMBER2"
    cp .sip.auth.user.3
     set .sip.auth.user.3.enable="1"
-    set .sip.auth.user.3.password="TRUNKNUMBER3"
+    set .sip.auth.user.3.password="TRUNKSECRET3"
     set .sip.auth.user.3.resource_priority="routine"
     set .sip.auth.user.3.sip_profile="1"
     set .sip.auth.user.3.subscriber="IF:0203"
     set .sip.auth.user.3.username="TRUNKNUMBER3"
    cp .sip.auth.user.4
     set .sip.auth.user.4.enable="1"
-    set .sip.auth.user.4.password="TRUNKNUMBER4"
+    set .sip.auth.user.4.password="TRUNKSECRET4"
     set .sip.auth.user.4.resource_priority="routine"
     set .sip.auth.user.4.sip_profile="1"
     set .sip.auth.user.4.subscriber="IF:0204"

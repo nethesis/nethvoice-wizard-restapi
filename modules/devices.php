@@ -295,17 +295,23 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
           'fxo' => $params['trunks_fxo']
         );
 
+        $passCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUWXYZ0123456789';
+
         foreach ($trunksByTypes as $type=>$trunks) {
           $port = (strtolower($res['manufacturer']) === 'patton' ? 0 : 1);
 
           foreach ($trunks as $trunk) {
             $trunkName = $vendor. '_'. $uid. '_'. $type. '_'. $port;
-
+            $trunkSecret = '';
+            $max = strlen($passCharacters) - 1;
+            for ($i = 0; $i < 10; $i++) {
+                $trunkSecret .= $characters[mt_rand(0, $max)];
+            }
             $peerdetails = 'context=from-pstn'. "\n".
               'host=dynamic'. "\n".
               'insecure=very'. "\n".
               'qualify=yes'. "\n".
-              'secret='. $trunkName. "\n".
+              'secret='. $trunkSecret. "\n".
               'type=friend'. "\n".
               'username='. $trunkName;
 
@@ -335,21 +341,21 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
 
             if ($type === 'isdn' && isset($params['trunks_isdn'])){
                 /*Save isdn trunks parameters*/
-                $sql = "REPLACE INTO `gateway_config_isdn` (`config_id`,`trunk`,`protocol`) VALUES (?,?,?)";
+                $sql = "REPLACE INTO `gateway_config_isdn` (`config_id`,`trunk`,`protocol`,`secret`) VALUES (?,?,?,?)";
                 $sth = FreePBX::Database()->prepare($sql);
-                $sth->execute(array($configId,$trunkId,$trunk['type']));
+                $sth->execute(array($configId,$trunkId,$trunk['type'],$trunkSecret));
             }
             else if ($type === 'pri' && isset($params['trunks_pri'])){
                 /*Save pri trunks parameters*/
-                $sql = "REPLACE INTO `gateway_config_pri` (`config_id`,`trunk`) VALUES (?,?)";
+                $sql = "REPLACE INTO `gateway_config_pri` (`config_id`,`trunk`,`secret`) VALUES (?,?,?)";
                 $sth = FreePBX::Database()->prepare($sql);
-                $sth->execute(array($configId,$trunkId));
+                $sth->execute(array($configId,$trunkId,$trunkSecret));
             }
             else if ($type === 'fxo' && isset($params['trunks_fxo'])){
                 /*Save fxo trunks parameters*/return $response->withJson(array('id'=>$configId), 200);
-                $sql = "REPLACE INTO `gateway_config_fxo` (`config_id`,`trunk`,`number`) VALUES (?,?,?)";
+                $sql = "REPLACE INTO `gateway_config_fxo` (`config_id`,`trunk`,`number`,`secret`) VALUES (?,?,?,?)";
                 $sth = FreePBX::Database()->prepare($sql);
-                $sth->execute(array($configId,$trunkId,$trunk['number']));
+                $sth->execute(array($configId,$trunkId,$trunk['number'],$trunkSecret));
             }
           }
         }

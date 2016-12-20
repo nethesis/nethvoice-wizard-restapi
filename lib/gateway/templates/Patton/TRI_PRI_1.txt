@@ -94,7 +94,7 @@ context cs SWITCH
     trust remote
 
 authentication-service AUTH_SRV
-  username TRUNKNUMBER1 password TRUNKNUMBER1
+  username TRUNKNUMBER1 password TRUNKSECRET1
 
 location-service SER_LOC_00
   domain 1 ASTERISKIP

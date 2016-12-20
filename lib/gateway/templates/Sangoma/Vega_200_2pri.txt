@@ -1660,14 +1660,14 @@
    purge .sip.auth.user
    cp .sip.auth.user.1
     set .sip.auth.user.1.enable="1"
-    set .sip.auth.user.1.password="TRUNKNUMBER1"
+    set .sip.auth.user.1.password="TRUNKSECRET1"
     set .sip.auth.user.1.resource_priority="routine"
     set .sip.auth.user.1.sip_profile="1"
     set .sip.auth.user.1.subscriber="IF:0401"
     set .sip.auth.user.1.username="TRUNKNUMBER1"
    cp .sip.auth.user.2
     set .sip.auth.user.2.enable="1"
-    set .sip.auth.user.2.password="TRUNKNUMBER2"
+    set .sip.auth.user.2.password="TRUNKSECRET2"
     set .sip.auth.user.2.resource_priority="routine"
     set .sip.auth.user.2.sip_profile="1"
     set .sip.auth.user.2.subscriber="IF:0402"

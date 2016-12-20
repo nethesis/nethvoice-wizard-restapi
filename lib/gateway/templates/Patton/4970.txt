@@ -80,7 +80,7 @@ context cs switch
   no shutdown
 
 authentication-service AUTH_TRAIN
-  username TRUNKNUMBER1 password TRUNKNUMBER1
+  username TRUNKNUMBER1 password TRUNKSECRET1
 
 location-service LOC_SERV_TRAIN
   domain 1 ASTERISKIP

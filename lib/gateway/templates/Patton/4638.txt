@@ -119,10 +119,10 @@ context cs switch
   no shutdown
 
 authentication-service AUTH_TRAIN
-  username TRUNKNUMBER1 password TRUNKNUMBER1
-  username TRUNKNUMBER2 password TRUNKNUMBER2
-  username TRUNKNUMBER3 password TRUNKNUMBER3
-  username TRUNKNUMBER4 password TRUNKNUMBER4
+  username TRUNKNUMBER1 password TRUNKSECRET1
+  username TRUNKNUMBER2 password TRUNKSECRET2
+  username TRUNKNUMBER3 password TRUNKSECRET3
+  username TRUNKNUMBER4 password TRUNKSECRET4
 
 location-service LOC_SERV_TRAIN
   domain 1 ASTERISKIP

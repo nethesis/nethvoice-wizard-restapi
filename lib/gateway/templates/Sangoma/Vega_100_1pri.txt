@@ -1641,7 +1641,7 @@
    purge .sip.auth.user
    cp .sip.auth.user.1
     set .sip.auth.user.1.enable="1"
-    set .sip.auth.user.1.password="TRUNKNUMBER1"
+    set .sip.auth.user.1.password="TRUNKSECRET1"
     set .sip.auth.user.1.resource_priority="routine"
     set .sip.auth.user.1.sip_profile="1"
     set .sip.auth.user.1.subscriber="IF:0401"
