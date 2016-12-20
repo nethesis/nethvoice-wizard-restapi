@@ -225,10 +225,6 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
             $id = $res['id'];
             $sqls = array();
             $sqls[] = "DELETE IGNORE FROM `gateway_config` WHERE `id` = ?";
-            $sqls[] = "DELETE IGNORE FROM `gateway_config_fxo` WHERE `config_id` = ?";
-            $sqls[] = "DELETE IGNORE FROM `gateway_config_fxs` WHERE `config_id` = ?";
-            $sqls[] = "DELETE IGNORE FROM `gateway_config_isdn` WHERE `config_id` = ?";
-            $sqls[] = "DELETE IGNORE FROM `gateway_config_pri` WHERE `config_id` = ?";
             foreach ($sqls as $sql) {
                 $sth = FreePBX::Database()->prepare($sql);
                 $sth->execute(array($id));
@@ -246,87 +242,86 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
         if ($res === false){
             return $response->withJson(array("status"=>"Failed to create configuration"),500);
         }
-        $id = $res['id'];
-        /*Save trunk specific configuration*/
-        if (isset($params['trunks_isdn'])){
-            /*Save isdn trunks parameters*/
-            foreach ($params['trunks_isdn'] as $trunk){
+        $configId = $res['id'];
+
+        // create trunks
+        $sql = "SELECT `manufacturer` FROM `gateway_models` WHERE `id` = ?";
+        $sth = FreePBX::Database()->prepare($sql);
+        $sth->execute(array($params['model']));
+        $res = $sth->fetch(\PDO::FETCH_ASSOC);
+
+        // Create unique smart name
+        $vendor = $res['manufacturer'];
+        $uid = strtolower(substr(str_replace(':', '', $params['mac']), -6, 6));
+
+        $trunksByTypes = array(
+          'isdn' => $params['trunks_isdn'],
+          'pri' => $params['trunks_pri'],
+          'fxo' => $params['trunks_fxo']
+        );
+
+        foreach ($trunksByTypes as $type=>$trunks) {
+          $port = (strtolower($res['manufacturer']) === 'patton' ? 0 : 1);
+
+          foreach ($trunks as $trunk) {
+            $trunkName = $vendor. '_'. $uid. '_'. $type. '_'. $port;
+
+            $peerdetails = 'context=from-pstn'. "\n".
+              'host=dynamic'. "\n".
+              'insecure=very'. "\n".
+              'qualify=yes'. "\n".
+              'secret='. $trunkName. "\n".
+              'type=friend'. "\n".
+              'username='. $trunkName;
+
+            $nextTrunkId = count(core_trunks_list());
+            $dialoutprefix = intval('20'. str_pad(++$nextTrunkId, 2, '0', STR_PAD_LEFT));
+
+            $trunkId = core_trunks_add(
+              'pjsip', // tech
+              $trunkName, // channelid as trunk name
+              $dialoutprefix, // dialoutprefix TODO
+              null, // maxchans
+              null, // outcid
+              $peerdetails, // peerdetails
+              'from-pstn', // usercontext
+              null, // userconfig
+              null, // register
+              'off', // keepcid
+              null, // failtrunk
+              'off', // disabletrunk
+              $trunkName, // name
+              null, // provider
+              'off', // continue
+              false   // dialopts
+            );
+
+            $port++;
+
+            if ($type === 'isdn' && isset($params['trunks_isdn'])){
+                /*Save isdn trunks parameters*/
                 $sql = "REPLACE INTO `gateway_config_isdn` (`config_id`,`trunk`,`protocol`) VALUES (?,?,?)";
                 $sth = FreePBX::Database()->prepare($sql);
-                $sth->execute(array($id,$trunk['name'],$trunk['type']));
+                $sth->execute(array($configId,$trunkId,$trunk['type']));
             }
-        }
-        if (isset($params['trunks_pri'])){
-            /*Save pri trunks parameters*/
-            foreach ($params['trunks_pri'] as $trunk){
+            else if ($type === 'pri' && isset($params['trunks_pri'])){
+                /*Save pri trunks parameters*/
                 $sql = "REPLACE INTO `gateway_config_pri` (`config_id`,`trunk`) VALUES (?,?)";
                 $sth = FreePBX::Database()->prepare($sql);
-                $sth->execute(array($id,$trunk['linked_trunk']));
+                $sth->execute(array($configId,$trunkId));
             }
-        }
-        if (isset($params['trunks_fxo'])){
-            /*Save fxo trunks parameters*/
-            foreach ($params['trunks_fxo'] as $trunk){
+            else if ($type === 'fxo' && isset($params['trunks_fxo'])){
+                /*Save fxo trunks parameters*/return $response->withJson(array('id'=>$configId), 200);
                 $sql = "REPLACE INTO `gateway_config_fxo` (`config_id`,`trunk`,`number`) VALUES (?,?,?)";
                 $sth = FreePBX::Database()->prepare($sql);
-                $sth->execute(array($id,$trunk['linked_trunk'],$trunk['number']));
+                $sth->execute(array($configId,$trunkId,$trunk['number']));
             }
+          }
         }
+
         system("/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/tftpGenerateConfig.php ".escapeshellarg($params['name']),$ret);
 
         if ($ret === 0 ) {
-          // Create trunks
-          $sql = "SELECT `manufacturer` FROM `gateway_models` WHERE `id` = ?";
-          $sth = FreePBX::Database()->prepare($sql);
-          $sth->execute(array($params['model']));
-          $res = $sth->fetch(\PDO::FETCH_ASSOC);
-
-          // Create unique smart name
-          $vendor = $res['manufacturer'];
-          $uid = strtolower(substr(str_replace(':', '', $params['mac']), -6, 6));
-          $port = (strtolower($res['manufacturer']) === 'patton' ? 0 : 1);
-
-          $trunksByTypes = array(
-            'isdn' => $params['trunks_isdn'],
-            'pri' => $params['trunks_pri'],
-            'fxo' => $params['trunks_fxo']
-          );
-
-          foreach ($trunksByTypes as $type=>$trunks) {
-            foreach ($trunks as $trunk) {
-              $trunkName = $vendor. '_'. $uid. '_'. $type. '_'. $port;
-
-              $peerdetails = 'context=from-pstn'. "\n".
-                'host=dynamic'. "\n".
-                'insecure=very'. "\n".
-                'qualify=yes'. "\n".
-                'secret='. $trunkName. "\n".
-                'type=friend'. "\n".
-                'username='. $trunkName;
-
-              core_trunks_add(
-                'pjsip', // tech
-                $trunkName, // channelid as trunk name
-                $dialoutprefix, // dialoutprefix TODO
-                null, // maxchans
-                null, // outcid
-                $peerdetails, // peerdetails
-                'from-pstn', // usercontext
-                null, // userconfig
-                null, // register
-                'off', // keepcid
-                null, // failtrunk
-                'off', // disabletrunk
-                $trunkName, // name
-                null, // provider
-                'off', // continue
-                false   // dialopts
-              );
-
-              $port++;
-            }
-          }
-
           return $response->withJson(array('id'=>$id), 200);
         } else {
             throw new Exception('Error generating configuration');
