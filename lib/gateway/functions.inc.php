@@ -18,21 +18,21 @@ function gateway_get_configuration($name){
         $res = $sth->fetch(\PDO::FETCH_ASSOC);
         $config['model'] = $res['model'];
         $config['manufacturer'] = $res['manufacturer'];
-        $sql = "SELECT `trunk`,`protocol` FROM `gateway_config_isdn` WHERE `config_id` = ?";
+        $sql = "SELECT a.trunk, `protocol`, `dialoutprefix` FROM `gateway_config_isdn` AS a JOIN trunks AS b ON a.trunk=b.trunkid WHERE `config_id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($config['id']));
         while ($row = $sth->fetch(\PDO::FETCH_ASSOC)){
             $config['trunks_isdn'][] = $row;
         }
 
-        $sql = "SELECT `trunk` FROM `gateway_config_pri` WHERE `config_id` = ?";
+        $sql = "SELECT a.trunk as trunk, `dialoutprefix` FROM `gateway_config_pri` AS a JOIN trunks AS b ON a.trunk=b.trunkid WHERE `config_id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($config['id']));
         while ($row = $sth->fetch(\PDO::FETCH_ASSOC)){
             $config['trunks_pri'][] = $row;
         }
 
-        $sql = "SELECT `trunk`,`number` FROM `gateway_config_fxo` WHERE `config_id` = ?";
+        $sql = "SELECT a.trunk as trunk,number,dialoutprefix FROM `gateway_config_fxo` AS a JOIN trunks AS b ON a.trunk=b.trunkid WHERE `config_id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($config['id']));
         while ($row = $sth->fetch(\PDO::FETCH_ASSOC)){
@@ -54,7 +54,6 @@ function gateway_get_configuration($name){
 
 function gateway_generate_configuration_file($name){
     try{
-        global $amp_conf;
         $config = gateway_get_configuration($name);
         # read template
         $template = "/var/www/html/freepbx/rest/lib/gateway/templates/{$config['manufacturer']}/{$config['model']}.txt";
@@ -79,11 +78,6 @@ function gateway_generate_configuration_file($name){
         $output = str_replace("DATE",date ('d/m/Y G:i:s'),$output);
 
         #Generate trunks config
-        /*trunk number:
-        * isdn = 1 + id
-        * pri  = 2 + id
-        * fxo  = 3 + id
-        */
         if (!empty($config['trunks_fxo'])){
             $i = 1;
             $n_trunks = count($config['trunks_isdn']);
@@ -94,7 +88,7 @@ function gateway_generate_configuration_file($name){
             }
             foreach ($config['trunks_fxo'] as $trunk){
                 $output = str_replace("LINENUMBER$i",$trunk['number'],$output);
-                $output = str_replace("TRUNKNUMBER$j","20".$trunk['id'],$output);
+                $output = str_replace("TRUNKNUMBER$j",$trunk['dialoutprefix'],$output);
                 $i++;
                 $j++;
             }
@@ -102,7 +96,7 @@ function gateway_generate_configuration_file($name){
         if (!empty($config['trunks_isdn'])){
             $i = 1;
             foreach ($config['trunks_isdn'] as $trunk) {
-                $output = str_replace("TRUNKNUMBER$i","20".$trunk['id'],$output);
+                $output = str_replace("TRUNKNUMBER$i",$trunk['dialoutprefix'],$output);
                 if ($trunk['protocol']=="pp") {
                     if ($config['manufacturer'] == 'Sangoma') {
                         $output = str_replace("PROTOCOLTYPE$i","pp",$output);
@@ -128,7 +122,7 @@ function gateway_generate_configuration_file($name){
         if (!empty($config['trunks_pri'])){
             $i = 1;
             foreach ($config['trunks_pri'] as $trunk){
-                $output = str_replace("TRUNKNUMBER$i","20".$trunk['id'],$output);
+                $output = str_replace("TRUNKNUMBER$i",$trunk['dialoutprefix'],$output);
                 $i++;
             }
         }
