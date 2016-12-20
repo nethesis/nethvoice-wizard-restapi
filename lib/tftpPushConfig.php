@@ -7,10 +7,9 @@ try{
     define('FREEPBX_IS_AUTH',1);
     require_once '/etc/freepbx.conf';
 
-    global $amp_conf;
     $dbh = FreePBX::Database();
     /*Check if config exists*/
-    $sql = "SELECT `id`,`model_id`,`ipv4`,`ipv4_new`,`gateway`,`mac` FROM `gateway_config` WHERE `name` = ?";
+    $sql = "SELECT `id`,`model_id`,`ipv4`,`ipv4_new`,`gateway`,`ipv4_green`,`netmask_green`,`mac` FROM `gateway_config` WHERE `name` = ?";
     $sth = FreePBX::Database()->prepare($sql);
     $sth->execute(array($name));
     $config = $sth->fetch(\PDO::FETCH_ASSOC);
@@ -27,7 +26,7 @@ try{
     $config['manufacturer'] = $res['manufacturer'];
 
     if ($config['manufacturer'] == 'Sangoma'){
-        $filename = preg_replace('/:/','',$config['mac']).".config.txt";
+        $filename = preg_replace('/:/','',$config['mac'])."config.txt";
         $scriptname = preg_replace('/:/','',$config['mac'])."script.txt";
         $script = "sangoma-tftp";
         $deviceUsername = 'admin';
@@ -44,9 +43,8 @@ try{
         $devicePassword = 'administrator';
     }
     
-    $cmd='/var/www/html/freepbx/rest/lib/gateway/pushtftp/'.$script.' '.escapeshellarg($config['ipv4']).' \''.$amp_conf['AMPWEBADDRESS'].'\' '.escapeshellarg($filename).' '.escapeshellarg($deviceUsername).' '.escapeshellarg($devicePassword);
+    $cmd='/var/www/html/freepbx/rest/lib/gateway/pushtftp/'.$script.' '.escapeshellarg($config['ipv4']).' '.escapeshellarg($config['ipv4_green']).' '.escapeshellarg($filename).' '.escapeshellarg($deviceUsername).' '.escapeshellarg($devicePassword);
     exec($cmd,$return);
-    echo print_r($return,true)."\n";
 } catch (Exception $e){
     error_log($e->getMessage());
     exit(1);
