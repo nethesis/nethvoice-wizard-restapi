@@ -385,3 +385,25 @@ $app->delete('/devices/gateways/{id}', function (Request $request, Response $res
     }
 });
 
+/**
+ * Download gateway configuration
+ *
+ * @api devices/gateways/download/:name
+ */
+ $app->get('/devices/gateways/download/{name}', function (Request $request, Response $response, $args) {
+    include_once('lib/gateway/functions.inc.php');
+    $route = $request->getAttribute('route');
+    $name = $route->getArgument('name');
+
+    try {
+      $config = gateway_generate_configuration_file($name);
+      $response->withHeader('Content-Type', 'application/octet-stream');
+      $response->withHeader('Content-Disposition', 'attachment; filename='. $name. '.txt');
+
+      return $response->write($config);
+    } catch (Exception $e) {
+      error_log($e->getMessage());
+      return $response->withStatus(500);
+    }
+});
+
