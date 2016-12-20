@@ -590,3 +590,12 @@ Result:
   }
 ]
 ```
+
+### Codecs
+
+Get allowed codecs for VoIP trunks, ordered and enabled
+
+```
+GET /codecs/voip
+```
+
