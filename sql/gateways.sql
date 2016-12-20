@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS `gateway_config` (
 CREATE TABLE IF NOT EXISTS `gateway_config_fxo` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `config_id` INT UNSIGNED NOT NULL default '0',
-  `trunk` varchar(100) default NULL,
+  `trunk` int(11) NOT NULL,
   `number` varchar(100) default NULL,
   PRIMARY KEY  (`id`),
   FOREIGN KEY (`config_id`) REFERENCES `gateway_config`(`id`)
@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS `gateway_config_fxo` (
 CREATE TABLE IF NOT EXISTS `gateway_config_isdn` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `config_id` INT UNSIGNED NOT NULL default '0',
-  `trunk` varchar(100) default NULL,
+  `trunk` int(11) NOT NULL,
   `protocol` varchar(100) default NULL,
   PRIMARY KEY  (`id`),
   FOREIGN KEY (`config_id`) REFERENCES `gateway_config`(`id`)
@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS `gateway_config_isdn` (
 CREATE TABLE IF NOT EXISTS `gateway_config_pri` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `config_id` INT UNSIGNED NOT NULL default '0',
-  `trunk` varchar(100) default NULL,
+  `trunk` int(11) NOT NULL,
   PRIMARY KEY  (`id`),
   FOREIGN KEY (`config_id`) REFERENCES `gateway_config`(`id`)
     ON UPDATE CASCADE

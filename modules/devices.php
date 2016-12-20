@@ -275,7 +275,7 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
               'username='. $trunkName;
 
             $nextTrunkId = count(core_trunks_list());
-            $dialoutprefix = intval('20'. str_pad(++$nextTrunkId, 2, '0', STR_PAD_LEFT));
+            $dialoutprefix = intval('20'. str_pad(++$nextTrunkId, 3, '0', STR_PAD_LEFT));
 
             $trunkId = core_trunks_add(
               'pjsip', // tech
@@ -322,7 +322,7 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
         system("/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/tftpGenerateConfig.php ".escapeshellarg($params['name']),$ret);
 
         if ($ret === 0 ) {
-          return $response->withJson(array('id'=>$id), 200);
+          return $response->withJson(array('id'=>$configId), 200);
         } else {
             throw new Exception('Error generating configuration');
         }
@@ -375,16 +375,9 @@ $app->delete('/devices/gateways/{id}', function (Request $request, Response $res
             core_routing_trunk_delbyid($row['trunk']);
             needreload();
         }
-        $sqls = array();
-        $sqls[] = "DELETE IGNORE FROM `gateway_config_fxo` WHERE `config_id` = ?";
-        $sqls[] = "DELETE IGNORE FROM `gateway_config_fxs` WHERE `config_id` = ?";
-        $sqls[] = "DELETE IGNORE FROM `gateway_config_isdn` WHERE `config_id` = ?";
-        $sqls[] = "DELETE IGNORE FROM `gateway_config_pri` WHERE `config_id` = ?";
-        $sqls[] = "DELETE IGNORE FROM `gateway_config` WHERE `id` = ?";
-        foreach ($sqls as $sql) {
-            $sth = FreePBX::Database()->prepare($sql);
-            $sth->execute(array($id));
-        }
+        $sql = "DELETE IGNORE FROM `gateway_config` WHERE `id` = ?";
+        $sth = FreePBX::Database()->prepare($sql);
+        $sth->execute(array($id));
         return $response->withJson(array('status' => true), 200);
     } catch (Exception $e){
         error_log($e->getMessage());
