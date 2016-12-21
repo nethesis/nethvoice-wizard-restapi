@@ -294,8 +294,6 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
           'fxo' => $params['trunks_fxo']
         );
 
-        $passCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUWXYZ0123456789';
-
         foreach ($trunksByTypes as $type=>$trunks) {
           $port = (strtolower($res['manufacturer']) === 'patton' ? 0 : 1);
 
