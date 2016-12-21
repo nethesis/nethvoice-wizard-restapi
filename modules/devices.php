@@ -9,7 +9,6 @@ include_once(__DIR__. '/../lib/gateway/functions.inc.php');
 require_once(__DIR__. '/../lib/freepbxFwConsole.php');
 require_once(__DIR__. '/../../admin/modules/endpointman/includes/functions.inc');
 
-
 /*
 *  Launch a scan: POST/devices/scan
 *  Parameter: { "network": "192.168.0.0/24"}
@@ -295,28 +294,21 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
           'fxo' => $params['trunks_fxo']
         );
 
-        $passCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUWXYZ0123456789';
-
         foreach ($trunksByTypes as $type=>$trunks) {
           $port = (strtolower($res['manufacturer']) === 'patton' ? 0 : 1);
 
           foreach ($trunks as $trunk) {
             $trunkName = $vendor. '_'. $uid. '_'. $type. '_'. $port;
-            $trunkSecret = '';
-            $max = strlen($passCharacters) - 1;
-            for ($i = 0; $i < 10; $i++) {
-                $trunkSecret .= $characters[mt_rand(0, $max)];
-            }
-            $peerdetails = 'context=from-pstn'. "\n".
-              'host=dynamic'. "\n".
-              'insecure=very'. "\n".
-              'qualify=yes'. "\n".
-              'secret='. $trunkSecret. "\n".
-              'type=friend'. "\n".
-              'username='. $trunkName;
 
             $nextTrunkId = count(core_trunks_list());
             $dialoutprefix = intval('20'. str_pad(++$nextTrunkId, 3, '0', STR_PAD_LEFT));
+
+            $secret = md5(uniqid(rand(), true));
+            $defaults = getPjSipDefaults($trunkName, $secret);
+            // set $_REQUEST params for pjsip
+            foreach ($defaults as $k => $v) {
+                $_REQUEST[$k] = $v;
+            }
 
             $trunkId = core_trunks_add(
               'pjsip', // tech
@@ -324,7 +316,7 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
               $dialoutprefix, // dialoutprefix TODO
               null, // maxchans
               null, // outcid
-              $peerdetails, // peerdetails
+              null, // peerdetails
               'from-pstn', // usercontext
               null, // userconfig
               null, // register
@@ -343,19 +335,19 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
                 /*Save isdn trunks parameters*/
                 $sql = "REPLACE INTO `gateway_config_isdn` (`config_id`,`trunk`,`protocol`,`secret`) VALUES (?,?,?,?)";
                 $sth = FreePBX::Database()->prepare($sql);
-                $sth->execute(array($configId,$trunkId,$trunk['type'],$trunkSecret));
+                $sth->execute(array($configId,$trunkId,$trunk['type'],$secret));
             }
             else if ($type === 'pri' && isset($params['trunks_pri'])){
                 /*Save pri trunks parameters*/
                 $sql = "REPLACE INTO `gateway_config_pri` (`config_id`,`trunk`,`secret`) VALUES (?,?,?)";
                 $sth = FreePBX::Database()->prepare($sql);
-                $sth->execute(array($configId,$trunkId,$trunkSecret));
+                $sth->execute(array($configId,$trunkId,$secret));
             }
             else if ($type === 'fxo' && isset($params['trunks_fxo'])){
                 /*Save fxo trunks parameters*/return $response->withJson(array('id'=>$configId), 200);
                 $sql = "REPLACE INTO `gateway_config_fxo` (`config_id`,`trunk`,`number`,`secret`) VALUES (?,?,?,?)";
                 $sth = FreePBX::Database()->prepare($sql);
-                $sth->execute(array($configId,$trunkId,$trunk['number'],$trunkSecret));
+                $sth->execute(array($configId,$trunkId,$trunk['number'],$secret));
             }
           }
         }
