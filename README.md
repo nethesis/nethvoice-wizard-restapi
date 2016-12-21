@@ -501,6 +501,12 @@ Delete outbound routes
 DELETE /outboundroutes/{id}
 ```
 
+Get list of supported patterns for outbound routes
+
+```
+GET /outboundroutes/supportedLocales
+```
+
 ### Mobiles
 
 Retrieve list of all mobile phones and associated users
