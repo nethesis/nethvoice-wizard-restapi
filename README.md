@@ -454,6 +454,37 @@ Retrieve outbound routes
 GET /outboundroutes
 ```
 
+Retrieve default outbound routes
+
+```
+GET /outboundroutes/defaults
+```
+
+Result:
+
+```
+{
+  "it": [
+    {
+      "name": "national_it",
+      "trunks": [
+        { "name": "patton_1_isdn_1", "id": "2001" },
+        { "name": "patton_2_isdn_2", "id": "2002" }
+      ],
+    },
+    {
+      "name": "international_it",
+      "trunks": [
+        { "name": "patton_1_isdn_1", "id": "2001" },
+        { "name": "patton_2_isdn_2", "id": "2002" }
+      ],
+    },
+    ...
+  ],
+  "en": ...
+}
+```
+
 Create an outbound route
 
 ```

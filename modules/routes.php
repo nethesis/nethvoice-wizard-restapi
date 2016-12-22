@@ -106,6 +106,44 @@ $app->get('/outboundroutes/count', function (Request $request, Response $respons
      return $response->withJson($routes, 200);
  });
 
+/**
+ * @api {get} /outboundroutes/defaults Retrieves defaults outbound routes
+ */
+ $app->get('/outboundroutes/defaults', function (Request $request, Response $response, $args) {
+     try {
+        $dbh = FreePBX::Database();
+        $sql = "SELECT DISTINCT `locale` FROM `outbound_routes_locales`";
+        $locales = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC);
+        $sql = "SELECT DISTINCT `key` FROM `outbound_routes_locales`";
+        $keys = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC);
+
+        $trunks = array();
+        $alltrunks = FreePBX::Core()->listTrunks();
+        foreach($alltrunks as $tr) {
+            array_push($trunks, array("name" => $tr["name"], "id" => $tr["trunkid"]));
+        }
+
+        $res = array();
+        foreach($locales as $locale) {
+            if (!array_key_exists($locale["locale"], $res)) {
+                $res[$locale["locale"]] = array();
+            }
+            foreach($keys as $key) {
+                array_push($res[$locale["locale"]], array(
+                        "name" => $key["key"]."_".$locale["locale"],
+                        "trunks" => $trunks
+                    )
+                );
+            }
+        }
+        return $response->withJson($res,200);
+
+     } catch (Exception $e) {
+       error_log($e->getMessage());
+       return $response->withJson('An error occurred', 500);
+     }
+ });
+
  /**
  * @api {post} /outboundroutes  Create an outbound routes (incoming)
  */
