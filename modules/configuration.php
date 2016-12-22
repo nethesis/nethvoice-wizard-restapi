@@ -2,7 +2,7 @@
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
-require_once('lib/SystemTasks.php');
+require_once(__DIR__. '/../lib/SystemTasks.php');
 
 function getLegacyMode() {
     exec("/usr/bin/sudo /sbin/e-smith/config getprop nethvoice LegacyMode", $out);

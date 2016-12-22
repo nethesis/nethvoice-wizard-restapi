@@ -2,7 +2,9 @@
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
-require_once("lib/SystemTasks.php");
+require_once(__DIR__. '/../lib/SystemTasks.php');
+require_once(__DIR__. '/../../admin/modules/core/functions.inc.php');
+include_once(__DIR__. '/../lib/gateway/functions.inc.php');
 
 
 /*
@@ -364,7 +366,6 @@ $app->delete('/devices/gateways/{id}', function (Request $request, Response $res
         $sth->execute(array($id));
         $res = $sth->fetch(\PDO::FETCH_ASSOC);
         system("/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/tftpDeleteConfig.php ".escapeshellarg($res['name']),$ret);
-        require_once(__DIR__. '/../../admin/modules/core/functions.inc.php');
         //get all trunks for this gateway
         $sql = "SELECT `trunk` FROM `gateway_config_fxo` WHERE `config_id` = ? UNION SELECT `trunk` FROM `gateway_config_isdn` WHERE `config_id` = ? UNION SELECT `trunk` FROM `gateway_config_pri` WHERE `config_id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
@@ -391,7 +392,6 @@ $app->delete('/devices/gateways/{id}', function (Request $request, Response $res
  * @api devices/gateways/download/:name
  */
  $app->get('/devices/gateways/download/{name}', function (Request $request, Response $response, $args) {
-    include_once('lib/gateway/functions.inc.php');
     $route = $request->getAttribute('route');
     $name = $route->getArgument('name');
 

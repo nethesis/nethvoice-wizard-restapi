@@ -2,7 +2,7 @@
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
-require_once('/var/www/html/freepbx/admin/modules/core/functions.inc.php');
+require_once(__DIR__. '/../../admin/modules/core/functions.inc.php');
 
 /**
  * @api {get} /providers  Retrieve all providers

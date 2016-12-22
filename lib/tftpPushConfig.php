@@ -1,11 +1,13 @@
 <?php
+
+require_once('/etc/freepbx.conf');
+
 try{
     $name = $argv[1];
     $tftpdir = "/var/lib/tftpboot";
 
     $bootstrap_settings['freepbx_error_handler'] = false;
     define('FREEPBX_IS_AUTH',1);
-    require_once '/etc/freepbx.conf';
 
     $dbh = FreePBX::Database();
     /*Check if config exists*/
@@ -42,7 +44,7 @@ try{
         $deviceUsername = 'admin';
         $devicePassword = 'administrator';
     }
-    
+
     $cmd='/var/www/html/freepbx/rest/lib/gateway/pushtftp/'.$script.' '.escapeshellarg($config['ipv4']).' '.escapeshellarg($config['ipv4_green']).' '.escapeshellarg($filename).' '.escapeshellarg($deviceUsername).' '.escapeshellarg($devicePassword);
     exec($cmd,$return);
 } catch (Exception $e){
