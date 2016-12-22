@@ -120,6 +120,10 @@ $app->get('/outboundroutes/count', function (Request $request, Response $respons
         $trunks = array();
         $alltrunks = FreePBX::Core()->listTrunks();
         foreach($alltrunks as $tr) {
+            // this is the dahdi trunk automatically created by freepbx on the first time. So it is not added
+            if ($tr["name"] == "DAHDI/g0" && $tr["trunkid"] == "1" && $tr["tech"] == "dahdi" && $tr["channelid"] == "g0") {
+                continue;
+            }
             array_push($trunks, array("name" => $tr["name"], "id" => $tr["trunkid"]));
         }
 
