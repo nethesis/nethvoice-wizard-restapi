@@ -5,7 +5,8 @@ CREATE TABLE IF NOT EXISTS `outbound_routes_locales` (
   `locale` varchar(10) NOT NULL default '',
   `key` varchar(50) default NULL,
   `prefix_value` varchar(50) default NULL,
-  `pattern_value` varchar(50) default NULL
+  `pattern_value` varchar(50) default NULL,
+  KEY `locale` (`locale`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 LOCK TABLES `outbound_routes_locales` WRITE;
