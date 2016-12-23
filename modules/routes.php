@@ -157,12 +157,6 @@ $app->get('/outboundroutes/count', function (Request $request, Response $respons
  });
 
  /**
-<<<<<<< 1d5a1150f4fb104d5b2db0589b002ba97d7f1cf6
- * @api {post} /outboundroutes  Create an outbound routes (incoming)
- */
- $app->post('/outboundroutes', function (Request $request, Response $response, $args) {
-    $params = $request->getParsedBody();
-=======
  * @api {post} /outboundroutes Creates outbound routes. If the routes passed as argument have not the "route_id", then
  *                             default outbound route will be created into the FreePBX db tables. Otherwise it updates
  *                             the sequences of routes and their trunks.
@@ -235,32 +229,10 @@ $app->get('/outboundroutes/count', function (Request $request, Response $respons
         }
         needreload();
         return $response->withStatus(200);
->>>>>>> adjust POST /outboundroutes. task #358 2
-
-    try {
-      core_routing_addbyid(
-        $params['name'],
-        $params['outcid'],
-        $params['outcid_mode'],
-        $params['password'],
-        $params['emergency_route'],
-        $params['intracompany_route'],
-        $params['mohclass'] ? $params['mohclass'] : 'default',
-        $params['time_group_id'],
-        $params['patterns'], // array of patterns
-        $params['trunks'], // array of trunks id
-        $params['seq'],
-        $params['dest']);
     } catch (Exception $e) {
       error_log($e->getMessage());
       return $response->withJson('An error occurred', 500);
     }
-<<<<<<< 1d5a1150f4fb104d5b2db0589b002ba97d7f1cf6
-
-    needreload();
-    return $response->withStatus(200);
-=======
->>>>>>> adjust POST /outboundroutes. task #358 2
 });
 
  /**
