@@ -103,7 +103,7 @@ $app->get('/outboundroutes/count', function (Request $request, Response $respons
            $route_trunks = core_routing_getroutetrunksbyid($route['route_id']);
            $route['trunks'] = [];
            foreach($route_trunks as $trunk) {
-               $route['trunks'][] = array("id" => $trunk, "name" => core_trunks_getTrunkTrunkName($trunk));
+               $route['trunks'][] = array("trunkid" => $trunk, "name" => core_trunks_getTrunkTrunkName($trunk));
            }
            $routes[] = $route;
        }
@@ -132,7 +132,7 @@ $app->get('/outboundroutes/count', function (Request $request, Response $respons
             if ($tr["name"] == "DAHDI/g0" && $tr["trunkid"] == "1" && $tr["tech"] == "dahdi" && $tr["channelid"] == "g0") {
                 continue;
             }
-            array_push($trunks, array("name" => $tr["name"], "id" => $tr["trunkid"]));
+            array_push($trunks, array("name" => $tr["name"], "trunkid" => $tr["trunkid"]));
         }
 
         $res = array();
@@ -181,7 +181,7 @@ $app->get('/outboundroutes/count', function (Request $request, Response $respons
             foreach($params[$locale] as $index => $route) {
                 $trunks = array();
                 foreach($route["trunks"] as $tr) {
-                    array_push($trunks, $tr["id"]);
+                    array_push($trunks, $tr["trunkid"]);
                 }
                 core_routing_setrouteorder($route["route_id"], strval($index));
                 core_routing_updatetrunks($route["route_id"], $trunks, true);
@@ -196,7 +196,7 @@ $app->get('/outboundroutes/count', function (Request $request, Response $respons
 
                 $trunks = array();
                 foreach($route["trunks"] as $tr) {
-                    array_push($trunks, $tr["id"]);
+                    array_push($trunks, $tr["trunkid"]);
                 }
 
                 $patterns = array();
