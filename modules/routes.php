@@ -96,13 +96,21 @@ $app->get('/outboundroutes/count', function (Request $request, Response $respons
  * @api {get} /outboundroutes  Retrieve outbound routes.
  */
  $app->get('/outboundroutes', function (Request $request, Response $response, $args) {
+     $routes = [];
      try {
-       $routes = FreePBX::Core()->getAllRoutes();
+       $allRoutes = FreePBX::Core()->getAllRoutes();
+       foreach($allRoutes as $route) {
+           $route_trunks = core_routing_getroutetrunksbyid($route['route_id']);
+           $route['trunks'] = [];
+           foreach($route_trunks as $trunk) {
+               $route['trunks'][] = array("id" => $trunk, "name" => core_trunks_getTrunkTrunkName($trunk));
+           }
+           $routes[] = $route;
+       }
      } catch (Exception $e) {
        error_log($e->getMessage());
        return $response->withJson('An error occurred', 500);
      }
-
      return $response->withJson($routes, 200);
  });
 
