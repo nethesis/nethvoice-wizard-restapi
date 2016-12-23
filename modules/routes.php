@@ -236,19 +236,16 @@ $app->get('/outboundroutes/count', function (Request $request, Response $respons
 });
 
  /**
-  * @api {delete} /outboundroutes/:id Delete an outbound route
+  * @api {delete} /outboundroutes/:id Removes the association between the outbound route and the trunk
   */
- $app->delete('/outboundroutes/{id}', function (Request $request, Response $response, $args) {
-   $route = $request->getAttribute('route');
-   $id = $route->getArgument('id');
-
-   try {
-     $res = core_routing_get($id);
-
-     if ($res === false)
-       return $response->withStatus(404);
-
-     core_routing_delbyid($id);
+ $app->delete('/outboundroutes/{route_id}/trunks/{id}', function (Request $request, Response $response, $args) {
+    try {
+        $route = $request->getAttribute('route');
+        $trunk_id = $route->getArgument('id');
+        $route_id = $route->getArgument('route_id');
+        $sql = "DELETE FROM `outbound_route_trunks` WHERE `route_id`=\"$route_id\" AND `trunk_id`=\"$trunk_id\"";
+        $sth = FreePBX::Database()->prepare($sql);
+        $res = $sth->execute();
    } catch (Exception $e) {
      error_log($e->getMessage());
      return $response->withJson('An error occurred', 500);
