@@ -492,7 +492,35 @@ POST /outboundroutes
 ```
 
 ```
-Parameter: { "name": "<string>", "outcid": "<string>", "outcid_mode": "<val>", "password": "<string>", "emergency_route": "YES | NO", "intracompany_route": "YES | NO", "mohclass" : "", "time_group_id" : "<val>", "patterns" : [ "prepend", "prefix", "prepone", "cid", ... ], "trunks": [ <trunk id>, <trunk id>, ... ], "seq": "<string>", "dest": <string> }
+Parameters:
+{
+   "it":[
+      {
+         "route_id":"25",
+         "name":"national_it",
+         "outcid":"",
+         "outcid_mode":"",
+         "password":"",
+         "emergency_route":"",
+         "intracompany_route":"",
+         "mohclass":"default",
+         "time_group_id":null,
+         "dest":"",
+         "seq":"0",
+         "trunks":[
+            {
+               "trunkid":"1",
+               "name":"Patton_0b1cda_isdn_0"
+            },
+            {
+               "trunkid":"2",
+               "name":"Patton_0b1cda_isdn_1"
+            }
+         ]
+      },
+      ...
+   ]
+}
 ```
 
 Delete outbound routes
