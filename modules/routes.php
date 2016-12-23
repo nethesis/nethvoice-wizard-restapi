@@ -149,10 +149,85 @@ $app->get('/outboundroutes/count', function (Request $request, Response $respons
  });
 
  /**
+<<<<<<< 1d5a1150f4fb104d5b2db0589b002ba97d7f1cf6
  * @api {post} /outboundroutes  Create an outbound routes (incoming)
  */
  $app->post('/outboundroutes', function (Request $request, Response $response, $args) {
     $params = $request->getParsedBody();
+=======
+ * @api {post} /outboundroutes Creates outbound routes. If the routes passed as argument have not the "route_id", then
+ *                             default outbound route will be created into the FreePBX db tables. Otherwise it updates
+ *                             the sequences of routes and their trunks.
+ */
+ $app->post('/outboundroutes', function (Request $request, Response $response, $args) {
+    try {
+        $params = $request->getParsedBody();
+        reset($params);
+        $locale = key($params);
+
+        // check if the routes are present into the freepbx db
+        $route_keys = array_keys($params[$locale][0]);
+        $created = false;
+        foreach($route_keys as $key) {
+            if ($key == "route_id") {
+                $created = true;
+            }
+        }
+
+        if ($created) {
+            // update data into the freepbx db tables
+            foreach($params[$locale] as $index => $route) {
+                $trunks = array();
+                foreach($route["trunks"] as $tr) {
+                    array_push($trunks, $tr["id"]);
+                }
+                core_routing_setrouteorder($route["route_id"], strval($index));
+                core_routing_updatetrunks($route["route_id"], $trunks, true);
+            }
+        } else {
+            // initialize data into the freepbx db tables using data of table "outbound_routes_locales"
+            $dbh = FreePBX::Database();
+            $sql = "SELECT * FROM `outbound_routes_locales` where locale=\"$locale\"";
+            $dblocales = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC);
+
+            foreach($params[$locale] as $route) {
+
+                $trunks = array();
+                foreach($route["trunks"] as $tr) {
+                    array_push($trunks, $tr["id"]);
+                }
+
+                $patterns = array();
+                foreach($dblocales as $dbloc) {
+                    if ($dbloc["locale"] == $locale && $route["name"] == $dbloc["key"]."_".$locale) {
+                        array_push($patterns, array(
+                            "match_pattern_prefix" => $dbloc["prefix_value"],
+                            "match_pattern_pass" => $dbloc["pattern_value"],
+                            "match_cid" => "",
+                            "prepend_digits" => ""
+                        ));
+                    }
+                }
+
+                core_routing_addbyid(
+                    $route["name"], // name
+                    "", // outcid
+                    "", // outcid_mode
+                    "", //password
+                    "", // emergency_mode
+                    "", // intracompany_route
+                    "default", // mohclass
+                    NULL, //time_group_id
+                    $patterns, // array of patterns
+                    $trunks, // array of trunks id
+                    NULL, // seq
+                    "" // dest
+                );
+            }
+        }
+        needreload();
+        return $response->withStatus(200);
+>>>>>>> adjust POST /outboundroutes. task #358 2
 
     try {
       core_routing_addbyid(
@@ -172,9 +247,12 @@ $app->get('/outboundroutes/count', function (Request $request, Response $respons
       error_log($e->getMessage());
       return $response->withJson('An error occurred', 500);
     }
+<<<<<<< 1d5a1150f4fb104d5b2db0589b002ba97d7f1cf6
 
     needreload();
     return $response->withStatus(200);
+=======
+>>>>>>> adjust POST /outboundroutes. task #358 2
 });
 
  /**
