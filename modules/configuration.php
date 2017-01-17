@@ -66,6 +66,14 @@ $app->get('/configuration/networks', function (Request $request, Response $respo
     }
     $networkDB = json_decode($out[0],true);
     $networks = array();
+    $isRed = false;
+    // searching red interfaces
+    foreach ($networkDB as $key) {
+        if($key['props']['role'] === 'red' && $key['props']['type'] != 'xdsl-disabled') {
+            $isRed = true;
+        }
+    }
+    // create network obj
     foreach ($networkDB as $key){
         if($key['props']['role'] === 'green')
         {
@@ -73,7 +81,7 @@ $app->get('/configuration/networks', function (Request $request, Response $respo
                 "network"=>long2ip(ip2long($key['props']['ipaddr']) & ip2long($key['props']['netmask'])),
                 "ip"=>$key['props']['ipaddr'],
                 "netmask"=>$key['props']['netmask'],
-                "gateway"=>$key['props']['gateway']
+                "gateway"=>$isRed ? $key['props']['ipaddr'] : $key['props']['gateway']
             );
         }
     }

@@ -8,7 +8,7 @@
 "Unidata": ["WPU-7800"],
 "Intelbras": ["200","300"],
 "Grandstream": ["BT200","BT201","GXP280","GXP1200","GXP2000","GXP2010","GXP2020","GXP285","GXP2100","GXP2110","GXP2120","GXP1100","GXP1105","GXP1400","GXP1405","GXP1450","GXP2124","HT486","HT286","GXP2130"],
-"Sangoma": ["S300","S500","S700"],
+"Sangoma": ["S300", "S400", "S500","S700"],
 "AudioCodes": ["MP112","MP114","MP118","MP124"],
 "Polycom": ["SoundPoint IP 430","SoundPoint IP 320","SoundPoint IP 330","Polycom PTX151","Polycom PTX150","SoundPoint IP 321","SoundPoint IP 331","SoundPoint IP 335","SoundPoint IP 450","SoundPoint IP 550","SoundPoint IP 560","SoundPoint IP 650","SoundPoint IP 670","SoundPoint IP 6000","SoundPoint IP 7000","VVX 1500","SoundPoint IP 5000","SoundPoint IP 301","SoundPoint IP 501","SoundPoint IP 600","SoundPoint IP 601","SoundStation IP 4000","SoundPoint IP 300","SoundPoint IP 500","VVX 500"],
 "Snom": ["300","320","360","370","710","715","720","760","820","821","870","D375","725","D765","D305","D345","D315","D745"],
