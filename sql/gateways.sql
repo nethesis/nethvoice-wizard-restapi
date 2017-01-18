@@ -1,10 +1,5 @@
 USE asterisk;
 
-DROP TABLE IF EXISTS `gateway_config_fxo`;
-DROP TABLE IF EXISTS `gateway_config_isdn`;
-DROP TABLE IF EXISTS `gateway_config_pri`;
-DROP TABLE IF EXISTS `gateway_config_fxs`;
-DROP TABLE IF EXISTS `gateway_config`;
 DROP TABLE IF EXISTS `gateway_models`;
 
 CREATE TABLE IF NOT EXISTS `gateway_models` (

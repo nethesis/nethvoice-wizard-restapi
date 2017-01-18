@@ -1,5 +1,4 @@
 USE asterisk;
-DROP TABLE IF EXISTS `rest_mobiles`;
 CREATE TABLE IF NOT EXISTS `rest_mobiles`(
   `id` BIGINT(20) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `mobile` varchar(20),
