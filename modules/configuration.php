@@ -14,17 +14,13 @@ function setLegacyMode($value) {
 }
 
 # get enabled mode
-
 $app->get('/configuration/mode', function (Request $request, Response $response, $args) {
     $mode = getLegacyMode();
-
     # return 'unknown' if LegacyMode prop is not set
     if ( $mode == "" ) {
         return $response->withJson(['result' => 'unknown'],200);
     }
-
     exec("/usr/bin/rpm -q nethserver-directory", $out, $ret);
-
     # return true, if LegacyMode is enabled and nethserver-directory is installed
     if ($mode == "enabled" && $ret === 0) {
         return $response->withJson(['result' => "legacy"],200);
@@ -32,15 +28,12 @@ $app->get('/configuration/mode', function (Request $request, Response $response,
     return $response->withJson(['result' => "uc"],200);
 });
 
-
 # set mode to legacy or uc
 #
 # JSON body: { "mode" : <mode> } where <mode> can be: "legacy" or "uc"
 #
-
 $app->post('/configuration/mode', function (Request $request, Response $response, $args) {
     $params = $request->getParsedBody();
-
     if ($params['mode'] == "legacy") {
         setLegacyMode('enabled');
         $st = new SystemTasks();
@@ -54,11 +47,9 @@ $app->post('/configuration/mode', function (Request $request, Response $response
     }
 });
 
-
 #
 # GET /configuration/networks return green ip address and netmasks
 #
-
 $app->get('/configuration/networks', function (Request $request, Response $response, $args) {
     exec('/bin/sudo /sbin/e-smith/db networks getjson', $out, $ret);
     if ($ret!==0)    {
@@ -88,3 +79,37 @@ $app->get('/configuration/networks', function (Request $request, Response $respo
     return $response->withJson($networks,200);
 });
 
+$app->get('/configuration/wizard', function (Request $request, Response $response, $args) {
+    try {
+        $dbh = FreePBX::Database();
+        $sql = 'SELECT * FROM rest_wizard';
+        $wizard = $dbh->sql($sql, 'getAll', \PDO::FETCH_ASSOC);
+        return $response->withJson($wizard, 200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
+# JSON body: { "step" : <current_wizard_step>, "status": <true|false> } where <status> is the wizard status
+$app->post('/configuration/wizard', function (Request $request, Response $response, $args) {
+    try {
+        $params = $request->getParsedBody();
+        $step = $params['step'];
+        $status = $params['status'];
+        // clean table
+        sql('TRUNCATE `rest_wizard`');
+        // insert wizard data
+        $dbh = FreePBX::Database();
+        $sql = 'REPLACE INTO `rest_wizard` (`step`,`status`) VALUES (?,?)';
+        $stmt = $dbh->prepare($sql);
+        if ($res = $stmt->execute(array($step,$status))) {
+            return $response->withStatus(200);
+        } else {
+            return $response->withStatus(500);
+        }
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
