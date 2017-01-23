@@ -4,7 +4,8 @@ use \Psr\Http\Message\ResponseInterface as Response;
 
 require_once(__DIR__. '/../lib/SystemTasks.php');
 require_once(__DIR__. '/../../admin/modules/core/functions.inc.php');
-include_once(__DIR__. '/../lib/gateway/functions.inc.php');
+require_once(__DIR__. '/../lib/gateway/functions.inc.php');
+require_once(__DIR__. '/../../admin/modules/endpointman/includes/functions.inc');
 
 
 /*
@@ -404,6 +405,58 @@ $app->delete('/devices/gateways/{id}', function (Request $request, Response $res
     } catch (Exception $e) {
       error_log($e->getMessage());
       return $response->withStatus(500);
+    }
+});
+
+/*
+* Provision phone (using FreePBX endpointman https://github.com/FreePBX-ContributedModules/endpointman)
+*/
+$app->post('/devices/phones/provision', function (Request $request, Response $response, $args) {
+    try {
+        $body = $request->getParsedBody();
+
+        $mac = $body['mac'];
+        $brand = $body['brand'];
+        $model = $body['model'];
+        $ext = $body['ext'];
+
+        $endpoint = new endpointmanager();
+
+        $endpoint->delete_device_by_mac(str_replace(':', '', $mac));
+
+        // Get model id by mac
+        $brand = $endpoint->get_brand_from_mac($mac);
+        $models = $endpoint->models_available(null, $brand['id']);
+
+        $model_id = null;
+        foreach ($models as $m) {
+          if ($m['text'] === $model) {
+            $model_id = $m['value'];
+            break;
+          }
+        }
+
+        // add device to endpointman module
+        if ($model_id) {
+          // function add_device($mac, $model, $ext, $template=NULL, $line=NULL, $displayname=NULL)
+          $mac_id = $endpoint->add_device(
+            $mac,
+            $model_id,
+            $ext
+          );
+
+          if ($mac_id) {
+            $phone_info = $endpoint->get_phone_info($mac_id);
+            $res = $endpoint->prepare_configs($phone_info, FALSE);
+          }
+        } else {
+          throw new Exception('model not found');
+        }
+
+        return $response->withStatus(200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withJson(array('message' => $e->getMessage()), 500);
     }
 });
 
