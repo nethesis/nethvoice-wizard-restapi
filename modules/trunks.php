@@ -1,4 +1,7 @@
 <?php
+
+require_once(__DIR__. '/../lib/freepbxFwConsole.php');
+
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
@@ -114,6 +117,7 @@ $app->post('/trunks', function (Request $request, Response $response, $args) {
     return $response->withStatus(500);
   }
 
-  needreload();
+  fwconsole('r');
+
   return $response->withStatus(200);
 });

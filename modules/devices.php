@@ -6,6 +6,7 @@ require_once(__DIR__. '/../lib/SystemTasks.php');
 require_once(__DIR__. '/../lib/modelRetrieve.php');
 require_once(__DIR__. '/../../admin/modules/core/functions.inc.php');
 include_once(__DIR__. '/../lib/gateway/functions.inc.php');
+require_once(__DIR__. '/../lib/freepbxFwConsole.php');
 require_once(__DIR__. '/../../admin/modules/endpointman/includes/functions.inc');
 
 
@@ -406,7 +407,7 @@ $app->delete('/devices/gateways/{id}', function (Request $request, Response $res
             core_trunks_del($row['trunk']);
             core_trunks_delete_dialrules($row['trunk']);
             core_routing_trunk_delbyid($row['trunk']);
-            needreload();
+            fwconsole('r');
         }
         $sql = "DELETE IGNORE FROM `gateway_config` WHERE `id` = ?";
         $sth = FreePBX::Database()->prepare($sql);

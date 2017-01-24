@@ -1,6 +1,7 @@
 <?php
 
 require_once(__DIR__. '/../../admin/modules/endpointman/includes/functions.inc');
+require_once(__DIR__. '/../lib/freepbxFwConsole.php');
 
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
@@ -134,6 +135,7 @@ $app->post('/physicalextensions', function (Request $request, Response $response
           }
 
           needreload();
+          fwconsole('r');
           return $response->withJson(array('extension'=>$created_extension), 200);
       } else {
           throw new Exception();
@@ -166,7 +168,8 @@ $app->delete('/physicalextensions/{extension}', function (Request $request, Resp
             unset($existingdevices_array[$extension]);
             $existingdevices = implode('&',$existingdevices_array);
             $astman->database_put("AMPUSER",$mainextension."/device",$existingdevices);
-        }
+	}
+
         // Remove endpoint from endpointman
         $endpoint = new endpointmanager();
         $mac_id = $endpoint->retrieve_device_by_ext($extension);
@@ -174,7 +177,7 @@ $app->delete('/physicalextensions/{extension}', function (Request $request, Resp
           $endpoint->delete_device($mac_id);
         }
 
-        needreload();
+        fwconsole('r');
         return $response->withStatus(200);
     } catch (Exception $e) {
         error_log($e->getMessage());

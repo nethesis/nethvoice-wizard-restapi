@@ -1,5 +1,7 @@
 <?php
 
+require_once(__DIR__. '/../lib/freepbxFwConsole.php');
+
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
@@ -64,7 +66,8 @@ $app->post('/voicemails', function (Request $request, Response $response, $args)
             FreePBX::create()->Voicemail->delMailbox($extension['extension']);
         }
 
-        needreload();
+        fwconsole('r');
+
         return $response->withJson(array('status' => true), 200);
     } catch (Exception $e) {
         error_log($e->getMessage());

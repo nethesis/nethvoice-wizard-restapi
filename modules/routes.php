@@ -4,6 +4,7 @@ use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
 require_once(__DIR__. '/../../admin/modules/core/functions.inc.php');
+require_once(__DIR__. '/../lib/freepbxFwConsole.php');
 
 /**
  * @api {get} /inboundroutes/count  Retrieve inbound routes (incoming) count
@@ -48,7 +49,7 @@ $app->post('/inboundroutes', function (Request $request, Response $response, $ar
       return $response->withJson('An error occurred', 500);
     }
 
-    needreload();
+    fwconsole('r');
     return $response->withStatus(200);
 });
 
@@ -74,7 +75,7 @@ $app->delete('/inboundroutes/{id}', function (Request $request, Response $respon
     return $response->withJson('An error occurred', 500);
   }
 
-  needreload();
+  fwconsole('r');
   return $response;
 });
 
@@ -227,7 +228,7 @@ $app->get('/outboundroutes/count', function (Request $request, Response $respons
                 );
             }
         }
-        needreload();
+        fwconsole('r');
         return $response->withStatus(200);
     } catch (Exception $e) {
       error_log($e->getMessage());
@@ -251,7 +252,7 @@ $app->get('/outboundroutes/count', function (Request $request, Response $respons
      return $response->withJson('An error occurred', 500);
    }
 
-   needreload();
+   fwconsole('r');
    return $response;
  });
 
