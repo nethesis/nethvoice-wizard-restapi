@@ -5,7 +5,7 @@ use \Psr\Http\Message\ResponseInterface as Response;
 require_once(__DIR__. '/../lib/SystemTasks.php');
 require_once(__DIR__. '/../lib/modelRetrieve.php');
 require_once(__DIR__. '/../../admin/modules/core/functions.inc.php');
-require_once(__DIR__. '/../lib/gateway/functions.inc.php');
+include_once(__DIR__. '/../lib/gateway/functions.inc.php');
 require_once(__DIR__. '/../../admin/modules/endpointman/includes/functions.inc');
 
 
@@ -493,3 +493,51 @@ $app->post('/devices/phones/provision', function (Request $request, Response $re
     }
 });
 
+/*
+* Reboot phone (using FreePBX endpointman https://github.com/FreePBX-ContributedModules/endpointman)
+*/
+$app->post('/devices/phones/reboot', function (Request $request, Response $response, $args) {
+    try {
+        $body = $request->getParsedBody();
+
+        $mac = $body['mac'];
+        $phoneIp = $body['ip'];
+        $endpoint = new endpointmanager();
+
+        $mac_id = $endpoint->retrieve_device_by_mac($mac);
+        if ($mac_id) {
+          $phone_info = $endpoint->get_phone_info($mac_id);
+
+          // define('PROVISIONER_BASE', PHONE_MODULES_PATH);
+          if (file_exists(PHONE_MODULES_PATH . 'autoload.php')) {
+              if (!class_exists('ProvisionerConfig')) {
+                  require(PHONE_MODULES_PATH . 'autoload.php');
+              }
+
+            //Load Provisioner
+            $class = "endpoint_" . $phone_info['directory'] . "_" . $phone_info['cfg_dir'] . '_phone';
+            $base_class = "endpoint_" . $phone_info['directory'] . '_base';
+            $master_class = "endpoint_base";
+            if (!class_exists($master_class)) {
+                ProvisionerConfig::endpointsAutoload($master_class);
+            }
+            if (!class_exists($base_class)) {
+                ProvisionerConfig::endpointsAutoload($base_class);
+            }
+            if (!class_exists($class)) {
+                ProvisionerConfig::endpointsAutoload($class);
+            }
+
+            if (class_exists($class)) {
+                $provisioner_lib = new $class();
+                $provisioner_lib->reboot($phoneIp);
+            }
+          }
+        }
+
+        return $response->withStatus(200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withJson(array('message' => $e->getMessage()), 500);
+    }
+});
