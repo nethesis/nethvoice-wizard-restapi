@@ -416,7 +416,6 @@ $app->post('/devices/phones/provision', function (Request $request, Response $re
         $body = $request->getParsedBody();
 
         $mac = $body['mac'];
-        $brand = $body['brand'];
         $model = $body['model'];
         $ext = $body['ext'];
 
