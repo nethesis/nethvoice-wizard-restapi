@@ -447,6 +447,9 @@ $app->post('/devices/phones/provision', function (Request $request, Response $re
           if ($mac_id) {
             $phone_info = $endpoint->get_phone_info($mac_id);
             $res = $endpoint->prepare_configs($phone_info, FALSE);
+
+            // Copy provisioning file to correct destination
+            system('/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/moveProvisionFiles.php');
           }
         } else {
           throw new Exception('model not found');
