@@ -447,43 +447,19 @@ $app->post('/devices/phones/provision', function (Request $request, Response $re
         $body = $request->getParsedBody();
 
         $mac = $body['mac'];
-        $model = $body['model'];
-        $ext = $body['ext'];
 
         $endpoint = new endpointmanager();
 
-        $endpoint->delete_device_by_mac(str_replace(':', '', $mac));
+        $mac_id = $endpoint->retrieve_device_by_mac($mac);
 
-        // Get model id by mac
-        $brand = $endpoint->get_brand_from_mac($mac);
-        $models = $endpoint->models_available(null, $brand['id']);
+        if ($mac_id) {
+          $phone_info = $endpoint->get_phone_info($mac_id);
+          $res = $endpoint->prepare_configs($phone_info, FALSE);
 
-        $model_id = null;
-        foreach ($models as $m) {
-          if ($m['text'] === $model) {
-            $model_id = $m['value'];
-            break;
-          }
-        }
-
-        // add device to endpointman module
-        if ($model_id) {
-          // function add_device($mac, $model, $ext, $template=NULL, $line=NULL, $displayname=NULL)
-          $mac_id = $endpoint->add_device(
-            $mac,
-            $model_id,
-            $ext
-          );
-
-          if ($mac_id) {
-            $phone_info = $endpoint->get_phone_info($mac_id);
-            $res = $endpoint->prepare_configs($phone_info, FALSE);
-
-            // Copy provisioning file to correct destination
-            system('/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/moveProvisionFiles.php');
-          }
+          // Copy provisioning file to correct destination
+          system('/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/moveProvisionFiles.php');
         } else {
-          throw new Exception('model not found');
+          throw new Exception('device not found');
         }
 
         return $response->withStatus(200);
@@ -502,6 +478,7 @@ $app->post('/devices/phones/reboot', function (Request $request, Response $respo
 
         $mac = $body['mac'];
         $phoneIp = $body['ip'];
+
         $endpoint = new endpointmanager();
 
         $mac_id = $endpoint->retrieve_device_by_mac($mac);
@@ -533,6 +510,8 @@ $app->post('/devices/phones/reboot', function (Request $request, Response $respo
                 $provisioner_lib->reboot($phoneIp);
             }
           }
+        } else {
+          throw new Exception('device not found');
         }
 
         return $response->withStatus(200);
