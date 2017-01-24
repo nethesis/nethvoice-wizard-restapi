@@ -3,6 +3,7 @@ use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
 require_once(__DIR__. '/../lib/SystemTasks.php');
+require_once(__DIR__. '/../lib/modelRetrieve.php');
 require_once(__DIR__. '/../../admin/modules/core/functions.inc.php');
 include_once(__DIR__. '/../lib/gateway/functions.inc.php');
 
@@ -33,9 +34,35 @@ $app->get('/devices/phones/list/{id}', function (Request $request, Response $res
            return $response->withJson(array("status"=>"Scan for network $id doesn't exist!"),404);
         }
 
+        // dhcp names
+        exec('/bin/sudo /usr/libexec/nethserver/read-dhcp-leases', $out, $ret);
+        $dhcp_map = array();
+        if ($ret==0) {
+            $dhcp_arr = json_decode($out[0], true);
+            foreach($dhcp_arr as $key => $value) {
+                $dhcp_map[$value['mac']] = $value['name'];
+            }
+        }
+
         $phones = json_decode(file_get_contents($filename), true);
+
         foreach ($phones as $key => $value) {
-            $phones[$key]['model'] = sql('SELECT model FROM `rest_devices_phones` WHERE mac = "' . $phones[$key]['mac'] . '"', "getOne");
+            // get model from db
+            $model = sql('SELECT model FROM `rest_devices_phones` WHERE mac = "' . $phones[$key]['mac'] . '"', "getOne");
+            if($model) {
+                $phones[$key]['model'] = $model;
+            } else { // read from other sources
+                $modelNew = retrieveModel($phones[$key]['manufacturer'], $dhcp_map[strtolower($phones[$key]['mac'])], $phones[$key]['ipv4']);
+                $phones[$key]['model'] = $modelNew;
+                if($modelNew) {
+                    $dbh = FreePBX::Database();
+                    $sql = 'REPLACE INTO `rest_devices_phones` (`mac`,`vendor`, `model`) VALUES (?,?,?)';
+                    $stmt = $dbh->prepare($sql);
+                    if (!$res = $stmt->execute(array($phones[$key]['mac'],$phones[$key]['manufacturer'],$modelNew))) {
+                        return $response->withStatus(500);
+                    }
+                }
+            }
         }
         return $response->withJson($phones,200);
     } catch(Exception $e) {
@@ -164,13 +191,17 @@ $app->get('/devices/gateways/list', function (Request $request, Response $respon
 });
 
 $app->get('/devices/phones/manufacturers', function (Request $request, Response $response, $args) {
-   $file='/var/www/html/freepbx/rest/lib/phoneModelMap.json';
-   if (file_exists($file)){
-       $map=file_get_contents($file);
-       return $response->write($map,200);
-   } else {
-       return $response->withJson(array(),200);
-   }
+    $dbh = FreePBX::Database();
+    $sql = "select bl.name,ml.model from endpointman_brand_list bl join endpointman_model_list ml on bl.id=ml.brand";
+    $models = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC);
+    $res=array();
+    foreach ($models as $model){
+        if (!array_key_exists($model['name'], $res)) {
+            $res[$model['name']] = array();
+        }
+        array_push($res[$model['name']], $model['model']);
+    }
+    return $response->withJson($res,200);
 });
 
 $app->get('/devices/gateways/manufacturers', function (Request $request, Response $response, $args) {
