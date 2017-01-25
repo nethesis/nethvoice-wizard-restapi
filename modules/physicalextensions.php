@@ -128,13 +128,12 @@ $app->post('/physicalextensions', function (Request $request, Response $response
             $mac_id = $endpoint->add_device(
               $mac,
               $model_id,
-              $ext
+              $created_extension
             );
           } else {
             throw new Exception('model not found');
           }
 
-          needreload();
           fwconsole('r');
           return $response->withJson(array('extension'=>$created_extension), 200);
       } else {
