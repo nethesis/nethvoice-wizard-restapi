@@ -44,8 +44,8 @@ $app->post('/physicalextensions', function (Request $request, Response $response
       $mainextensions = $fpbx->Core->getAllUsers();
       foreach ($mainextensions as $ve) {
           if ($ve['extension'] == $mainextensionnumber){
-  	    $mainextension = $ve;
-              break;
+  	        $mainextension = $ve;
+            break;
           }
       }
       //error if main extension number doesn't exist

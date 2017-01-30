@@ -38,7 +38,7 @@ function gateway_get_configuration($name){
         while ($row = $sth->fetch(\PDO::FETCH_ASSOC)){
             $config['trunks_fxo'][] = $row;
         }
-        $sql = "SELECT `extension`,`secret` FROM `gateway_config_fxs` WHERE `config_id` = ?";
+        $sql = "SELECT `physical_extension`,`secret` FROM `gateway_config_fxs` WHERE `config_id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($config['id']));
         while ($config['trunks_fxs'][] = $sth->fetch(\PDO::FETCH_ASSOC)){
@@ -132,7 +132,7 @@ function gateway_generate_configuration_file($name){
         if (!empty($config['trunks_fxs'])){
             $i=0;
             foreach ($config['trunks_fxs'] as $trunk){
-                $output = str_replace("FXSEXTENSION$i",$trunk['extension'],$output);
+                $output = str_replace("FXSEXTENSION$i",$trunk['physical_extension'],$output);
                 $output = str_replace("FXSPASS$i",$trunk['secret'],$output);
                 $i++;
             }

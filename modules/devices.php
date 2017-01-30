@@ -107,6 +107,7 @@ $app->get('/devices/gateways/list/{id}', function (Request $request, Response $r
             // Add trunks info
             $trunksMeta = array(
               'fxo' => array('`gateway_config_fxo`.trunk AS linked_trunk', '`gateway_config_fxo`.number'),
+              'fxs' => array('`gateway_config_fxs`.extension AS linked_extension'),
               'pri' => array('`gateway_config_pri`.trunk AS linked_trunk'),
               'isdn' => array('`gateway_config_isdn`.trunk AS name', '`gateway_config_isdn`.protocol AS type'),
             );
@@ -291,7 +292,8 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
         $trunksByTypes = array(
           'isdn' => $params['trunks_isdn'],
           'pri' => $params['trunks_pri'],
-          'fxo' => $params['trunks_fxo']
+          'fxo' => $params['trunks_fxo'],
+          'fxs' => $params['trunks_fxs']
         );
 
         foreach ($trunksByTypes as $type=>$trunks) {
@@ -344,10 +346,69 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
                 $sth->execute(array($configId,$trunkId,$secret));
             }
             else if ($type === 'fxo' && isset($params['trunks_fxo'])){
-                /*Save fxo trunks parameters*/return $response->withJson(array('id'=>$configId), 200);
+                /*Save fxo trunks parameters*/
                 $sql = "REPLACE INTO `gateway_config_fxo` (`config_id`,`trunk`,`number`,`secret`) VALUES (?,?,?,?)";
                 $sth = FreePBX::Database()->prepare($sql);
                 $sth->execute(array($configId,$trunkId,$trunk['number'],$secret));
+            }
+            else if ($type === 'fxs' && isset($params['trunks_fxs'])){
+                /* create physical extension */
+                //get associated main extension
+                $mainextensions = $fpbx->Core->getAllUsers();
+                $mainextensionnumber = $trunk['linked_extension'];
+                foreach ($mainextensions as $ve) {
+                    if ($ve['extension'] == $mainextensionnumber){
+                        $mainextension = $ve;
+                        break;
+                    }
+                }
+                //error if main extension number doesn't exist
+                if (!isset($mainextension)){
+                    return $response->withJson(array("status"=>"Main extension ".$mainextensionnumber." doesn't exist"),400);
+                }
+
+                if (isset($params['extension'])){
+                    //use given extension number
+                    if (!preg_match('/9[1-7]'.$mainextensionnumber.'/', $params['extension'])){
+                        return $response->withJson(array("status"=>"Wrong physical extension number supplied"),400);
+                    } else {
+                        $extension = $params['extension'];
+                    }
+                } else {
+                    //get first free physical extension number for this main extension
+                    $extensions = $fpbx->Core->getAllUsersByDeviceType();
+                    for ($i=91; $i<=97; $i++){
+                        if (!extensionExists($i.$mainextensionnumber,$extensions)){
+                            $extension = $i.$mainextensionnumber;
+                            break;
+                        }
+                    }
+                    //error if there aren't available extension numbers
+                    if (!isset($extension)){
+                        return $response->withJson(array("status"=>"There aren't available extension numbers"),500);
+                    }
+                }
+
+                //delete extension
+                $fpbx->Core->delDevice($extension,true);
+                $fpbx->Core->delUser($extension,true);
+
+                //create physical extension
+                $data['name'] = $mainextension['name'];
+                $mainextdata = $fpbx->Core->getUser($mainextension['extension']);
+                $data['outboundcid'] = $mainextdata['outboundcid'];
+                $res = $fpbx->Core->processQuickCreate('pjsip',$extension,$data);
+                if (!$res['status']) {
+                    return $response->withJson(array('message'=>$res['message']),500);
+                }
+
+                $created_extension = $res['ext'];
+                $created_extension_secret = sql('SELECT data FROM `sip` WHERE id = "' . $created_extension . '" AND keyword="secret"', "getOne");
+
+                /*Save fxs trunks parameters*/
+                $sql = "REPLACE INTO `gateway_config_fxs` (`config_id`,`extension`,`physical_extension`,`secret`) VALUES (?,?,?,?)";
+                $sth = FreePBX::Database()->prepare($sql);
+                $sth->execute(array($configId,$trunk['linked_extension'],$created_extension,$created_extension_secret));
             }
           }
         }
@@ -393,18 +454,21 @@ $app->delete('/devices/gateways/{id}', function (Request $request, Response $res
         $route = $request->getAttribute('route');
         $id = $route->getArgument('id');
         $sql = "SELECT `name` FROM `gateway_config` WHERE `id` = ?";
+        $fpbx = FreePBX::create();
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($id));
         $res = $sth->fetch(\PDO::FETCH_ASSOC);
         system("/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/tftpDeleteConfig.php ".escapeshellarg($res['name']),$ret);
         //get all trunks for this gateway
-        $sql = "SELECT `trunk` FROM `gateway_config_fxo` WHERE `config_id` = ? UNION SELECT `trunk` FROM `gateway_config_isdn` WHERE `config_id` = ? UNION SELECT `trunk` FROM `gateway_config_pri` WHERE `config_id` = ?";
+        $sql = "SELECT `trunk` FROM `gateway_config_fxo` WHERE `config_id` = ? UNION SELECT `physical_extension` FROM `gateway_config_fxs` WHERE `config_id` = ? UNION SELECT `trunk` FROM `gateway_config_isdn` WHERE `config_id` = ? UNION SELECT `trunk` FROM `gateway_config_pri` WHERE `config_id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
-        $sth->execute(array($id,$id,$id));
+        $sth->execute(array($id,$id,$id,$id));
         while ($row = $sth->fetch(\PDO::FETCH_ASSOC)){
             core_trunks_del($row['trunk']);
             core_trunks_delete_dialrules($row['trunk']);
             core_routing_trunk_delbyid($row['trunk']);
+            $fpbx->Core->delDevice($row['trunk'],true);
+            $fpbx->Core->delUser($row['trunk'],true);
             fwconsole('r');
         }
         $sql = "DELETE IGNORE FROM `gateway_config` WHERE `id` = ?";

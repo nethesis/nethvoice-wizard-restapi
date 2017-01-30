@@ -57,9 +57,12 @@ $app->get('/users/count', function (Request $request, Response $response, $args)
 
 # List all users
 
-$app->get('/users', function (Request $request, Response $response, $args) {
+$app->get('/users/{all}', function (Request $request, Response $response, $args) {
+    $all = $request->getAttribute('all');
     $blacklist = ['admin', 'administrator', 'guest', 'krbtgt'];
-    sync(); // force FreePBX user sync
+    if($all == "true") {
+        sync(); // force FreePBX user sync
+    }
     $users = FreePBX::create()->Userman->getAllUsers();
     $dbh = FreePBX::Database();
     $i = 0;
@@ -67,8 +70,12 @@ $app->get('/users', function (Request $request, Response $response, $args) {
         if (in_array(strtolower($users[$i]['username']), $blacklist)) {
             unset($users[$i]);
         } else {
-            $users[$i]['password'] = getPassword(getUser($users[$i]['username']));
-            $users[$i]['devices'] = $dbh->sql('SELECT * FROM `rest_devices_phones` WHERE mainextension = "' . $users[$i]['default_extension'] . '"',"getAll",\PDO::FETCH_ASSOC);
+            if($all == "false" && $users[$i]['default_extension'] == 'none') {
+                unset($users[$i]);
+            } else {
+                $users[$i]['password'] = getPassword(getUser($users[$i]['username']));
+                $users[$i]['devices'] = $dbh->sql('SELECT * FROM `rest_devices_phones` WHERE mainextension = "' . $users[$i]['default_extension'] . '"',"getAll",\PDO::FETCH_ASSOC);
+            }
         }
         $i++;
     }
@@ -78,7 +85,7 @@ $app->get('/users', function (Request $request, Response $response, $args) {
 
 # Return the selected user
 
-$app->get('/users/{username}', function (Request $request, Response $response, $args) {
+/*$app->get('/users/{username}', function (Request $request, Response $response, $args) {
     $username = $request->getAttribute('username');
     if (userExists($username)) {
         $users = FreePBX::create()->Userman->getAllUsers();
@@ -90,7 +97,7 @@ $app->get('/users/{username}', function (Request $request, Response $response, $
         }
     }
     return $response->withStatus(404);
-});
+});*/
 
 
 # Create or edit a system user inside OpenLDAP
