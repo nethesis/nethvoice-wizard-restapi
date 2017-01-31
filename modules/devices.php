@@ -24,6 +24,18 @@ $app->post('/devices/scan', function (Request $request, Response $response, $arg
     return $response->withJson(['result' => $taskId], 200);
 });
 
+$app->get('/devices/{mac}/brand', function (Request $request, Response $response, $args) {
+    try {
+        $route = $request->getAttribute('route');
+        $mac = $route->getArgument('mac');
+        $brand = json_decode(file_get_contents(__DIR__. '/../lib/macAddressMap.json'), true);
+        return $response->withJson($brand[$mac],200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
 $app->get('/devices/phones/list/{id}', function (Request $request, Response $response, $args) {
     try {
         $route = $request->getAttribute('route');
