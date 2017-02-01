@@ -148,13 +148,16 @@ $app->get('/devices/phones/list', function (Request $request, Response $response
                     $phones = json_decode(file_get_contents($basedir."/".$file),true);
                     foreach ($phones as $key => $value) {
                         $sql = 'SELECT model,mainextension,extension,line FROM `rest_devices_phones` WHERE mac = "' . $phones[$key]['mac'] . '"';
-                        $obj = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC)[0];
-                        $phones[$key]['model'] = $obj['model'];
-                        $phones[$key]['mainextension'] = $obj['mainextension'];
-                        $phones[$key]['extension'] = $obj['extension'];
-                        $phones[$key]['line'] = $obj['line'];
-                        if($phones[$key]['model']) {
-                            $res[]=$phones[$key];
+                        $objs = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC);
+                        foreach ($objs as $obj){
+                            error_log(print_r($obj,true));
+                            $phones[$key]['model'] = $obj['model'];
+                            $phones[$key]['mainextension'] = $obj['mainextension'];
+                            $phones[$key]['extension'] = $obj['extension'];
+                            $phones[$key]['line'] = $obj['line'];
+                            if($phones[$key]['model']) {
+                                $res[]=$phones[$key];
+                            }
                         }
                     }
                 }
