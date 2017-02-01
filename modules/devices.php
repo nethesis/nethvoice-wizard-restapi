@@ -150,7 +150,6 @@ $app->get('/devices/phones/list', function (Request $request, Response $response
                         $sql = 'SELECT model,mainextension,extension,line FROM `rest_devices_phones` WHERE mac = "' . $phones[$key]['mac'] . '"';
                         $objs = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC);
                         foreach ($objs as $obj){
-                            error_log(print_r($obj,true));
                             $phones[$key]['model'] = $obj['model'];
                             $phones[$key]['mainextension'] = $obj['mainextension'];
                             $phones[$key]['extension'] = $obj['extension'];
@@ -229,7 +228,8 @@ $app->post('/devices/phones/model', function (Request $request, Response $respon
         $model = $params['model'];
 
         $dbh = FreePBX::Database();
-        $sql = 'REPLACE INTO `rest_devices_phones` (`mac`,`vendor`, `model`) VALUES (?,?,?)';
+        $dbh->query('DELETE IGNORE FROM `rest_devices_phones` WHERE `mac` = "'.$mac.'"');
+        $sql = 'INSERT INTO `rest_devices_phones` (`mac`,`vendor`, `model`) VALUES (?,?,?)';
         $stmt = $dbh->prepare($sql);
         if ($res = $stmt->execute(array($mac,$vendor,$model))) {
             return $response->withStatus(200);
