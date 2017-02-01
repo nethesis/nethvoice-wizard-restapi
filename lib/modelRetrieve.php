@@ -22,6 +22,10 @@ function retrieveModel($manufacturer, $name, $ip) {
         break;
 
         case 'Snom':
+            if (strpos($name,'IPDECT')!==false){
+                /*MXXX*/
+                return doNastyCurl($ip,'SnomMXXX');
+            }
             $model = substr(explode("-", $name)[0],4);
             if($model) {
                 return $model;
@@ -43,6 +47,18 @@ function retrieveModel($manufacturer, $name, $ip) {
 
 function doNastyCurl($ip_address,$manufacturer) {
     switch ($manufacturer) {
+        case "SnomMXXX":
+            $url='http://'.$ip_address.'/main.html';
+            $username="admin";
+            $password="admin";
+            $cmd = 'curl -s -u "'.$username.'":"'.$password.'" '.$url;
+            exec($cmd, $output);
+            $output= implode ($output);
+            $matches=array();
+            $regexp='/.*<title>(M[3,7]00)<\/title>.*/';
+            preg_match ($regexp,$output,$matches);
+            if (isset($matches[1])) return $matches[1];
+        break;
         case "Snom":
             $url='http://'.$ip_address.'/info.htm';
             $username="admin";
