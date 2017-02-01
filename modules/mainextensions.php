@@ -91,7 +91,7 @@ $app->delete('/mainextensions/{extension}', function (Request $request, Response
         foreach ($ext_to_del as $extension){
             $fpbx->Core->delUser($extension);
             $fpbx->Core->delDevice($extension);
-            $sql = 'UPDATE `rest_devices_phones` SET `mainextension`= "", `extension`= "", `secret`= "" WHERE `extension`= ?';
+            $sql = 'UPDATE `rest_devices_phones` SET `mainextension`= NULL, `extension`= NULL, `secret`= NULL WHERE `extension`= ?';
             $stmt = $dbh->prepare($sql);
             $stmt->execute(array($extension));
         }

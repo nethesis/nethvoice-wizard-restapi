@@ -38,6 +38,7 @@ $app->post('/physicalextensions', function (Request $request, Response $response
       $mainextensionnumber = $params['mainextension'];
       $mac = $params['mac'];
       $model = $params['model'];
+      $line = $params['line'];
       $fpbx = FreePBX::create();
 
       //get associated main extension
@@ -105,7 +106,11 @@ $app->post('/physicalextensions', function (Request $request, Response $response
       $created_extension = $res['ext'];
       $created_extension_secret = sql('SELECT data FROM `sip` WHERE id = "' . $created_extension . '" AND keyword="secret"', "getOne");
       $dbh = FreePBX::Database();
-      $sql = 'UPDATE `rest_devices_phones` SET `mainextension`= ?, `extension`= ?, `secret`= ? WHERE mac = "'.$mac.'"';
+      if (isset($line) && $line) {
+          $sql = 'UPDATE `rest_devices_phones` SET `mainextension`= ?, `extension`= ?, `secret`= ? WHERE mac = "'.$mac.'" AND `line` = '.$line;
+      } else {
+          $sql = 'UPDATE `rest_devices_phones` SET `mainextension`= ?, `extension`= ?, `secret`= ? WHERE mac = "'.$mac.'"';
+      }
       $stmt = $dbh->prepare($sql);
       if ($res = $stmt->execute(array($mainextensionnumber,$created_extension,$created_extension_secret))) {
           // Add extension to endpointman
@@ -123,15 +128,17 @@ $app->post('/physicalextensions', function (Request $request, Response $response
             }
           }
 
-          // add device to endpointman module
-          if ($model_id) {
-            $mac_id = $endpoint->add_device(
-              $mac,
-              $model_id,
-              $created_extension
-            );
+          if (!$model_id){
+              throw new Exception('model not found');
           } else {
-            throw new Exception('model not found');
+              $mac_id = $dbh->sql('SELECT id FROM endpointman_mac_list WHERE mac = "'.preg_replace('/:/','',$mac).'"',"getOne");
+              if ($mac_id){
+                  // add line if device already exist
+                  $endpoint->add_line($mac_id, $line, $created_extension, $mainextension['name']);
+              } else {
+                  // add device to endpointman module
+                  $mac_id = $endpoint->add_device($mac, $model_id, $created_extension, null, $line, $mainextension['name']);
+              }
           }
 
           fwconsole('r');
@@ -152,6 +159,11 @@ $app->delete('/physicalextensions/{extension}', function (Request $request, Resp
         $extension = $route->getArgument('extension');
         $mainextensions = substr($extension,2);
         $dbh = FreePBX::Database();
+
+        //Get device lines
+        $mac = $dbh->sql('SELECT `mac` FROM `rest_devices_phones` WHERE `extension` = "'.$extension.'"',"getOne");
+        $usedlinecount = $dbh->sql('SELECT COUNT(*) FROM `rest_devices_phones` WHERE `mac` = "'.$mac.'" AND `extension` != "" AND `extension`',"getOne");
+
         // clean extension
         $fpbx = FreePBX::create();
         $fpbx->Core->delUser($extension);
@@ -169,11 +181,18 @@ $app->delete('/physicalextensions/{extension}', function (Request $request, Resp
             $astman->database_put("AMPUSER",$mainextension."/device",$existingdevices);
 	}
 
+
         // Remove endpoint from endpointman
         $endpoint = new endpointmanager();
-        $mac_id = $endpoint->retrieve_device_by_ext($extension);
-        if ($mac_id) {
-          $endpoint->delete_device($mac_id);
+        $mac_id = $dbh->sql('SELECT id FROM endpointman_mac_list WHERE mac = "'.preg_replace('/:/','',$mac).'"',"getOne");
+        $luid = $dbh->sql('SELECT luid FROM endpointman_line_list WHERE mac_id = "'.$mac_id.'" AND ext = "'.$extension.'"',"getOne");
+
+        if ($usedlinecount > 1){
+            //There are other configured lines for this device
+            $endpoint->delete_line($luid,FALSE);
+        } else {
+            //last line, also remove device
+            $endpoint->delete_line($luid,TRUE);
         }
 
         fwconsole('r');

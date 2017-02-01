@@ -4,8 +4,8 @@ CREATE TABLE IF NOT EXISTS `rest_devices_phones`(
   `mac` varchar(20),
   `vendor` varchar(64) DEFAULT NULL,
   `model` varchar(64) DEFAULT NULL,
+  `line` int DEFAULT NULL,
   `mainextension` varchar(16) DEFAULT NULL,
   `extension` varchar(16) DEFAULT NULL,
-  `secret` varchar(128) DEFAULT NULL,
-  UNIQUE `mac_key` (`mac`)
+  `secret` varchar(128) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
