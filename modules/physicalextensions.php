@@ -128,17 +128,21 @@ $app->post('/physicalextensions', function (Request $request, Response $response
             }
           }
 
-          // add device to endpointman module
-          if ($model_id) {
-            $mac_id = $endpoint->add_device(
-              $mac,
-              $model_id,
-              $created_extension
-            );
+          if (!$model_id){
+              throw new Exception('model not found');
           } else {
-            throw new Exception('model not found');
+              $mac_id = $dbh->sql('SELECT id FROM endpointman_mac_list WHERE mac = "'.preg_replace('/:/','',$mac).'"',"getOne");
+              if ($mac_id){
+                  // add line if device already exist
+                  error_log(print_r(array($mac_id, $line, $created_extension, $mainextension['name']),true));
+                  $endpoint->add_line($mac_id, $line, $created_extension, $mainextension['name']);
+              } else {
+                  error_log(print_r(array($mac, $model_id, $created_extension, null, $line, $mainextension['name']),true));
+                  // add device to endpointman module
+                  $mac_id = $endpoint->add_device($mac, $model_id, $created_extension, null, $line, $mainextension['name']);
+              }
           }
-
+          
           fwconsole('r');
           return $response->withJson(array('extension'=>$created_extension), 200);
       } else {
