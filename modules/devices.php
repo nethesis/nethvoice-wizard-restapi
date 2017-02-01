@@ -56,10 +56,7 @@ $app->get('/devices/phones/list/{id}', function (Request $request, Response $res
                 $modelNew = retrieveModel($phones[$key]['manufacturer'], $dhcp_map[strtolower($phones[$key]['mac'])], $phones[$key]['ipv4']);
                 $phones[$key]['model'] = $modelNew;
                 if($modelNew) {
-                    $dbh = FreePBX::Database();
-                    $sql = 'REPLACE INTO `rest_devices_phones` (`mac`,`vendor`, `model`) VALUES (?,?,?)';
-                    $stmt = $dbh->prepare($sql);
-                    if (!$res = $stmt->execute(array($phones[$key]['mac'],$phones[$key]['manufacturer'],$modelNew))) {
+                    if (!addPhone($phones[$key]['mac'],$phones[$key]['manufacturer'],$modelNew)){
                         return $response->withStatus(500);
                     }
                 }
@@ -150,11 +147,12 @@ $app->get('/devices/phones/list', function (Request $request, Response $response
                 if (file_exists($basedir."/".$file)){
                     $phones = json_decode(file_get_contents($basedir."/".$file),true);
                     foreach ($phones as $key => $value) {
-                        $sql = 'SELECT model,mainextension,extension FROM `rest_devices_phones` WHERE mac = "' . $phones[$key]['mac'] . '"';
+                        $sql = 'SELECT model,mainextension,extension,line FROM `rest_devices_phones` WHERE mac = "' . $phones[$key]['mac'] . '"';
                         $obj = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC)[0];
                         $phones[$key]['model'] = $obj['model'];
                         $phones[$key]['mainextension'] = $obj['mainextension'];
                         $phones[$key]['extension'] = $obj['extension'];
+                        $phones[$key]['line'] = $obj['line'];
                         if($phones[$key]['model']) {
                             $res[]=$phones[$key];
                         }

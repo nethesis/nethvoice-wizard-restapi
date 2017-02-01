@@ -1,5 +1,26 @@
 <?php
 
+function addPhone ($mac,$vendor,$model){
+    $lines = 0;
+    if ($vendor === 'Snom' && $model === 'M300') $lines = 30;
+    if ($vendor === 'Snom' && $model === 'M700') $lines = 40;
+    $dbh = FreePBX::Database();
+    $dbh->query('DELETE IGNORE FROM `rest_devices_phones` WHERE `mac` = "'.$mac.'"');
+    if ($lines === 0) {
+        $sql = 'INSERT INTO `rest_devices_phones` (`mac`,`vendor`, `model`) VALUES (?,?,?)';
+        $stmt = $dbh->prepare($sql);
+        return $stmt->execute(array($mac,$vendor,$model));
+    } else {
+        $ret = true;
+        for ($i=1; $i<=$lines; $i++){
+            $sql = 'INSERT INTO `rest_devices_phones` (`mac`,`vendor`, `model`,`line`) VALUES (?,?,?,?)';
+            $stmt = $dbh->prepare($sql);
+            if (!$stmt->execute(array($mac,$vendor,$model,$i))) $ret = false ;
+        }
+        return $ret;
+    }
+}
+
 function retrieveModel($manufacturer, $name, $ip) {
     switch($manufacturer) {
         case 'Cisco/Linksys':
