@@ -38,6 +38,7 @@ $app->post('/physicalextensions', function (Request $request, Response $response
       $mainextensionnumber = $params['mainextension'];
       $mac = $params['mac'];
       $model = $params['model'];
+      $line = $params['line'];
       $fpbx = FreePBX::create();
 
       //get associated main extension
@@ -105,7 +106,11 @@ $app->post('/physicalextensions', function (Request $request, Response $response
       $created_extension = $res['ext'];
       $created_extension_secret = sql('SELECT data FROM `sip` WHERE id = "' . $created_extension . '" AND keyword="secret"', "getOne");
       $dbh = FreePBX::Database();
-      $sql = 'UPDATE `rest_devices_phones` SET `mainextension`= ?, `extension`= ?, `secret`= ? WHERE mac = "'.$mac.'"';
+      if (isset($line) && $line) {
+          $sql = 'UPDATE `rest_devices_phones` SET `mainextension`= ?, `extension`= ?, `secret`= ? WHERE mac = "'.$mac.'" AND `line` = '.$line;
+      } else {
+          $sql = 'UPDATE `rest_devices_phones` SET `mainextension`= ?, `extension`= ?, `secret`= ? WHERE mac = "'.$mac.'"';
+      }
       $stmt = $dbh->prepare($sql);
       if ($res = $stmt->execute(array($mainextensionnumber,$created_extension,$created_extension_secret))) {
           // Add extension to endpointman
@@ -152,6 +157,10 @@ $app->delete('/physicalextensions/{extension}', function (Request $request, Resp
         $extension = $route->getArgument('extension');
         $mainextensions = substr($extension,2);
         $dbh = FreePBX::Database();
+
+        //Get device lines
+        $linecount = $dbh->sql('SELECT COUNT(*) FROM `rest_devices_phones` WHERE `mac` = (SELECT `mac` FROM `rest_devices_phones` WHERE `extension` = "'.$extension.'")',"getOne");
+
         // clean extension
         $fpbx = FreePBX::create();
         $fpbx->Core->delUser($extension);
