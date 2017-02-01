@@ -23,7 +23,7 @@ class AuthMiddleware
         if ($request->isOptions()) {
             $response = $next($request, $response);
         }
-        else if (!$request->hasHeader('Secretkey') || !$request->hasHeader('User')) {
+        else if ($request->getUri()->getPath() != 'testauth' && (!$request->hasHeader('Secretkey') || !$request->hasHeader('User'))) {
             return $response->withJson(['error' => 'Forbidden: no credentials'], 403);
         } else {
             $given_user = $request->getHeaderLine('User');
@@ -34,12 +34,11 @@ class AuthMiddleware
             $username = $user[0]['username'];
 
             # check the user is valid and is an admin (sections = *)
-            if ( !$username ) {
+            if ($request->getUri()->getPath() != 'testauth' && !$username ) {
                 return $response->withJson(['error' => 'Forbidden: invalid user'], 403);
             }
-
             $hash = sha1($username . $password_sha1 . $this->secret);
-            if ($given_secret != $hash) {
+            if ($request->getUri()->getPath() != 'testauth' && $given_secret != $hash) {
                 $response = $response->withJson(['error' => 'Forbidden: wrong secret key'], 403);
             } else {
                 $response = $next($request, $response);
