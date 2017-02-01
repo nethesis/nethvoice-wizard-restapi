@@ -159,7 +159,8 @@ $app->delete('/physicalextensions/{extension}', function (Request $request, Resp
         $dbh = FreePBX::Database();
 
         //Get device lines
-        $linecount = $dbh->sql('SELECT COUNT(*) FROM `rest_devices_phones` WHERE `mac` = (SELECT `mac` FROM `rest_devices_phones` WHERE `extension` = "'.$extension.'")',"getOne");
+        $mac = $dbh->sql('SELECT `mac` FROM `rest_devices_phones` WHERE `extension` = "'.$extension.'"',"getOne");
+        $usedlinecount = $dbh->sql('SELECT COUNT(*) FROM `rest_devices_phones` WHERE `mac` = "'.$mac.'" AND `extension` != "" AND `extension`',"getOne");
 
         // clean extension
         $fpbx = FreePBX::create();
@@ -178,11 +179,18 @@ $app->delete('/physicalextensions/{extension}', function (Request $request, Resp
             $astman->database_put("AMPUSER",$mainextension."/device",$existingdevices);
 	}
 
+
         // Remove endpoint from endpointman
         $endpoint = new endpointmanager();
-        $mac_id = $endpoint->retrieve_device_by_ext($extension);
-        if ($mac_id) {
-          $endpoint->delete_device($mac_id);
+        $mac_id = $dbh->sql('SELECT id FROM endpointman_mac_list WHERE mac = "'.preg_replace('/:/','',$mac).'"',"getOne");
+        $luid = $dbh->sql('SELECT luid FROM endpointman_line_list WHERE mac_id = "'.$mac_id.'" AND ext = "'.$extension.'"',"getOne");
+
+        if ($usedlinecount > 1){
+            //There are other configured lines for this device
+            $endpoint->delete_line($luid,FALSE);
+        } else {
+            //last line, also remove device
+            $endpoint->delete_line($luid,TRUE);
         }
 
         fwconsole('r');
