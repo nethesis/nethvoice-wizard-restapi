@@ -161,21 +161,24 @@ $app->get('/devices/phones/list', function (Request $request, Response $response
                     $phones = json_decode(file_get_contents($basedir."/".$file), true);
                     foreach ($phones as $key => $value) {
                         $sql = 'SELECT model,mainextension,extension,line FROM `rest_devices_phones` WHERE mac = "' . $phones[$key]['mac'] . '"';
-                        $objs = $dbh->sql($sql, "getAll", \PDO::FETCH_ASSOC);
-                        foreach ($objs as $obj) {
+                        $objs = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC);
+                        $phones[$key]['lines'] = array();
+                        foreach ($objs as $obj){
                             $phones[$key]['model'] = $obj['model'];
-                            $phones[$key]['mainextension'] = $obj['mainextension'];
-                            $phones[$key]['extension'] = $obj['extension'];
-                            $phones[$key]['line'] = $obj['line'];
-                            if ($phones[$key]['model']) {
-                                $res[]=$phones[$key];
-                            }
+                            $phones[$key]['lines'][] = (object)array(
+                                                        "extension"=>$obj['extension'],
+                                                        "mainextension"=>$obj['mainextension'],
+                                                        "line"=>$obj['line'],
+                                                        );
+                        }
+                        if($phones[$key]['model']) {
+                            $res[]=$phones[$key];
                         }
                     }
                 }
             }
         }
-        return $response->withJson(array_unique($res, SORT_REGULAR), 200);
+        return $response->withJson($res,200);
     } catch (Exception $e) {
         error_log($e->getMessage());
         return $response->withStatus(500);
