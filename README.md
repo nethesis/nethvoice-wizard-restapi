@@ -118,6 +118,12 @@ Retrieve all users
 GET /users
 ```
 
+Count all users
+
+```
+GET /users/count
+```
+
 Retrieve a specific user by username
 
 ```
