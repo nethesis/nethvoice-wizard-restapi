@@ -2,14 +2,16 @@
 
 function addPhone($mac, $vendor, $model)
 {
-    $lines = 0;
-    if ($vendor === 'Snom' && $model === 'M300') {
-        $lines = 30;
-    }
-    if ($vendor === 'Snom' && $model === 'M700') {
-        $lines = 40;
-    }
     $dbh = FreePBX::Database();
+    $multiline_phones = array(
+        array('Snom'=>'M300'),
+        array('Snom'=>'M700')
+    );
+    $lines = 0;
+    if (in_array(array($vendor => $model), $multiline_phones)){
+        $sql = 'SELECT max_lines from `endpointman_model_list` WHERE `model`="'.$model.'" AND `brand` = (SELECT `id` FROM `endpointman_brand_list` WHERE `name` = "'.$vendor.'")';
+        $lines = $dbh->sql($sql, 'getOne');
+    }
     $dbh->query('DELETE IGNORE FROM `rest_devices_phones` WHERE `mac` = "'.$mac.'"');
     if ($lines === 0) {
         $sql = 'INSERT INTO `rest_devices_phones` (`mac`,`vendor`, `model`) VALUES (?,?,?)';
