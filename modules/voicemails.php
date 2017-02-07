@@ -60,7 +60,10 @@ $app->post('/voicemails', function (Request $request, Response $response, $args)
             $data['email'] = $user['email'];
             $data['vm'] = 'yes';
             FreePBX::create()->Voicemail->processQuickCreate($tech, $extension['extension'], $data);
-            $sql = 'UPDATE `rest_user_passwords` SET `voicemail_password`="'.$data['vmpwd'].'" WHERE `username`="'.$user['username'].'"';
+            $sql = 'UPDATE rest_users'.
+              ' SET rest_users.voicemail_password = \''. $data['vmpwd']. '\''.
+              ' JOIN userman_users ON rest_users.user_id = userman_users.id'.
+              ' WHERE userman_users.username = \''. $user['username']. '\'';
             $db->query($sql);
         } else {
             FreePBX::create()->Voicemail->delMailbox($extension['extension']);

@@ -160,14 +160,18 @@ $app->get('/devices/phones/list', function (Request $request, Response $response
                 if (file_exists($basedir."/".$file)) {
                     $phones = json_decode(file_get_contents($basedir."/".$file), true);
                     foreach ($phones as $key => $value) {
-                        $sql = 'SELECT model,mainextension,extension,line FROM `rest_devices_phones` WHERE mac = "' . $phones[$key]['mac'] . '"';
+                        $sql = 'SELECT userman_users.default_extension'.
+                            ' , rest_devices_phones.model, rest_devices_phones.extension, rest_devices_phones.line'.
+                          ' FROM `rest_devices_phones`'.
+                          ' LEFT JOIN userman_users ON userman_users.id = rest_devices_phones.user_id'.
+                          ' WHERE mac = "' . $phones[$key]['mac'] . '"';
                         $objs = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC);
                         $phones[$key]['lines'] = array();
                         foreach ($objs as $obj){
                             $phones[$key]['model'] = $obj['model'];
                             $phones[$key]['lines'][] = (object)array(
                                                         "extension"=>$obj['extension'],
-                                                        "mainextension"=>$obj['mainextension'],
+                                                        "mainextension"=>$obj['default_extension'],
                                                         "line"=>$obj['line'],
                                                         );
                         }

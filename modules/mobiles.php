@@ -6,7 +6,9 @@ use \Psr\Http\Message\ResponseInterface as Response;
 $app->get('/mobiles', function (Request $request, Response $response, $args) {
     try {
         $dbh = FreePBX::Database();
-        $sql = 'SELECT * FROM rest_mobiles';
+        $sql = 'SELECT rest_users.mobile, userman_users.username'.
+          ' FROM rest_users'.
+          ' JOIN userman_users ON userman_users.id = rest_users.user_id';
         $mobiles = $dbh->sql($sql, 'getAll', \PDO::FETCH_ASSOC);
 
         return $response->withJson($mobiles, 200);
@@ -22,7 +24,10 @@ $app->get('/mobiles/{username}', function (Request $request, Response $response,
         $route = $request->getAttribute('route');
         $username = $route->getArgument('username');
         $dbh = FreePBX::Database();
-        $sql = "SELECT `mobile` FROM `rest_mobiles` WHERE username='$username'";
+        $sql = 'SELECT rest_users.mobile'.
+          ' FROM rest_users'.
+          ' JOIN userman_users ON userman_users.id = rest_users.user_id'.
+          ' WHERE userman_users.username = \''. $username. '\'';
         $mobile = $dbh->sql($sql, 'getOne', \PDO::FETCH_ASSOC);
         if ($mobile == false) {
             return $response->withStatus(404);
@@ -40,18 +45,21 @@ $app->post('/mobiles', function (Request $request, Response $response, $args) {
     try {
         $params = $request->getParsedBody();
         $dbh = FreePBX::Database();
-        $sql = 'REPLACE INTO `rest_mobiles` (`username`,`mobile`) VALUES (?,?)';
+        $sql = 'UPDATE rest_users'.
+          ' JOIN userman_users ON userman_users.id = rest_users.user_id'.
+          ' SET rest_users.mobile = ?'.
+          ' WHERE userman_users.username = ?';
         $stmt = $dbh->prepare($sql);
         $mobile = preg_replace('/^\+/', '00', $params['mobile']);
         $mobile = preg_replace('/[^0-9]/', '', $mobile);
-        if ($res = $stmt->execute(array($params['username'], $mobile))) {
-            return $response->withStatus(200);
-        } else {
-            return $response->withStatus(500);
+        $res = $stmt->execute(array($params['username'], $mobile));
+        if (!res || $stmt->affected_rows < 1) {
+            throw new Exception('db error');
         }
     } catch (Exception $e) {
         error_log($e->getMessage());
-
         return $response->withStatus(500);
     }
+
+    return $response->withStatus(200);
 });
