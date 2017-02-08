@@ -17,7 +17,7 @@ $app->get('/cti/profiles', function (Request $request, Response $response, $args
 
 
 /* GET /cti/profiles/{id} 
-Return: {id:1, name: admin, permissions: [{name: "foo", type: customer_card, value: false},{name: "bar", type: standard, value: true}]}
+Return: {id:1, name: admin, macro_permissions [ oppanel: {value: true, permissions [ {name: "foo", description: "descrizione...", value: false}
 */
 $app->get('/cti/profiles/{id}', function (Request $request, Response $response, $args) {
     try {
@@ -37,11 +37,16 @@ $app->get('/cti/profiles/{id}', function (Request $request, Response $response, 
 
 
 /* GET /cti/permissions 
-Return: [{id:1, name: NAME, type: TYPE}]
+Return: [{"cdr": {"permissions": [{"description": "descrizione...", "id": "2", "name": "sms", "value": true  },  { ...}]},{"phonebook": {"permissions": [{"description": "descrizione...", "id": "2", "name": "sms", "value": true  },  { ...}]}]
 */
 $app->get('/cti/permissions', function (Request $request, Response $response, $args) {
     try {
-	$dbh = FreePBX::Database();
+        include_once('lib/libCTI.php');
+       	$results = getCTIPermissions();
+        if (!$results) {
+            return $response->withStatus(500);
+        }
+        return $response->withJson($results,200);
     } catch (Exception $e) {
         error_log($e->getMessage());
         return $response->withStatus(500);
