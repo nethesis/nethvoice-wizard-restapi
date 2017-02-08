@@ -21,10 +21,14 @@ Return: {id:1, name: admin, permissions: [{name: "foo", type: customer_card, val
 */
 $app->get('/cti/profiles/{id}', function (Request $request, Response $response, $args) {
     try {
+        include_once('lib/libCTI.php');
         $route = $request->getAttribute('route');
         $id = $route->getArgument('id');
-	$dbh = FreePBX::Database();
-//return $response->withJson(
+        $results = getCTIPermissionProfiles($id);
+        if (!$results) {
+            return $response->withStatus(500);
+        }
+        return $response->withJson($results,200);
     } catch (Exception $e) {
         error_log($e->getMessage());
         return $response->withStatus(500);

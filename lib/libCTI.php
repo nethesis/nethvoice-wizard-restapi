@@ -60,7 +60,11 @@ function getCTIPermissionProfiles($profileId=false){
                 }
             }
         }
-        return array_values($results);
+        if (!$profileId) {
+            return array_values($results);
+        } else {
+            return $results[$profileId];
+        }
     } catch (Exception $e) {
         error_log($e->getMessage());
         return false;
