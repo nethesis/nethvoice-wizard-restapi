@@ -74,14 +74,14 @@ $app->post('/cti/profiles/{id}', function (Request $request, Response $response,
 });
 
 
-/* POST /cti/profiles {name: admin, permissions: [{name: "foo", type: customer_card, value: false} return id
-*/
+/* POST /cti/profiles {name: admin, permissions: [{name: "foo", type: customer_card, value: false} return id */
 $app->post('/cti/profiles', function (Request $request, Response $response, $args) {
     try {
         include_once('lib/libCTI.php');
         $profile = $request->getParsedBody();
-        if (postCTIProfile($profile)) {
-            return $response->withJson(array('status' => true), 200);
+        $id = postCTIProfile($profile);
+        if ($id) {
+            return $response->withJson(array('id' => $id ), 200);
         } else {
             throw new Exception('Error creating new profile');
         }
@@ -90,3 +90,22 @@ $app->post('/cti/profiles', function (Request $request, Response $response, $arg
         return $response->withStatus(500);
     }
 });
+
+/* POST /cti/profiles/users/{user_id} => {profile_id: <profile_id>} */
+$app->post('/cti/profiles/users/{user_id}', function (Request $request, Response $response, $args) {
+    try {
+        $dbh = FreePBX::Database();
+        $route = $request->getAttribute('route');
+        $user_id = $route->getArgument('user_id');
+        $data = $request->getParsedBody();
+        $profile_id = $data['profile_id'];
+        $sql = 'UPDATE IGNORE `rest_users` SET `profile_id` = ? WHERE `id` = ?';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array($profile_id,$id));
+        return $response->withJson(array('status' => true), 200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+

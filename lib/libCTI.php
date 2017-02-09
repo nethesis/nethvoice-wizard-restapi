@@ -167,7 +167,7 @@ function postCTIProfile($profile, $id=false){
         if (!$id){
             //Creating a new profile
             $sql = 'INSERT INTO `rest_cti_profiles` VALUES (NULL, ?)';
-            $sth = FreePBX::Database()->prepare($sql);
+            $sth = $dbh->prepare($sql);
             $sth->execute(array($profile['name']));
 
             //Get id
@@ -177,7 +177,7 @@ function postCTIProfile($profile, $id=false){
             //editing an existing profile
             //set name
             $sql = 'UPDATE `rest_cti_profiles` SET `name` = ? WHERE `id` = ?';
-            $sth = FreePBX::Database()->prepare($sql);
+            $sth = $dbh->prepare($sql);
             $sth->execute(array($profile['name'], $id));
         }
 
@@ -185,7 +185,7 @@ function postCTIProfile($profile, $id=false){
         foreach (getAllAvailableMacroPermissions() as $macro_permission) {
             if (!$profile['macro_permissions'][$macro_permission['name']]['value']) {
                 $sql = 'DELETE IGNORE FROM `rest_cti_profiles_macro_permissions` WHERE `profile_id` = ? AND `macro_permission_id` = ?';
-                $sth = FreePBX::Database()->prepare($sql);
+                $sth = $dbh->prepare($sql);
                 $sth->execute(array($id, $macro_permission['id']));
             } else {
                 $sql = 'INSERT IGNORE INTO `rest_cti_profiles_macro_permissions` VALUES (?, ?)';
