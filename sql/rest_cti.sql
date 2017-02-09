@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS `rest_cti_profiles`(
 CREATE TABLE IF NOT EXISTS `rest_cti_macro_permissions`(
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `name` varchar(255) NOT NULL DEFAULT ''
+  `description` varchar(1024) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `rest_cti_permissions`(

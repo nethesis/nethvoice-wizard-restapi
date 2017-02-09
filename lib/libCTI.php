@@ -76,7 +76,9 @@ function getCTIPermissionProfiles($profileId=false){
                     $results[$id]['macro_permissions'][$macro_permission['name']]['value'] = true;
                 } else {
                     $results[$id]['macro_permissions'][$macro_permission['name']]['value'] = false;
-                }
+		}
+		// Write macro permission description
+		$results[$id]['macro_permissions'][$macro_permission['name']]['description'] = $macro_permission['description']
                 // write permissions in this macro permission
                 $sql = 'SELECT `permission_id` FROM `rest_cti_profiles_permissions` WHERE `profile_id` = '.$id;
                 $enabled_permissions = $dbh->sql($sql,"getAll",\PDO::FETCH_COLUMN);
