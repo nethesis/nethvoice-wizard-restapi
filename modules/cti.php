@@ -102,7 +102,7 @@ $app->get('/cti/profiles/users/{user_id}', function (Request $request, Response 
         $sth->execute(array($user_id));
         $profile_id = $sth->fetchAll()[0][0];
         if (!$profile_id) {
-            return $response->withStatus(500);
+            return $response->withStatus(404);
         }
         return $response->withJson(array('id' => $profile_id),200);
     } catch (Exception $e) {
