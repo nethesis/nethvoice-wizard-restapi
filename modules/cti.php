@@ -54,13 +54,19 @@ $app->get('/cti/permissions', function (Request $request, Response $response, $a
 });
 
 
-/* POST /cti/profiles/{id} {name: admin, permissions: [{name: "foo", type: customer_card, value: false}
+/* POST /cti/profiles/{id} {"id":"1","name":"base","macro_permissions":{"phonebook":{"value":false,"permissions":[]},"oppanel":{"value":true,"permissions":[{"id":"1","name":"intrude","description":"descrizione...","value":false}
 */
 $app->post('/cti/profiles/{id}', function (Request $request, Response $response, $args) {
     try {
+        include_once('lib/libCTI.php');
         $route = $request->getAttribute('route');
         $id = $route->getArgument('id');
-	$dbh = FreePBX::Database();
+        $profile = $request->getParsedBody();
+        if (postCTIProfile($profile,$id)) {
+            return $response->withJson(array('status' => true), 200);
+        } else {
+            throw new Exception('Error editing profile');
+        }
     } catch (Exception $e) {
         error_log($e->getMessage());
         return $response->withStatus(500);
@@ -72,7 +78,13 @@ $app->post('/cti/profiles/{id}', function (Request $request, Response $response,
 */
 $app->post('/cti/profiles', function (Request $request, Response $response, $args) {
     try {
-	$dbh = FreePBX::Database();
+        include_once('lib/libCTI.php');
+        $profile = $request->getParsedBody();
+        if (postCTIProfile($profile)) {
+            return $response->withJson(array('status' => true), 200);
+        } else {
+            throw new Exception('Error creating new profile');
+        }
     } catch (Exception $e) {
         error_log($e->getMessage());
         return $response->withStatus(500);

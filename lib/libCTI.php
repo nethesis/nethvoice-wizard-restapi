@@ -1,5 +1,50 @@
 <?php
 
+/*Get All Available macro permissions*/
+function getAllAvailableMacroPermissions() {
+    try {
+        $dbh = FreePBX::Database();
+        $sql = 'SELECT * FROM `rest_cti_macro_permissions`';
+        return $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return false;
+    }
+}
+
+/*Get All permissions*/
+function getAllAvailablePermissions() {
+    try {
+        $dbh = FreePBX::Database();
+        $sql = 'SELECT * FROM `rest_cti_permissions`';
+        $tmp_permissions = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC);
+        foreach ($dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC) as $perm) {
+            $permissions[$perm['id']] = $perm;
+        }
+
+        return $permissions;
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return false;
+    }
+}
+
+/*Get all available permissions for all available macro permissions*/
+function getAllAvailableMacroPermissionsPermissions() {
+    try {
+        $dbh = FreePBX::Database();
+        foreach (getAllAvailableMacroPermissions() as $macro_permission) {
+            $sql = 'SELECT `permission_id` FROM `rest_cti_macro_permissions_permissions` WHERE `macro_permission_id` = '.$macro_permission['id'];
+            $macro_permissions_permissions[$macro_permission['id']] = $dbh->sql($sql,"getAll",\PDO::FETCH_COLUMN);
+        }
+        return $macro_permissions_permissions;
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return false;
+    }
+
+}
+
 function getCTIPermissionProfiles($profileId=false){
     try {
         $dbh = FreePBX::Database();
@@ -9,21 +54,13 @@ function getCTIPermissionProfiles($profileId=false){
         $profiles = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC);
 
         // Get all available macro permissions
-        $sql = 'SELECT * FROM `rest_cti_macro_permissions`';
-        $macro_permissions = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC);
+        $macro_permissions = getAllAvailableMacroPermissions();
 
         // Get all available permissions
-        $sql = 'SELECT * FROM `rest_cti_permissions`';
-        $tmp_permissions = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC);
-        foreach ($dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC) as $perm) {
-            $permissions[$perm['id']] = $perm;
-        }
+        $permissions = getAllAvailablePermissions();
 
         // Get all available permissions for all available macro permissions
-        foreach ($macro_permissions as $macro_permission) {
-            $sql = 'SELECT `permission_id` FROM `rest_cti_macro_permissions_permissions` WHERE `macro_permission_id` = '.$macro_permission['id'];
-            $macro_permissions_permissions[$macro_permission['id']] = $dbh->sql($sql,"getAll",\PDO::FETCH_COLUMN);
-        }
+        $macro_permissions_permissions = getAllAvailableMacroPermissionsPermissions();
 
         foreach ($profiles as $profile) {
             $id = $profile['id'];
@@ -80,15 +117,10 @@ function getCTIPermissions(){
         $profiles = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC);
 
         // Get all available macro permissions
-        $sql = 'SELECT * FROM `rest_cti_macro_permissions`';
-        $macro_permissions = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC);
+        $macro_permissions = getAllAvailableMacroPermissions();
 
         // Get all available permissions
-        $sql = 'SELECT * FROM `rest_cti_permissions`';
-        $tmp_permissions = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC);
-        foreach ($dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC) as $perm) {
-            $permissions[$perm['id']] = $perm;
-        }
+        $permissions = getAllAvailablePermissions();
 
         // Get all available permissions for all available macro permissions
         foreach ($macro_permissions as $macro_permission) {
@@ -121,6 +153,57 @@ function getCTIPermissions(){
             }
         }
         return $results;
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return false;
+    }
+}
+
+
+
+function postCTIProfile($profile, $id=false){
+    try {
+        $dbh = FreePBX::Database();
+        if (!$id){
+            //Creating a new profile
+            $sql = 'INSERT INTO `rest_cti_profiles` VALUES (NULL, ?)';
+            $sth = FreePBX::Database()->prepare($sql);
+            $sth->execute(array($profile['name']));
+
+            //Get id
+            $sql = 'SELECT LAST_INSERT_ID()';
+            $id = $dbh->sql($sql,"getOne");
+        } else {
+            //editing an existing profile
+            //set name
+            $sql = 'UPDATE `rest_cti_profiles` SET `name` = ? WHERE `id` = ?';
+            $sth = FreePBX::Database()->prepare($sql);
+            $sth->execute(array($profile['name'], $id));
+        }
+
+        //set macro_permissions
+        foreach (getAllAvailableMacroPermissions() as $macro_permission) {
+            if (!$profile['macro_permissions'][$macro_permission['name']]['value']) {
+                $sql = 'DELETE IGNORE FROM `rest_cti_profiles_macro_permissions` WHERE `profile_id` = ? AND `macro_permission_id` = ?';
+                $sth = FreePBX::Database()->prepare($sql);
+                $sth->execute(array($id, $macro_permission['id']));
+            } else {
+                $sql = 'INSERT IGNORE INTO `rest_cti_profiles_macro_permissions` VALUES (?, ?)';
+                $sth->execute(array($id, $macro_permission['id']));
+            }
+            if (!empty($macro_permission['permissions'])) {
+                foreach ($macro_permission['permissions'] as $permission ) {
+                    if ($permission['value']) {
+                        $sql = 'INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (?, ?)';
+                        $sth->execute(array($id, $permission['id']));
+                    } else {
+                        $sql = 'DELETE IGNORE FROM `rest_cti_profiles_permissions` WHERE `profile_id` = ? AND `permission_id` = ?';
+                        $sth->execute(array($id, $permission['id']));
+                    }
+                }
+            }
+        }
+        return $id;
     } catch (Exception $e) {
         error_log($e->getMessage());
         return false;
