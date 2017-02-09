@@ -125,7 +125,7 @@ function getCTIPermissions(){
         // Get all available permissions for all available macro permissions
         foreach ($macro_permissions as $macro_permission) {
             $results[$macro_permission['name']] = $macro_permission;
-        } 
+        }
 
         foreach ($macro_permissions as $macro_permission) {
             $sql = 'SELECT `permission_id` FROM `rest_cti_macro_permissions_permissions` WHERE `macro_permission_id` = '.$macro_permission['id'];
@@ -173,12 +173,6 @@ function postCTIProfile($profile, $id=false){
             //Get id
             $sql = 'SELECT LAST_INSERT_ID()';
             $id = $dbh->sql($sql,"getOne");
-        } else {
-            //editing an existing profile
-            //set name
-            $sql = 'UPDATE `rest_cti_profiles` SET `name` = ? WHERE `id` = ?';
-            $sth = $dbh->prepare($sql);
-            $sth->execute(array($profile['name'], $id));
         }
 
         //set macro_permissions
@@ -189,6 +183,7 @@ function postCTIProfile($profile, $id=false){
                 $sth->execute(array($id, $macro_permission['id']));
             } else {
                 $sql = 'INSERT IGNORE INTO `rest_cti_profiles_macro_permissions` VALUES (?, ?)';
+                $sth = $dbh->prepare($sql);
                 $sth->execute(array($id, $macro_permission['id']));
             }
             if (!empty($macro_permission['permissions'])) {
