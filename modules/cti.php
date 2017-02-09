@@ -91,6 +91,27 @@ $app->post('/cti/profiles', function (Request $request, Response $response, $arg
     }
 });
 
+/* GET /cti/profiles/users/{user_id} Return profile id of the user*/
+$app->get('/cti/profiles/users/{user_id}', function (Request $request, Response $response, $args) {
+    try {
+        $dbh = FreePBX::Database();
+        $route = $request->getAttribute('route');
+        $user_id = $route->getArgument('user_id');
+        $sql = 'SELECT `profile_id` FROM `rest_users` WHERE `id` = ?';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array($user_id));
+        $profile_id = $sth->fetchAll()[0][0];
+        if (!$profile_id) {
+            return $response->withStatus(500);
+        }
+        return $response->withJson(array('id' => $profile_id),200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
+
 /* POST /cti/profiles/users/{user_id} => {profile_id: <profile_id>} */
 $app->post('/cti/profiles/users/{user_id}', function (Request $request, Response $response, $args) {
     try {
