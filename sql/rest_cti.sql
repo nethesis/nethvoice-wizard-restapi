@@ -24,7 +24,8 @@ CREATE TABLE IF NOT EXISTS `rest_cti_profiles_permissions`(
     ON DELETE CASCADE,
   FOREIGN KEY (`permission_id`) REFERENCES `rest_cti_permissions`(`id`)
     ON UPDATE CASCADE
-    ON DELETE CASCADE
+    ON DELETE CASCADE,
+  UNIQUE KEY `line` (`profile_id`,`permission_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `rest_cti_profiles_macro_permissions`(
@@ -35,9 +36,11 @@ CREATE TABLE IF NOT EXISTS `rest_cti_profiles_macro_permissions`(
     ON DELETE CASCADE,
   FOREIGN KEY (`macro_permission_id`) REFERENCES `rest_cti_macro_permissions`(`id`)
     ON UPDATE CASCADE
-    ON DELETE CASCADE
+    ON DELETE CASCADE,
+  UNIQUE KEY `line` (`profile_id`,`macro_permission_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+/*This table contains all available permissions inside macro permissions*/
 CREATE TABLE IF NOT EXISTS `rest_cti_macro_permissions_permissions`(
   `macro_permission_id` INT UNSIGNED NOT NULL,
   `permission_id` INT UNSIGNED NOT NULL,
@@ -46,6 +49,7 @@ CREATE TABLE IF NOT EXISTS `rest_cti_macro_permissions_permissions`(
     ON DELETE CASCADE,
   FOREIGN KEY (`permission_id`) REFERENCES `rest_cti_permissions`(`id`)
     ON UPDATE CASCADE
-    ON DELETE CASCADE
+    ON DELETE CASCADE,
+  UNIQUE KEY `line` (`macro_permission_id`,`permission_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
