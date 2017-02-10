@@ -97,7 +97,7 @@ $app->get('/cti/profiles/users/{user_id}', function (Request $request, Response 
         $dbh = FreePBX::Database();
         $route = $request->getAttribute('route');
         $user_id = $route->getArgument('user_id');
-        $sql = 'SELECT `profile_id` FROM `rest_users` WHERE `id` = ?';
+        $sql = 'SELECT `profile_id` FROM `rest_users` WHERE `user_id` = ?';
         $sth = $dbh->prepare($sql);
         $sth->execute(array($user_id));
         $profile_id = $sth->fetchAll()[0][0];
