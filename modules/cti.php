@@ -120,7 +120,7 @@ $app->post('/cti/profiles/users/{user_id}', function (Request $request, Response
         $user_id = $route->getArgument('user_id');
         $data = $request->getParsedBody();
         $profile_id = $data['profile_id'];
-        $sql = 'UPDATE IGNORE `rest_users` SET `profile_id` = ? WHERE `id` = ?';
+        $sql = 'REPLACE `rest_users` SET `profile_id` = ? WHERE `user_id` = ?';
         $sth = $dbh->prepare($sql);
         $sth->execute(array($profile_id,$id));
         return $response->withJson(array('status' => true), 200);
