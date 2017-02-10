@@ -7,5 +7,6 @@ CREATE TABLE IF NOT EXISTS `rest_users` (
   `voicemail_password` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `webrtc_password` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `profile_id` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE `user_profile` (`user_id`,`profile_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
