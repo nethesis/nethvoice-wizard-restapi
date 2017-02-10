@@ -98,6 +98,19 @@ print_r($task);
 
 ## API
 
+### Authentication
+
+Retrieve the secret code
+
+```
+POST /testauth
+```
+```
+Parameter: { "username": "myuser", "password": "myPassword" }
+```
+JSon result:
+- {result: "1234"}
+
 ### Login
 
 Example:
@@ -339,6 +352,18 @@ Get phones scanned from all netwotks
 
 ```
 GET /devices/phones/list
+```
+Get brand from mac scanned
+
+```
+/devices/{mac}/brand
+```
+{mac} is the device mac (example: 00:50:58:50:C3:3C)
+
+Result:
+```
+{Sangoma}
+
 ```
 
 Get gateways scanned from all netwotks
