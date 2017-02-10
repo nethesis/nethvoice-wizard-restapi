@@ -13,10 +13,14 @@ function getAllAvailableMacroPermissions() {
 }
 
 /*Get All permissions*/
-function getAllAvailablePermissions() {
+function getAllAvailablePermissions($minified=false) {
     try {
         $dbh = FreePBX::Database();
-        $sql = 'SELECT * FROM `rest_cti_permissions`';
+        if ($minified) {
+            $sql = 'SELECT `id`,`name` FROM `rest_cti_permissions`';
+        } else {
+            $sql = 'SELECT * FROM `rest_cti_permissions`';
+        }
         $tmp_permissions = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC);
         foreach ($dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC) as $perm) {
             $permissions[$perm['id']] = $perm;
@@ -45,7 +49,7 @@ function getAllAvailableMacroPermissionsPermissions() {
 
 }
 
-function getCTIPermissionProfiles($profileId=false){
+function getCTIPermissionProfiles($profileId=false, $minified=false){
     try {
         $dbh = FreePBX::Database();
 
@@ -57,7 +61,7 @@ function getCTIPermissionProfiles($profileId=false){
         $macro_permissions = getAllAvailableMacroPermissions();
 
         // Get all available permissions
-        $permissions = getAllAvailablePermissions();
+        $permissions = getAllAvailablePermissions(true);
 
         // Get all available permissions for all available macro permissions
         $macro_permissions_permissions = getAllAvailableMacroPermissionsPermissions();
@@ -77,10 +81,12 @@ function getCTIPermissionProfiles($profileId=false){
                 } else {
                     $results[$id]['macro_permissions'][$macro_permission['name']]['value'] = false;
 		}
-		// Write macro permission displayname
-                $results[$id]['macro_permissions'][$macro_permission['name']]['displayname'] = $macro_permission['displayname'];
-		// Write macro permission description
-		$results[$id]['macro_permissions'][$macro_permission['name']]['description'] = $macro_permission['description'];
+                if (!$minified) {
+                    // Write macro permission displayname
+                    $results[$id]['macro_permissions'][$macro_permission['name']]['displayname'] = $macro_permission['displayname'];
+		    // Write macro permission description
+		    $results[$id]['macro_permissions'][$macro_permission['name']]['description'] = $macro_permission['description'];
+                }
                 // write permissions in this macro permission
                 $sql = 'SELECT `permission_id` FROM `rest_cti_profiles_permissions` WHERE `profile_id` = '.$id;
                 $enabled_permissions = $dbh->sql($sql,"getAll",\PDO::FETCH_COLUMN);

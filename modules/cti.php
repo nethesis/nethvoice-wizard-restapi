@@ -154,7 +154,7 @@ $app->delete('/cti/profiles/{id}', function (Request $request, Response $respons
  * @api /cti/usersConfiguration
  *
  */
-$app->post('/cti/usersConfiguration', function (Request $request, Response $response, $args) {
+$app->post('/cti/configuration/users', function (Request $request, Response $response, $args) {
     try {
         $json = array();
 
@@ -244,3 +244,34 @@ $app->post('/cti/usersConfiguration', function (Request $request, Response $resp
     // return $response->withJson($json, 200);
     return $response->withStatus(200);
 });
+
+
+/*
+ * Write cti profiles configuration
+ *
+ * @api /cti/configuration/profiles
+ *
+ */
+
+$app->post('/cti/configuration/profiles', function (Request $request, Response $response, $args) {
+    try {
+        include_once('lib/libCTI.php');
+        error_log(print_r("ddd",true));
+        $results = getCTIPermissionProfiles(false,true);
+        error_log(print_r($results,true));
+        if (!$results) {
+            throw new Exception('Empty profile config');
+        }
+        // Write configuration file
+        require(__DIR__. '/../config.inc.php');
+        $res = file_put_contents($config['settings']['cti_config_path']. '/profiles.json',json_encode($results, JSON_PRETTY_PRINT));
+                if ($res === FALSE) {
+            throw new Exception('fail to write config');
+        }
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+    return $response->withStatus(200);
+});
+
