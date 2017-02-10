@@ -61,7 +61,7 @@ function getCTIPermissionProfiles($profileId=false, $minified=false){
         $macro_permissions = getAllAvailableMacroPermissions();
 
         // Get all available permissions
-        $permissions = getAllAvailablePermissions(true);
+        $permissions = getAllAvailablePermissions($minified);
 
         // Get all available permissions for all available macro permissions
         $macro_permissions_permissions = getAllAvailableMacroPermissionsPermissions();
