@@ -45,15 +45,17 @@ $app->post('/mobiles', function (Request $request, Response $response, $args) {
     try {
         $params = $request->getParsedBody();
         $dbh = FreePBX::Database();
-        $sql = 'UPDATE rest_users'.
-          ' JOIN userman_users ON userman_users.id = rest_users.user_id'.
-          ' SET rest_users.mobile = ?'.
-          ' WHERE userman_users.username = ?';
+        $sql =  'INSERT INTO rest_users (user_id,mobile)'.
+                ' SELECT id, ?'.
+                ' FROM userman_users'.
+                ' WHERE username = ?'.
+                ' ON DUPLICATE KEY UPDATE mobile = ?';
+
         $stmt = $dbh->prepare($sql);
         $mobile = preg_replace('/^\+/', '00', $params['mobile']);
         $mobile = preg_replace('/[^0-9]/', '', $mobile);
-        $res = $stmt->execute(array($params['username'], $mobile));
-        if (!res || $stmt->affected_rows < 1) {
+        $stmt->execute(array($mobile, $params['username'], $mobile));
+        if ($stmt->rowCount() < 1) {
             throw new Exception('db error');
         }
     } catch (Exception $e) {
