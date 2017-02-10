@@ -196,7 +196,7 @@ $app->post('/cti/configuration/users', function (Request $request, Response $res
                     $endpoints['cellphone'] = ($user['cell'] ? array($user['cell'] => (object) array()) : (object)array());
 
                     // Retrieve webrtc, webrtc_mobile, profile id
-                    $stmt = $dbh->prepare('SELECT webrtc, webrtc_mobile, profile_id FROM rest_users WHERE user_id = ?');
+                    $stmt = $dbh->prepare('SELECT webrtc_password, profile_id FROM rest_users WHERE user_id = ?');
                     $stmt->execute(array($user['id']));
                     $profileRes = $stmt->fetch();
 
@@ -205,8 +205,8 @@ $app->post('/cti/configuration/users', function (Request $request, Response $res
                     }
 
                     // Set webrtc
-                    $endpoints['webrtc'] = ($profileRes['webrtc'] ?
-                        array($profileRes['webrtc'] => (object)array()) : (object)array());
+                    $endpoints['webrtc'] = ($profileRes['webrtc_password'] ?
+                        array($profileRes['webrtc_password'] => (object)array()) : (object)array());
 
                     // Set mobile webrtc
                     $endpoints['webrtc_mobile'] = ($profileRes['webrtc_mobile'] ?
@@ -256,9 +256,7 @@ $app->post('/cti/configuration/users', function (Request $request, Response $res
 $app->post('/cti/configuration/profiles', function (Request $request, Response $response, $args) {
     try {
         include_once('lib/libCTI.php');
-        error_log(print_r("ddd",true));
         $results = getCTIPermissionProfiles(false,true);
-        error_log(print_r($results,true));
         if (!$results) {
             throw new Exception('Empty profile config');
         }
