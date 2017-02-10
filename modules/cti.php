@@ -122,7 +122,7 @@ $app->post('/cti/profiles/users/{user_id}', function (Request $request, Response
         $profile_id = $data['profile_id'];
         $sql = 'REPLACE `rest_users` SET `profile_id` = ? WHERE `user_id` = ?';
         $sth = $dbh->prepare($sql);
-        $sth->execute(array($profile_id,$id));
+        $sth->execute(array($profile_id,$user_id));
         return $response->withJson(array('status' => true), 200);
     } catch (Exception $e) {
         error_log($e->getMessage());
