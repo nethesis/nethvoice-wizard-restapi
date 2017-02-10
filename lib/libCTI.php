@@ -77,6 +77,8 @@ function getCTIPermissionProfiles($profileId=false){
                 } else {
                     $results[$id]['macro_permissions'][$macro_permission['name']]['value'] = false;
 		}
+		// Write macro permission displayname
+                $results[$id]['macro_permissions'][$macro_permission['name']]['displayname'] = $macro_permission['displayname'];
 		// Write macro permission description
 		$results[$id]['macro_permissions'][$macro_permission['name']]['description'] = $macro_permission['description'];
                 // write permissions in this macro permission
