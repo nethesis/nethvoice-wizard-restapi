@@ -36,7 +36,7 @@ $app->get('/voicemails/{extension}', function (Request $request, Response $respo
 });
 
 $app->post('/voicemails', function (Request $request, Response $response, $args) {
-    global $db;
+    $dbh = FreePBX::Database();
     try {
         $params = $request->getParsedBody();
         $users = FreePBX::create()->Core->getAllUsersByDeviceType();
@@ -60,11 +60,18 @@ $app->post('/voicemails', function (Request $request, Response $response, $args)
             $data['email'] = $user['email'];
             $data['vm'] = 'yes';
             FreePBX::create()->Voicemail->processQuickCreate($tech, $extension['extension'], $data);
-            $sql = 'UPDATE rest_users'.
-              ' SET rest_users.voicemail_password = \''. $data['vmpwd']. '\''.
-              ' JOIN userman_users ON rest_users.user_id = userman_users.id'.
-              ' WHERE userman_users.username = \''. $user['username']. '\'';
-            $db->query($sql);
+
+            $sql =  'INSERT INTO rest_users (user_id,voicemail_password)'.
+                ' SELECT id, ?'.
+                ' FROM userman_users'.
+                ' WHERE username = ?'.
+                ' ON DUPLICATE KEY UPDATE voicemail_password = ?';
+
+            $stmt = $dbh->prepare($sql);
+            $stmt->execute(array($data['vmpwd'], $user['username'], $data['vmpwd']));
+            if ($stmt->rowCount() < 1) {
+                throw new Exception('db error');
+            }
         } else {
             FreePBX::create()->Voicemail->delMailbox($extension['extension']);
         }

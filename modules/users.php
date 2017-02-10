@@ -33,12 +33,15 @@ function getPassword($username) {
 }
 
 function setPassword($username, $password) {
-    global $db;
-    $sql = 'UPDATE rest_users'.
-      ' JOIN userman_users ON rest_users.user_id = userman_users.id'.
-      ' SET rest_users.password = \''. $password. '\''.
-      ' WHERE userman_users.username = \''. getUser($username). '\'';
-    $db->query($sql);
+    sync();
+    $dbh = FreePBX::Database();
+    $sql =  'INSERT INTO rest_users (user_id,password)'.
+            ' SELECT id, ?'.
+            ' FROM userman_users'.
+            ' WHERE username = ?'.
+            ' ON DUPLICATE KEY UPDATE password = ?';
+    $stmt = $dbh->prepare($sql);
+    $stmt->execute(array($password, $username, $password));
 }
 
 function sync() {
@@ -160,7 +163,7 @@ $app->post('/users/{username}/password', function (Request $request, Response $r
 
         exec("/usr/bin/sudo /sbin/e-smith/signal-event password-modify '".getUser($username)."' $tmp", $out, $ret);
         if ($ret === 0) {
-            setPassword(getUser($username), $password);
+            setPassword($username, $password);
             return $response->withStatus(201);
         }
     }

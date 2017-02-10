@@ -3,7 +3,7 @@ use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
 
-/* GET /cti/profiles 
+/* GET /cti/profiles
 Return: [{id:1, name: admin, macro_permissions [ oppanel: {value: true, permissions [ {name: "foo", description: "descrizione...", value: false},{..} ]}
 */
 $app->get('/cti/profiles', function (Request $request, Response $response, $args) {
@@ -16,7 +16,7 @@ $app->get('/cti/profiles', function (Request $request, Response $response, $args
 });
 
 
-/* GET /cti/profiles/{id} 
+/* GET /cti/profiles/{id}
 Return: {id:1, name: admin, macro_permissions [ oppanel: {value: true, permissions [ {name: "foo", description: "descrizione...", value: false}
 */
 $app->get('/cti/profiles/{id}', function (Request $request, Response $response, $args) {
@@ -36,7 +36,7 @@ $app->get('/cti/profiles/{id}', function (Request $request, Response $response, 
 });
 
 
-/* GET /cti/permissions 
+/* GET /cti/permissions
 Return: [{"cdr": {"permissions": [{"description": "descrizione...", "id": "2", "name": "sms", "value": true  },  { ...}]},{"phonebook": {"permissions": [{"description": "descrizione...", "id": "2", "name": "sms", "value": true  },  { ...}]}]
 */
 $app->get('/cti/permissions', function (Request $request, Response $response, $args) {
@@ -120,9 +120,11 @@ $app->post('/cti/profiles/users/{user_id}', function (Request $request, Response
         $user_id = $route->getArgument('user_id');
         $data = $request->getParsedBody();
         $profile_id = $data['profile_id'];
-        $sql = 'REPLACE `rest_users` SET `profile_id` = ?, `user_id` = ?';
-        $sth = $dbh->prepare($sql);
-        $sth->execute(array($profile_id,$user_id));
+        $sql =  'INSERT INTO rest_users (user_id,profile_id)'.
+                ' VALUES (?,?)'.
+                ' ON DUPLICATE KEY UPDATE profile_id = ?';
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute(array($user_id, $profile_id, $profile_id));
         return $response->withJson(array('status' => true), 200);
     } catch (Exception $e) {
         error_log($e->getMessage());
