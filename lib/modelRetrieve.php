@@ -144,7 +144,7 @@ function doNastyCurl($ip_address, $manufacturer)
                 $regexp='/>[^<>]*((Enterprise|Gigabit)[^<>"]*)/';
                 preg_match($regexp, $output, $matches);
                 if (isset($matches[1])) {
-                    $model = preg_replace('/.*(SIP-| )([TW][0-9]*)[PWG]/', '${2}', $matches[1]);
+                    $model = preg_replace('/.*(SIP-| )([TW][0-9]*[PWG])/', '${2}', $matches[1]);
                 }
             }
             if (!isset($matches[1])) {
@@ -160,11 +160,7 @@ function doNastyCurl($ip_address, $manufacturer)
                     $model = "";
                 }
             }
-            if (substr($model, 0, 1) == "T") {
-                return substr($model, 0, 3);
-            } else {
-                return $model;
-            }
+            return $model;
         break;
         case "Cisco/Linksys":
             $url='http://'.$ip_address.'/';
