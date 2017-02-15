@@ -90,6 +90,11 @@ $app->get('/users/{all}', function (Request $request, Response $response, $args)
                   ' JOIN userman_users ON rest_devices_phones.user_id = userman_users.id'.
                   ' WHERE userman_users.default_extension = "' . $users[$i]['default_extension'] . '"'
                   , 'getAll', \PDO::FETCH_ASSOC);
+                $users[$i]['profile'] = $dbh->sql('SELECT rest_users.profile_id'.
+                  ' FROM rest_users'.
+                  ' JOIN userman_users ON rest_users.user_id = userman_users.id'.
+                  ' WHERE userman_users.username = "' . $users[$i]['username'] . '"'
+                  , 'getOne', \PDO::FETCH_ASSOC);
             }
         }
         $i++;
