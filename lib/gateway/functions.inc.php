@@ -18,27 +18,27 @@ function gateway_get_configuration($name){
         $res = $sth->fetch(\PDO::FETCH_ASSOC);
         $config['model'] = $res['model'];
         $config['manufacturer'] = $res['manufacturer'];
-        $sql = "SELECT a.trunk, `protocol`, `dialoutprefix`,`secret` FROM `gateway_config_isdn` AS a JOIN trunks AS b ON a.trunk=b.trunkid WHERE `config_id` = ?";
+        $sql = "SELECT a.trunk,a.trunknumber AS trunknumber, secret, `protocol` FROM `gateway_config_isdn` AS a JOIN trunks AS b ON a.trunk=b.trunkid WHERE `config_id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($config['id']));
         while ($row = $sth->fetch(\PDO::FETCH_ASSOC)){
             $config['trunks_isdn'][] = $row;
         }
 
-        $sql = "SELECT a.trunk as trunk, `dialoutprefix`,`secret` FROM `gateway_config_pri` AS a JOIN trunks AS b ON a.trunk=b.trunkid WHERE `config_id` = ?";
+        $sql = "SELECT a.trunk as trunk,a.trunknumber AS trunknumber, secret  FROM `gateway_config_pri` AS a JOIN trunks AS b ON a.trunk=b.trunkid WHERE `config_id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($config['id']));
         while ($row = $sth->fetch(\PDO::FETCH_ASSOC)){
             $config['trunks_pri'][] = $row;
         }
 
-        $sql = "SELECT a.trunk as trunk,number,dialoutprefix,`secret` FROM `gateway_config_fxo` AS a JOIN trunks AS b ON a.trunk=b.trunkid WHERE `config_id` = ?";
+        $sql = "SELECT a.trunk as trunk,a.trunknumber AS trunknumber,number, secret FROM `gateway_config_fxo` AS a JOIN trunks AS b ON a.trunk=b.trunkid WHERE `config_id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($config['id']));
         while ($row = $sth->fetch(\PDO::FETCH_ASSOC)){
             $config['trunks_fxo'][] = $row;
         }
-        $sql = "SELECT `physical_extension`,`secret` FROM `gateway_config_fxs` WHERE `config_id` = ?";
+        $sql = "SELECT `extension`,`secret` FROM `gateway_config_fxs` WHERE `config_id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($config['id']));
         while ($config['trunks_fxs'][] = $sth->fetch(\PDO::FETCH_ASSOC)){
@@ -88,7 +88,7 @@ function gateway_generate_configuration_file($name){
             }
             foreach ($config['trunks_fxo'] as $trunk){
                 $output = str_replace("LINENUMBER$i",$trunk['number'],$output);
-                $output = str_replace("TRUNKNUMBER$j",$trunk['dialoutprefix'],$output);
+                $output = str_replace("TRUNKNUMBER$j",$trunk['trunknumber'],$output);
                 $output = str_replace("TRUNKSECRET$j",$trunk['secret'],$output);
                 $i++;
                 $j++;
@@ -97,8 +97,9 @@ function gateway_generate_configuration_file($name){
         if (!empty($config['trunks_isdn'])){
             $i = 1;
             foreach ($config['trunks_isdn'] as $trunk) {
-                $output = str_replace("TRUNKNUMBER$i",$trunk['dialoutprefix'],$output);
+                $output = str_replace("TRUNKNUMBER$i",$trunk['trunknumber'],$output);
                 $output = str_replace("TRUNKSECRET$i",$trunk['secret'],$output);
+
                 if ($trunk['protocol']=="pp") {
                     if ($config['manufacturer'] == 'Sangoma') {
                         $output = str_replace("PROTOCOLTYPE$i","pp",$output);
@@ -124,7 +125,7 @@ function gateway_generate_configuration_file($name){
         if (!empty($config['trunks_pri'])){
             $i = 1;
             foreach ($config['trunks_pri'] as $trunk){
-                $output = str_replace("TRUNKNUMBER$i",$trunk['dialoutprefix'],$output);
+                $output = str_replace("TRUNKNUMBER$i",$trunk['trunknumber'],$output);
                 $output = str_replace("TRUNKSECRET$i",$trunk['secret'],$output);
                 $i++;
             }
@@ -132,7 +133,7 @@ function gateway_generate_configuration_file($name){
         if (!empty($config['trunks_fxs'])){
             $i=0;
             foreach ($config['trunks_fxs'] as $trunk){
-                $output = str_replace("FXSEXTENSION$i",$trunk['physical_extension'],$output);
+                $output = str_replace("FXSEXTENSION$i",$trunk['extension'],$output);
                 $output = str_replace("FXSPASS$i",$trunk['secret'],$output);
                 $i++;
             }
@@ -146,7 +147,7 @@ function gateway_generate_configuration_file($name){
     return $output;
 }
 
-function getPjSipDefaults($username, $secret) {
+function getPjSipDefaults() {
     return array(
         "aor_contact"=> "",
         "auth_rejection_permanent"=> "on",
@@ -177,9 +178,9 @@ function getPjSipDefaults($username, $secret) {
         "outcid"=> "33334567890",
         "provider"=> "",
         "qualify_frequency"=> 60,
-        "registration"=> "receive",
+        "registration"=> "none",
         "retry_interval"=> 60,
-        "secret"=> $secret,
+        "secret"=> "",
         "sendrpid"=> "no",
         "server_uri"=> "",
         "sip_server"=> "",
@@ -193,6 +194,6 @@ function getPjSipDefaults($username, $secret) {
         "tech"=> "pjsip",
         "transport"=> "0.0.0.0-udp",
         "trunk_name"=> "alex1",
-        "username"=> $username
+        "username"=> ""
     );
 }

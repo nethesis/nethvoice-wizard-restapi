@@ -1,7 +1,5 @@
 USE asterisk;
 
-DROP TABLE IF EXISTS `gateway_models`;
-
 CREATE TABLE IF NOT EXISTS `gateway_models` (
   `id` INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
   `model` varchar(100) NOT NULL default '',
@@ -11,7 +9,8 @@ CREATE TABLE IF NOT EXISTS `gateway_models` (
   `n_isdn_trunks` INT UNSIGNED default '0',
   `n_fxo_trunks` INT UNSIGNED default '0',
   `n_fxs_ext` INT UNSIGNED default '0',
-  `description` varchar(50) default NULL
+  `description` varchar(50) default NULL,
+  UNIQUE KEY `model_manufacturer` (`model`, `manufacturer`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 LOCK TABLES `gateway_models` WRITE;
@@ -79,6 +78,7 @@ CREATE TABLE IF NOT EXISTS `gateway_config_fxo` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `config_id` INT UNSIGNED NOT NULL default '0',
   `trunk` int(11) NOT NULL,
+  `trunknumber` int(11) NOT NULL,
   `number` varchar(100) default NULL,
   `secret` varchar(10) default NULL,
   PRIMARY KEY  (`id`),
@@ -91,6 +91,7 @@ CREATE TABLE IF NOT EXISTS `gateway_config_isdn` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `config_id` INT UNSIGNED NOT NULL default '0',
   `trunk` int(11) NOT NULL,
+  `trunknumber` int(11) NOT NULL,
   `protocol` varchar(3) default NULL,
   `secret` varchar(10) default NULL,
   PRIMARY KEY  (`id`),
@@ -103,6 +104,7 @@ CREATE TABLE IF NOT EXISTS `gateway_config_pri` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `config_id` INT UNSIGNED NOT NULL default '0',
   `trunk` int(11) NOT NULL,
+  `trunknumber` int(11) NOT NULL,
   `secret` varchar(10) default NULL,
   PRIMARY KEY  (`id`),
   FOREIGN KEY (`config_id`) REFERENCES `gateway_config`(`id`)

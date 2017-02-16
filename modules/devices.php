@@ -323,19 +323,28 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
                 $trunkName = $vendor. '_'. $uid. '_'. $type. '_'. $port;
 
                 $nextTrunkId = count(core_trunks_list());
-                $dialoutprefix = intval('20'. str_pad(++$nextTrunkId, 3, '0', STR_PAD_LEFT));
 
-                $secret = md5(uniqid(rand(), true));
-                $defaults = getPjSipDefaults($trunkName, $secret);
-            // set $_REQUEST params for pjsip
-            foreach ($defaults as $k => $v) {
-                $_REQUEST[$k] = $v;
-            }
+                $trunk['trunknumber'] = intval('20'. str_pad(++$nextTrunkId, 3, '0', STR_PAD_LEFT));
+                if ($vendor==='Sangoma') {
+                    $dialoutprefix = $trunk['trunknumber'];
+                } else {
+                    $dialoutprefix = null;
+                }
+
+                $secret = substr(md5(uniqid(rand(), true)),0,8);
+                $defaults = getPjSipDefaults();
+                $defaults['secret'] = $secret;
+                $defaults['username'] = $trunk['trunknumber'];
+                $defaults['sip_server'] = $params['ipv4_new'];
+                // set $_REQUEST params for pjsip
+                foreach ($defaults as $k => $v) {
+                    $_REQUEST[$k] = $v;
+                }
 
                 $trunkId = core_trunks_add(
               'pjsip', // tech
               $trunkName, // channelid as trunk name
-              $dialoutprefix, // dialoutprefix TODO
+              $dialoutprefix, // dialoutprefix
               null, // maxchans
               null, // outcid
               null, // peerdetails
@@ -355,19 +364,19 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
 
                 if ($type === 'isdn' && isset($params['trunks_isdn'])) {
                     /*Save isdn trunks parameters*/
-                $sql = "REPLACE INTO `gateway_config_isdn` (`config_id`,`trunk`,`protocol`,`secret`) VALUES (?,?,?,?)";
+                $sql = "REPLACE INTO `gateway_config_isdn` (`config_id`,`trunk`,`trunknumber`,`protocol`,`secret`) VALUES (?,?,?,?,?)";
                     $sth = FreePBX::Database()->prepare($sql);
-                    $sth->execute(array($configId,$trunkId,$trunk['type'],$secret));
+                    $sth->execute(array($configId,$trunkId,$trunk['trunknumber'],$trunk['type'],$secret));
                 } elseif ($type === 'pri' && isset($params['trunks_pri'])) {
                     /*Save pri trunks parameters*/
-                $sql = "REPLACE INTO `gateway_config_pri` (`config_id`,`trunk`,`secret`) VALUES (?,?,?)";
+                $sql = "REPLACE INTO `gateway_config_pri` (`config_id`,`trunk`,`trunknumber`,`secret`) VALUES (?,?,?,?)";
                     $sth = FreePBX::Database()->prepare($sql);
-                    $sth->execute(array($configId,$trunkId,$secret));
+                    $sth->execute(array($configId,$trunkId,$trunk['trunknumber'],$secret));
                 } elseif ($type === 'fxo' && isset($params['trunks_fxo'])) {
                     /*Save fxo trunks parameters*/
-                $sql = "REPLACE INTO `gateway_config_fxo` (`config_id`,`trunk`,`number`,`secret`) VALUES (?,?,?,?)";
+                $sql = "REPLACE INTO `gateway_config_fxo` (`config_id`,`trunk`,`trunknumber`,`number`,`secret`) VALUES (?,?,?,?,?)";
                     $sth = FreePBX::Database()->prepare($sql);
-                    $sth->execute(array($configId,$trunkId,$trunk['number'],$secret));
+                    $sth->execute(array($configId,$trunkId,$trunk['trunknumber'],$trunk['number'],$secret));
                 } elseif ($type === 'fxs' && isset($params['trunks_fxs'])) {
                     /* create physical extension */
                 //get associated main extension
