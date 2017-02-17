@@ -448,8 +448,8 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
         }
 
         system("/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/tftpGenerateConfig.php ".escapeshellarg($params['name']), $ret);
-
         if ($ret === 0) {
+            fwconsole('r');
             return $response->withJson(array('id'=>$configId), 200);
         } else {
             throw new Exception('Error generating configuration');
