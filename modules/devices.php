@@ -331,11 +331,17 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
                     $dialoutprefix = null;
                 }
 
+                $srvip = sql('SELECT `value` FROM `endpointman_global_vars` WHERE `var_name` = "srvip"', "getOne");
                 $secret = substr(md5(uniqid(rand(), true)),0,8);
                 $defaults = getPjSipDefaults();
                 $defaults['secret'] = $secret;
                 $defaults['username'] = $trunk['trunknumber'];
+                $defaults['extdisplay'] = 'OUT_'.$nextTrunkId;
                 $defaults['sip_server'] = $params['ipv4_new'];
+                $defaults['sv_channelid'] = $trunkName;
+                $defaults['sv_trunk_name'] = $trunkName;
+                $defaults['transport'] = $srvip.'-udp';
+                $defaults['trunk_name'] = $trunkName;
                 // set $_REQUEST params for pjsip
                 foreach ($defaults as $k => $v) {
                     $_REQUEST[$k] = $v;
@@ -360,6 +366,8 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
               false   // dialopts
             );
 
+                $dialpattern_inser = array('prepend_digits'=>'','match_pattern_prefix'=>'','match_pattern_pass'=>'','match_cid'=>'');
+                core_trunks_update_dialrules($trunkId, $dialpattern_insert);
                 $port++;
 
                 if ($type === 'isdn' && isset($params['trunks_isdn'])) {

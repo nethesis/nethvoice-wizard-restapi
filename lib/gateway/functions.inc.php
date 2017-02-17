@@ -157,7 +157,7 @@ function getPjSipDefaults() {
         "contact_user"=> "",
         "context"=> "from-pstn",
         "continue"=> "off",
-        "dialoutopts_cb"=> "sysq",
+        "dialoutopts_cb"=> "sys",
         "dialoutprefix"=> "",
         "disabletrunk"=> "off",
         "dtmfmode"=> "rfc4733",
@@ -175,7 +175,7 @@ function getPjSipDefaults() {
         "maxchans"=> "",
         "npanxx"=> "",
         "outbound_proxy"=> "",
-        "outcid"=> "33334567890",
+        "outcid"=> "",
         "provider"=> "",
         "qualify_frequency"=> 60,
         "registration"=> "none",
@@ -193,7 +193,7 @@ function getPjSipDefaults() {
         "t38_udptl_nat"=> "no",
         "tech"=> "pjsip",
         "transport"=> "0.0.0.0-udp",
-        "trunk_name"=> "alex1",
+        "trunk_name"=> "",
         "username"=> ""
     );
 }
