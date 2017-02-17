@@ -503,11 +503,11 @@ $app->delete('/devices/gateways/{id}', function (Request $request, Response $res
             core_routing_trunk_delbyid($row['trunk']);
             $fpbx->Core->delDevice($row['trunk'], true);
             $fpbx->Core->delUser($row['trunk'], true);
-            fwconsole('r');
         }
         $sql = "DELETE IGNORE FROM `gateway_config` WHERE `id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($id));
+        fwconsole('r');
         return $response->withJson(array('status' => true), 200);
     } catch (Exception $e) {
         error_log($e->getMessage());
