@@ -172,10 +172,7 @@ $app->delete('/physicalextensions/{extension}', function (Request $request, Resp
         $fpbx = FreePBX::create();
         $fpbx->Core->delUser($extension);
         $fpbx->Core->delDevice($extension);
-        $sql = 'UPDATE rest_devices_phones'.
-          ' JOIN userman_users ON userman_users.id = rest_devices_phones.user_id'.
-          ' SET userman_users.default_extension = \'none\', rest_devices_phones.extension = NULL, rest_devices_phones.secret = NULL'.
-          ' WHERE rest_devices_phones.extension = ?';
+        $sql = 'UPDATE rest_devices_phones SET user_id = NULL, extension = NULL, secret = NULL WHERE extension = ?';
         $stmt = $dbh->prepare($sql);
         $stmt->execute(array($extension));
 
