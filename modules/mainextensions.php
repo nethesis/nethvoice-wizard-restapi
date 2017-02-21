@@ -33,7 +33,7 @@ $app->post('/mainextensions', function (Request $request, Response $response, $a
     //Make sure extension is not in use
     $free = checkFreeExtension($extension);
     if ($free !== true) {
-        return $response->withJson(array('message'=>$free ), 500);
+        return $response->withJson(array('message'=>$free ), 422);
     }
 
     //Update user to add this extension as default extension
@@ -204,6 +204,6 @@ function checkFreeExtension($extension){
         return true;
     } catch (Exception $e) {
         error_log($e->getMessage());
-        return $e->getMessage();
+        return "Extension already in use";
     }
 }
