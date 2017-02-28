@@ -60,18 +60,6 @@ $app->post('/voicemails', function (Request $request, Response $response, $args)
             $data['email'] = $user['email'];
             $data['vm'] = 'yes';
             FreePBX::create()->Voicemail->processQuickCreate($tech, $extension['extension'], $data);
-
-            $sql =  'INSERT INTO rest_users (user_id,voicemail_password)'.
-                ' SELECT id, ?'.
-                ' FROM userman_users'.
-                ' WHERE username = ?'.
-                ' ON DUPLICATE KEY UPDATE voicemail_password = ?';
-
-            $stmt = $dbh->prepare($sql);
-            $stmt->execute(array($data['vmpwd'], $user['username'], $data['vmpwd']));
-            if ($stmt->rowCount() < 1) {
-                throw new Exception('db error');
-            }
         } else {
             FreePBX::create()->Voicemail->delMailbox($extension['extension']);
         }

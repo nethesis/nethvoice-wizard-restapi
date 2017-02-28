@@ -196,7 +196,7 @@ $app->post('/cti/configuration/users', function (Request $request, Response $res
                     $endpoints['cellphone'] = ($user['cell'] ? array($user['cell'] => (object) array()) : (object)array());
 
                     // Retrieve webrtc, webrtc_mobile, profile id
-                    $stmt = $dbh->prepare('SELECT webrtc_password, profile_id FROM rest_users WHERE user_id = ?');
+                    $stmt = $dbh->prepare('SELECT profile_id FROM rest_users WHERE user_id = ?');
                     $stmt->execute(array($user['id']));
                     $profileRes = $stmt->fetch();
 
@@ -204,9 +204,14 @@ $app->post('/cti/configuration/users', function (Request $request, Response $res
                         throw new Exception('no profile associated for '. $user['id']);
                     }
 
+                    // Retrieve webrtc password
+                    $stmt = $dbh->prepare('SELECT data FROM sip WHERE keyword = "secret" AND id = ?');
+                    $stmt->execute(array("99".$user['default_extension']));
+                    $profileRes = $stmt->fetch();
+
                     // Set webrtc
-                    $endpoints['webrtc'] = ($profileRes['webrtc_password'] ?
-                        array($profileRes['webrtc_password'] => (object)array()) : (object)array());
+                    $endpoints['webrtc'] = ($profileRes['data'] ?
+                        array("99".$user['default_extension'] => (object)array("secret" => $profileRes['data'])) : (object)array());
 
                     // Set mobile webrtc
                     $endpoints['webrtc_mobile'] = ($profileRes['webrtc_mobile'] ?
