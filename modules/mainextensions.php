@@ -6,6 +6,7 @@ use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
 $app->get('/mainextensions', function (Request $request, Response $response, $args) {
+    fwconsole('userman sync');
     $mainextensions = FreePBX::create()->Core->getAllUsersByDeviceType('virtual');
     return $response->withJson($mainextensions, 200);
 });
@@ -23,23 +24,67 @@ $app->get('/mainextensions/{extension}', function (Request $request, Response $r
 });
 
 $app->post('/mainextensions', function (Request $request, Response $response, $args) {
+    global $astman;
     $params = $request->getParsedBody();
     $username = $params['username'];
-    $extension = $params['extension'];
+    $mainextension = $params['extension'];
     $data['outboundcid'] = $params['outboundcid'];
     $fpbx = FreePBX::create();
     $dbh = FreePBX::Database();
-
-    //Make sure extension is not in use
-    $free = checkFreeExtension($extension);
-    if ($free !== true) {
-        return $response->withJson(array('message'=>$free ), 422);
-    }
 
     //Update user to add this extension as default extension
     //get uid
     $user = $fpbx->Userman->getUserByUsername($username);
     $uid = $user['id'];
+
+    if (!isset($uid)) {
+        return $response->withJson(array('message'=>'User not found' ), 404);
+    }
+
+    //Delete user old extension and all his extensions
+    $sql = 'SELECT `default_extension` FROM `userman_users` WHERE `username` = ?';
+    $stmt = $dbh->prepare($sql);
+    $stmt->execute(array($username));
+    $res = $stmt->fetch(\PDO::FETCH_ASSOC);
+    if (isset($res)){
+        $oldmain = $res['default_extension'];
+        $ext_to_del = array();
+        $ext_to_del[] = $oldmain;
+        //Get all associated extensions
+        $all_extensions = $fpbx->Core->getAllUsers();
+        foreach ($fpbx->Core->getAllUsers() as $ext) {
+            if (substr($ext['extension'], 2) === $oldmain) {
+                $ext_to_del[] = $ext['extension'];
+            }
+        }
+        // clean extension and associated extensions
+        foreach ($ext_to_del as $extension) {
+            $fpbx->Core->delUser($extension);
+            $fpbx->Core->delDevice($extension);
+            $sql = 'UPDATE rest_devices_phones'.
+              ' SET extension = NULL'.
+              ', secret = NULL'.
+              ' WHERE extension = ?';
+            $stmt = $dbh->prepare($sql);
+            $stmt->execute(array($extension));
+
+            //Remove association between main extension and user
+        }
+        $fpbx->Userman->updateUser($uid, $username, $username);
+    }
+
+
+    //exit if extension is empty
+    error_log(print_r($mainextension,true));
+    if (!isset($mainextension) || empty($mainextension) || $mainextension=='none') {
+        return $response->withStatus(200);
+    }
+
+    //Make sure extension is not in use
+    $free = checkFreeExtension($mainextension);
+    if ($free !== true ) {
+        return $response->withJson(array('message'=>$free ), 422);
+    }
 
     if (isset($user['displayname']) && $user['displayname'] != '') {
         $data['name'] = $user['displayname'];
@@ -47,73 +92,26 @@ $app->post('/mainextensions', function (Request $request, Response $response, $a
         $data['name'] = $user['username'];
     }
 
-    if (!isset($uid)) {
-        return $response->withJson(array('message'=>'User not found' ), 404);
-    }
-
-    //update user with $extension as default extension
-    $fpbx->Userman->updateUser($uid, $username, $username, $extension);
-
-    //delete extension
-    $fpbx->Core->delDevice($extension, true);
-    $fpbx->Core->delUser($extension, true);
-
     //create main extension
-    $res = $fpbx->Core->processQuickCreate('pjsip', $extension, $data);
+    $res = $fpbx->Core->processQuickCreate('pjsip', $mainextension, $data);
     if (!$res['status']) {
         return $response->withJson(array('message'=>$res['message']), 500);
     }
 
+    //update user with $extension as default extension
+    $fpbx->Userman->updateUser($uid, $username, $username, $mainextension);
+
     //Configure Follow me for the extension
     $data['fmfm']='yes';
-    $fpbx->Findmefollow->processQuickCreate('pjsip', $extension, $data);
-    $fpbx->Findmefollow->addSettingById($extension, 'strategy', $fpbx->Config->get('FOLLOWME_RG_STRATEGY'));
-    $fpbx->Findmefollow->addSettingById($extension, 'pre_ring', '0');
-    $fpbx->Findmefollow->addSettingById($extension, 'grptime', $fpbx->Config->get('FOLLOWME_TIME'));
-    $fpbx->Findmefollow->addSettingById($extension, 'dring', '<http://www.notused >;info=ring2');
-    $fpbx->Findmefollow->addSettingById($extension, 'postdest', 'app-blackhole,hangup,1');
+    $fpbx->Findmefollow->processQuickCreate('pjsip', $mainextension, $data);
+    $fpbx->Findmefollow->addSettingById($mainextension, 'strategy', $fpbx->Config->get('FOLLOWME_RG_STRATEGY'));
+    $fpbx->Findmefollow->addSettingById($mainextension, 'pre_ring', '0');
+    $fpbx->Findmefollow->addSettingById($mainextension, 'grptime', $fpbx->Config->get('FOLLOWME_TIME'));
+    $fpbx->Findmefollow->addSettingById($mainextension, 'dring', '<http://www.notused >;info=ring2');
+    $fpbx->Findmefollow->addSettingById($mainextension, 'postdest', 'app-blackhole,hangup,1');
 
     fwconsole('r');
     return $response->withStatus(201);
-});
-
-$app->delete('/mainextensions/{extension}', function (Request $request, Response $response, $args) {
-    try {
-        global $astman;
-        $route = $request->getAttribute('route');
-        $mainextension = $route->getArgument('extension');
-        $fpbx = FreePBX::create();
-
-        $ext_to_del = array();
-        $ext_to_del[] = $mainextension;
-        //Get all associated extensions
-        $all_extensions = $fpbx->Core->getAllUsers();
-        foreach ($fpbx->Core->getAllUsers() as $ext) {
-            if (substr($ext['extension'], 2) === $mainextension) {
-                $ext_to_del[] = $ext['extension'];
-            }
-        }
-
-        $dbh = FreePBX::Database();
-        // clean extension and associated extensions
-        foreach ($ext_to_del as $extension) {
-            $fpbx->Core->delUser($extension);
-            $fpbx->Core->delDevice($extension);
-            $sql = 'UPDATE rest_devices_phones'.
-              ' LEFT JOIN userman_users ON rest_devices_phones.user_id = userman_users.id'.
-              ' SET userman_users.default_extension = NULL'.
-              ', rest_devices_phones.extension = NULL'.
-              ', rest_devices_phones.secret = NULL'.
-              ' WHERE rest_devices_phones.extension = ?';
-            $stmt = $dbh->prepare($sql);
-            $stmt->execute(array($extension));
-        }
-        fwconsole('r');
-        return $response->withStatus(200);
-    } catch (Exception $e) {
-        error_log($e->getMessage());
-        return $response->withStatus(500);
-    }
 });
 
 function checkTableExists($table) {
