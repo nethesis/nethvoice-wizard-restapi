@@ -192,11 +192,8 @@ $app->post('/cti/configuration/users', function (Request $request, Response $res
                     // Set email
                     $endpoints['email'] = ($user['email'] ? array($user['email'] => (object) array()) : (object)array());
 
-                    // Set cellphone
-                    $endpoints['cellphone'] = ($user['cell'] ? array($user['cell'] => (object) array()) : (object)array());
-
-                    // Retrieve webrtc, webrtc_mobile, profile id
-                    $stmt = $dbh->prepare('SELECT profile_id FROM rest_users WHERE user_id = ?');
+                    // Retrieve profile id and mobile
+                    $stmt = $dbh->prepare('SELECT profile_id,mobile FROM rest_users WHERE user_id = ?');
                     $stmt->execute(array($user['id']));
                     $profileRes = $stmt->fetch();
 
@@ -204,19 +201,26 @@ $app->post('/cti/configuration/users', function (Request $request, Response $res
                         throw new Exception('no profile associated for '. $user['id']);
                     }
 
+                    // Set cellphone
+                    $endpoints['cellphone'] = ($profileRes['mobile'] ? array($profileRes['mobile'] => (object) array()) : (object)array());
+
                     // Retrieve webrtc password
                     $stmt = $dbh->prepare('SELECT data FROM sip WHERE keyword = "secret" AND id = ?');
                     $stmt->execute(array("99".$user['default_extension']));
-                    $profileRes = $stmt->fetch();
+                    $res = $stmt->fetch();
 
                     // Set webrtc
-                    $endpoints['webrtc'] = ($profileRes['data'] ?
-                        array("99".$user['default_extension'] => (object)array("secret" => $profileRes['data'])) : (object)array());
+                    $endpoints['webrtc'] = ($res['data'] ?
+                        array("99".$user['default_extension'] => (object)array("secret" => $res['data'])) : (object)array());
+
+                    // Retrieve webrtc_mobile password
+                    $stmt = $dbh->prepare('SELECT data FROM sip WHERE keyword = "secret" AND id = ?');
+                    $stmt->execute(array("98".$user['default_extension']));
+                    $res = $stmt->fetch();
 
                     // Set mobile webrtc
-                    $endpoints['webrtc_mobile'] = ($profileRes['webrtc_mobile'] ?
-                        array($profileRes['webrtc_mobile'] => (object)array()) : (object)array());
-
+                    $endpoints['webrtc_mobile'] = ($res['data'] ?
+                        array("98".$user['default_extension'] => (object)array("secret" => $res['data'])) : (object)array());
 
                     // Join configuration
                     $userJson = array(
