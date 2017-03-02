@@ -55,9 +55,6 @@ $app->post('/mobiles', function (Request $request, Response $response, $args) {
         $mobile = preg_replace('/^\+/', '00', $params['mobile']);
         $mobile = preg_replace('/[^0-9]/', '', $mobile);
         $stmt->execute(array($mobile, $params['username'], $mobile));
-        if ($stmt->rowCount() < 1) {
-            throw new Exception('db error');
-        }
     } catch (Exception $e) {
         error_log($e->getMessage());
         return $response->withStatus(500);
