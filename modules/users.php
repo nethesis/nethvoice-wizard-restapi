@@ -50,6 +50,23 @@ function sync() {
     $auth->sync($output);
 }
 
+# Get final wizard report for created users
+
+$app->get('/final', function (Request $request, Response $response, $args) {
+    try {
+        $dbh = FreePBX::Database();
+        $sql = ' SELECT u.username, u.displayname, r.password, u.default_extension
+                 FROM userman_users u JOIN rest_users r ON r.user_id = u.id
+                 WHERE u.default_extension != "none"
+                 ORDER BY u.default_extension ';
+        $final = $dbh->sql($sql, 'getAll', \PDO::FETCH_ASSOC);
+        return $response->withJson($final, 200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
 # Count all users
 
 $app->get('/users/count', function (Request $request, Response $response, $args) {
