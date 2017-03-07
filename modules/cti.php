@@ -271,8 +271,17 @@ $app->post('/cti/configuration/profiles', function (Request $request, Response $
         }
         // Write configuration file
         require(__DIR__. '/../config.inc.php');
+        // remove "id" keys: useless for profiles.json
+        foreach($results as $keyp => $profile) {
+            unset($results[$keyp]['id']);
+            foreach($profile['macro_permissions'] as $keym => $macro) {
+                foreach($macro['permissions'] as $keype => $permission) {
+                    unset($results[$keyp]['macro_permissions'][$keym]['permissions'][$keype]['id']);
+                }
+            }
+        }
         $res = file_put_contents($config['settings']['cti_config_path']. '/profiles.json',json_encode($results, JSON_PRETTY_PRINT));
-                if ($res === FALSE) {
+        if ($res === FALSE) {
             throw new Exception('fail to write config');
         }
     } catch (Exception $e) {
