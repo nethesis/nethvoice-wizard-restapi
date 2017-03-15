@@ -60,7 +60,7 @@ $app->get('/configuration/networks', function (Request $request, Response $respo
     $isRed = false;
     // searching red interfaces
     foreach ($networkDB as $key) {
-        if($key['props']['role'] === 'red' && $key['props']['type'] != 'xdsl-disabled') {
+        if($key['props']['role'] === 'red' && $key['type'] != 'xdsl-disabled') {
             $isRed = true;
         }
     }
