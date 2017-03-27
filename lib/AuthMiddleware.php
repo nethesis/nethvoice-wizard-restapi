@@ -19,17 +19,19 @@ class AuthMiddleware
      */
     public function __invoke($request, $response, $next)
     {
-        global $db;
         if ($request->isOptions()) {
             $response = $next($request, $response);
         }
         else if ($request->getUri()->getPath() != 'testauth' && (!$request->hasHeader('Secretkey') || !$request->hasHeader('User'))) {
             return $response->withJson(['error' => 'Forbidden: no credentials'], 403);
-        } else {
+	} else {
+	    $dbh = FreePBX::Database();
             $given_user = $request->getHeaderLine('User');
             $given_secret = $request->getHeaderLine('Secretkey');
 
-            $user = sql("SELECT * FROM ampusers WHERE sections='*' AND username = '$given_user'", "getAll", DB_FETCHMODE_ASSOC);
+	    $stmt = $dbh->prepare("SELECT * FROM ampusers WHERE sections='*' AND username = ?");
+	    $stmt->execute(array($given_user));
+	    $user = $stmt->fetchAll();
             $password_sha1 = $user[0]['password_sha1'];
             $username = $user[0]['username'];
 
