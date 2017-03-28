@@ -171,14 +171,34 @@ $app->post('/cti/configuration/users', function (Request $request, Response $res
                     );
 
                     // Retrieve physical extensions
-                    $stmt = $dbh->prepare('SELECT extension FROM rest_devices_phones WHERE user_id = ?');
+                    $stmt = $dbh->prepare('SELECT extension, type FROM rest_devices_phones WHERE user_id = ?');
                     $stmt->execute(array($user['id']));
                     $res = $stmt->fetchAll();
 
                     if (count($res) > 0) {
                         $extensions = array();
                         foreach ($res as $e) {
-                            $extensions[$e['extension']] = (object)array();
+                            $settings = array(
+                                'type' => $e['type']
+                            );
+
+                            if ($e['type'] === 'physical') {
+                                $settings['web_user'] = 'admin';
+                                $settings['web_password'] = 'admin';
+                            }
+                            else if ($e['type'] === 'webrtc' || $e['type'] === 'webrtc_mobile') {
+                                // Retrieve webrtc sip credentials
+                                $stmt = $dbh->prepare('SELECT data FROM sip WHERE keyword IN ("account", "secret") AND id = ?');
+                                $stmt->execute(array($e['extension']));
+                                $sipres = $stmt->fetchAll();
+
+                                if ($sipres[0]['data'] && $sipres[1]['data']) {
+                                    $settings['user'] = $sipres[0]['data'];
+                                    $settings['password'] = $sipres[1]['data'];
+                                }
+                            }
+
+                            $extensions[$e['extension']] = (object)$settings;
                         }
 
                         $endpoints['extension'] = $extensions;
@@ -203,24 +223,6 @@ $app->post('/cti/configuration/users', function (Request $request, Response $res
 
                     // Set cellphone
                     $endpoints['cellphone'] = ($profileRes['mobile'] ? array($profileRes['mobile'] => (object) array()) : (object)array());
-
-                    // Retrieve webrtc password
-                    $stmt = $dbh->prepare('SELECT data FROM sip WHERE keyword = "secret" AND id = ?');
-                    $stmt->execute(array("99".$user['default_extension']));
-                    $res = $stmt->fetch();
-
-                    // Set webrtc
-                    $endpoints['webrtc'] = ($res['data'] ?
-                        array("99".$user['default_extension'] => (object)array("secret" => $res['data'])) : (object)array());
-
-                    // Retrieve webrtc_mobile password
-                    $stmt = $dbh->prepare('SELECT data FROM sip WHERE keyword = "secret" AND id = ?');
-                    $stmt->execute(array("98".$user['default_extension']));
-                    $res = $stmt->fetch();
-
-                    // Set mobile webrtc
-                    $endpoints['webrtc_mobile'] = ($res['data'] ?
-                        array("98".$user['default_extension'] => (object)array("secret" => $res['data'])) : (object)array());
 
                     // Join configuration
                     $userJson = array(
