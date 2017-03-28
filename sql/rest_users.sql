@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS `rest_users` (
   `mobile` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `password` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `profile_id` int(11) DEFAULT NULL,
+  `type` varchar(32) NOT NULL DEFAULT 'physical',
   UNIQUE (`user_id`),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
