@@ -547,8 +547,7 @@ $app->post('/devices/phones/provision', function (Request $request, Response $re
 
         $endpoint = new endpointmanager();
 
-        $mac_id = $endpoint->retrieve_device_by_mac($mac);
-
+        $mac_id = $endpoint->eda->sql('SELECT id FROM endpointman_mac_list WHERE mac = \''. str_replace(':', '', $mac) .'\'', 'getOne');
         if ($mac_id) {
             $phone_info = $endpoint->get_phone_info($mac_id);
             $res = $endpoint->prepare_configs($phone_info, false);
@@ -578,7 +577,7 @@ $app->post('/devices/phones/reboot', function (Request $request, Response $respo
 
         $endpoint = new endpointmanager();
 
-        $mac_id = $endpoint->retrieve_device_by_mac($mac);
+        $mac_id = $endpoint->eda->sql('SELECT id FROM endpointman_mac_list WHERE mac = \''. str_replace(':', '', $mac) .'\'', 'getOne');
         if ($mac_id) {
             $phone_info = $endpoint->get_phone_info($mac_id);
 
