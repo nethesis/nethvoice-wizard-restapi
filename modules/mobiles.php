@@ -54,6 +54,9 @@ $app->post('/mobiles', function (Request $request, Response $response, $args) {
         $stmt = $dbh->prepare($sql);
         $mobile = preg_replace('/^\+/', '00', $params['mobile']);
         $mobile = preg_replace('/[^0-9]/', '', $mobile);
+        if ($mobile == "") {
+            $mobile = NULL;
+        }
         $stmt->execute(array($mobile, $params['username'], $mobile));
     } catch (Exception $e) {
         error_log($e->getMessage());
