@@ -245,6 +245,9 @@ $app->post('/cti/configuration/users', function (Request $request, Response $res
 
         if ($res === FALSE) {
             throw new Exception('fail to write config');
+        } else {
+            //Restart nethcti-server
+            system("/usr/bin/sudo /usr/bin/systemctl restart nethcti-server &");
         }
     } catch (Exception $e) {
         error_log($e->getMessage());
