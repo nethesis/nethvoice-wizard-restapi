@@ -184,7 +184,6 @@ function postCTIProfile($profile, $id=false){
             $sql = 'SELECT LAST_INSERT_ID()';
             $id = $dbh->sql($sql,"getOne");
         }
-
         //set macro_permissions
         foreach (getAllAvailableMacroPermissions() as $macro_permission) {
             if (!$profile['macro_permissions'][$macro_permission['name']]['value']) {
@@ -196,13 +195,15 @@ function postCTIProfile($profile, $id=false){
                 $sth = $dbh->prepare($sql);
                 $sth->execute(array($id, $macro_permission['id']));
             }
-            if (!empty($macro_permission['permissions'])) {
-                foreach ($macro_permission['permissions'] as $permission ) {
+            if (!empty($profile['macro_permissions'][$macro_permission['name']]['permissions'])) {
+                foreach ($profile['macro_permissions'][$macro_permission['name']]['permissions'] as $permission ) {
                     if ($permission['value']) {
                         $sql = 'INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (?, ?)';
+                        $sth = $dbh->prepare($sql);
                         $sth->execute(array($id, $permission['id']));
                     } else {
                         $sql = 'DELETE IGNORE FROM `rest_cti_profiles_permissions` WHERE `profile_id` = ? AND `permission_id` = ?';
+                        $sth = $dbh->prepare($sql);
                         $sth->execute(array($id, $permission['id']));
                     }
                 }
