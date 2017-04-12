@@ -52,6 +52,11 @@ function createExtension($mainextensionnumber){
             if (!$res['status']) {
                 throw ("Error creating extension");
             }
+            //set accountcode = mainextension
+            $sql = 'UPDATE IGNORE `sip` SET `data` = ? WHERE `id` = ? AND `keyword` = "accountcode"';
+            $stmt = $dbh->prepare($sql);
+            $stmt->execute(array($mainextensionnumber,$extension));
+
             //Add device to main extension devices
             global $astman;
             $existingdevices = $astman->database_get("AMPUSER", $mainextensionnumber."/device");
@@ -263,7 +268,7 @@ function getWebRTCExtension($mainextension) {
     $uidquery = 'SELECT userman_users.id'.
        ' FROM userman_users'.
        ' WHERE userman_users.default_extension = ?';
-    $sql = 'SELECT extension FROM `rest_devices_phones` WHERE user_id = ('. $uidquery. ') AND type = "webrtc"';
+    $sql = 'SELECT extension FROM `rest_devices_phones` WHERE user_id = ('. $uidquery. ') AND type = "webrtc" AND `extension`';
     $stmt = $dbh->prepare($sql);
     $stmt->execute(array($mainextension));
     return $stmt->fetchAll()[0][0];

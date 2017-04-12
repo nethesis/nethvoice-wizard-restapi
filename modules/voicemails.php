@@ -23,7 +23,7 @@ $app->get('/voicemails/{extension}', function (Request $request, Response $respo
         $extension = $route->getArgument('extension');
         $res = FreePBX::Voicemail()->getVoicemail();
 
-        if (!array_key_exists($extension, $res['default'])) {
+        if (is_array($res['default']) && !array_key_exists($extension, $res['default'])) {
           return $response->withStatus(404);
         }
 

@@ -161,7 +161,7 @@ $app->post('/cti/configuration/users', function (Request $request, Response $res
         $users = FreePBX::create()->Userman->getAllUsers();
         $dbh = FreePBX::Database();
         $freepbxVoicemails = FreePBX::Voicemail()->getVoicemail();
-        $enabledVoicemails = array_keys($freepbxVoicemails['default']);
+        $enabledVoicemails = ($freepbxVoicemails['default'] != null) ? array_keys($freepbxVoicemails['default']) : array();
 
         foreach ($users as $user) {
             try {
@@ -242,7 +242,7 @@ $app->post('/cti/configuration/users', function (Request $request, Response $res
         $res = writeCTIConfigurationFile('/users.json',$json);
 
         if ($res === FALSE) {
-            throw new Exception('fail to write config');
+            throw new Exception('fail to write users config');
         } else {
             //Restart nethcti-server
             system("/usr/bin/sudo /usr/bin/systemctl restart nethcti-server &");
@@ -278,7 +278,7 @@ $app->post('/cti/configuration/profiles', function (Request $request, Response $
         // Write configuration file
         $res = writeCTIConfigurationFile('/profiles.json',$out);
         if ($res === FALSE) {
-            throw new Exception('fail to write config');
+            throw new Exception('fail to write profiles config');
         }
     } catch (Exception $e) {
         error_log($e->getMessage());
@@ -310,7 +310,7 @@ $app->post('/cti/configuration/asteriskcdrdb', function (Request $request, Respo
  
         $res = writeCTIConfigurationFile('/dbstatic.d/asteriskcdrdb.json',$asteriskcdrdb);
         if ($res === FALSE) {
-            throw new Exception('fail to write config');
+            throw new Exception('fail to write asteriskcdrdb config');
         }
     } catch (Exception $e) {
         error_log($e->getMessage());
@@ -331,7 +331,7 @@ $app->post('/cti/configuration/trunks', function (Request $request, Response $re
         $trunks = getTrunksConfiguration();
         $res = writeCTIConfigurationFile('/ast_trunks.json',$trunks);
         if ($res === FALSE) {
-            throw new Exception('fail to write config');
+            throw new Exception('fail to write trunks config');
         }
     } catch (Exception $e) {
         error_log($e->getMessage());
