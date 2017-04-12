@@ -156,8 +156,8 @@ $app->delete('/cti/profiles/{id}', function (Request $request, Response $respons
  */
 $app->post('/cti/configuration/users', function (Request $request, Response $response, $args) {
     try {
+        include_once('lib/libCTI.php');
         $json = array();
-
         $users = FreePBX::create()->Userman->getAllUsers();
         $dbh = FreePBX::Database();
         $freepbxVoicemails = FreePBX::Voicemail()->getVoicemail();
@@ -239,9 +239,7 @@ $app->post('/cti/configuration/users', function (Request $request, Response $res
             }
         }
         // Write configuration file
-        require(__DIR__. '/../config.inc.php');
-        $res = file_put_contents($config['settings']['cti_config_path']. '/users.json',
-            json_encode($json, JSON_PRETTY_PRINT));
+        $res = writeCTIConfigurationFile('/users.json',$json);
 
         if ($res === FALSE) {
             throw new Exception('fail to write config');
@@ -278,8 +276,60 @@ $app->post('/cti/configuration/profiles', function (Request $request, Response $
             $out[$r['id']] = $r;
         }
         // Write configuration file
-        require(__DIR__. '/../config.inc.php');
-        $res = file_put_contents($config['settings']['cti_config_path']. '/profiles.json',json_encode($out, JSON_PRETTY_PRINT));
+        $res = writeCTIConfigurationFile('/profiles.json',$out);
+        if ($res === FALSE) {
+            throw new Exception('fail to write config');
+        }
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+    return $response->withStatus(200);
+});
+
+/*
+ * Write cti configuration: allow CTI server to access CDR, CEL and voicemail DBs
+ *
+ * @api /cti/configuration/asteriskcdrdb
+ *
+ */
+$app->post('/cti/configuration/asteriskcdrdb', function (Request $request, Response $response, $args) {
+    try {
+        include_once('lib/libCTI.php');
+        global $amp_conf;
+        $asteriskcdrdb = array();
+        foreach (array('history_call','cel','voicemail') as $dbobj) {
+            $asteriskcdrdb[$dbobj] = array();
+            $asteriskcdrdb[$dbobj]['dbhost'] = 'localhost';
+            $asteriskcdrdb[$dbobj]['dbport'] = '/var/lib/mysql/mysql.sock';
+            $asteriskcdrdb[$dbobj]['dbtype'] = 'mysql';
+            $asteriskcdrdb[$dbobj]['dbuser'] = ($amp_conf['CDRDBUSER'] ? $amp_conf['CDRDBUSER'] : $amp_conf['AMPDBUSER']);
+            $asteriskcdrdb[$dbobj]['dbpassword'] = ($amp_conf['CDRDBPASS'] ? $amp_conf['CDRDBPASS'] : $amp_conf['AMPDBPASS']);
+            $asteriskcdrdb[$dbobj]['dbname'] = $amp_conf['CDRDBNAME'];
+        }
+ 
+        $res = writeCTIConfigurationFile('/dbstatic.d/asteriskcdrdb.json',$asteriskcdrdb);
+        if ($res === FALSE) {
+            throw new Exception('fail to write config');
+        }
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+    return $response->withStatus(200);
+});
+
+/*
+ * Write cti configuration: trunk file
+ *
+ * @api /cti/configuration/trunks
+ *
+ */
+$app->post('/cti/configuration/trunks', function (Request $request, Response $response, $args) {
+    try {
+        include_once('lib/libCTI.php');
+        $trunks = getTrunksConfiguration();
+        $res = writeCTIConfigurationFile('/ast_trunks.json',$trunks);
         if ($res === FALSE) {
             throw new Exception('fail to write config');
         }

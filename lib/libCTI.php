@@ -215,3 +215,32 @@ function postCTIProfile($profile, $id=false){
         return false;
     }
 }
+
+/*Write a CTI configuration file in JSON format*/
+function writeCTIConfigurationFile($filename, $obj) {
+    try {
+        // Write configuration file
+        require(__DIR__. '/../config.inc.php');
+        $res = file_put_contents($config['settings']['cti_config_path']. $filename,json_encode($obj, JSON_PRETTY_PRINT));
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return FALSE;
+    }
+    return $res;
+}
+
+/*Get trunk configuration*/
+function getTrunksConfiguration() {
+    try {
+        $result = array();
+        $trunks = FreePBX::Core()->listTrunks();
+        foreach($trunks as $trunk) {
+            $result[$trunk['name']] = (object) array();
+        }
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return FALSE;
+    }
+    return $result;
+}
+
