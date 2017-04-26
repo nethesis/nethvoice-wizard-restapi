@@ -288,16 +288,18 @@ $app->post('/cti/configuration/profiles', function (Request $request, Response $
 });
 
 /*
- * Write cti configuration: trunk file
+ * Write cti configuration: trunks, queues
  *
- * @api /cti/configuration/trunks
+ * @api /cti/configuration/astobjconfig
  *
  */
-$app->post('/cti/configuration/trunks', function (Request $request, Response $response, $args) {
+$app->post('/cti/configuration/astobjconfig', function (Request $request, Response $response, $args) {
     try {
         include_once('lib/libCTI.php');
-        $trunks = getTrunksConfiguration();
-        $res = writeCTIConfigurationFile('/ast_trunks.json',$trunks);
+        $obj = new stdClass();
+        $obj->trunks = getTrunksConfiguration();
+        $obj->queues = getQueuesConfiguration();
+        $res = writeCTIConfigurationFile('/ast_objects.json',$obj);
         if ($res === FALSE) {
             throw new Exception('fail to write trunks config');
         }
