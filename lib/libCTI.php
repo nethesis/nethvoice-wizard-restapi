@@ -244,3 +244,17 @@ function getTrunksConfiguration() {
     return $result;
 }
 
+function getQueuesConfiguration() {
+    try {
+        $result = array();
+        $queues = FreePBX::Queues()->listQueues();
+        foreach($queues as $queue) {
+            $result[$queue[0]] = (object) array("id" => $queue[0], "name" => $queue[1]);
+        }
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return FALSE;
+    }
+    return $result;
+}
+
