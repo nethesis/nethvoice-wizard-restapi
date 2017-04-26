@@ -2,12 +2,12 @@
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
+include_once('lib/libCTI.php');
 
 /* GET /cti/profiles
 Return: [{id:1, name: admin, macro_permissions [ oppanel: {value: true, permissions [ {name: "foo", description: "descrizione...", value: false},{..} ]}
 */
 $app->get('/cti/profiles', function (Request $request, Response $response, $args) {
-    include_once('lib/libCTI.php');
     $results = getCTIPermissionProfiles();
     if (!$results) {
         return $response->withStatus(500);
@@ -21,7 +21,6 @@ Return: {id:1, name: admin, macro_permissions [ oppanel: {value: true, permissio
 */
 $app->get('/cti/profiles/{id}', function (Request $request, Response $response, $args) {
     try {
-        include_once('lib/libCTI.php');
         $route = $request->getAttribute('route');
         $id = $route->getArgument('id');
         $results = getCTIPermissionProfiles($id);
@@ -41,7 +40,6 @@ Return: [{"cdr": {"permissions": [{"description": "descrizione...", "id": "2", "
 */
 $app->get('/cti/permissions', function (Request $request, Response $response, $args) {
     try {
-        include_once('lib/libCTI.php');
        	$results = getCTIPermissions();
         if (!$results) {
             return $response->withStatus(500);
@@ -58,7 +56,6 @@ $app->get('/cti/permissions', function (Request $request, Response $response, $a
 */
 $app->post('/cti/profiles/{id}', function (Request $request, Response $response, $args) {
     try {
-        include_once('lib/libCTI.php');
         $route = $request->getAttribute('route');
         $id = $route->getArgument('id');
         $profile = $request->getParsedBody();
@@ -77,7 +74,6 @@ $app->post('/cti/profiles/{id}', function (Request $request, Response $response,
 /* POST /cti/profiles {name: admin, permissions: [{name: "foo", type: customer_card, value: false} return id */
 $app->post('/cti/profiles', function (Request $request, Response $response, $args) {
     try {
-        include_once('lib/libCTI.php');
         $profile = $request->getParsedBody();
         $id = postCTIProfile($profile);
         if ($id) {
@@ -156,7 +152,6 @@ $app->delete('/cti/profiles/{id}', function (Request $request, Response $respons
  */
 $app->post('/cti/configuration/users', function (Request $request, Response $response, $args) {
     try {
-        include_once('lib/libCTI.php');
         $json = array();
         $users = FreePBX::create()->Userman->getAllUsers();
         $dbh = FreePBX::Database();
@@ -267,7 +262,6 @@ $app->post('/cti/configuration/users', function (Request $request, Response $res
 
 $app->post('/cti/configuration/profiles', function (Request $request, Response $response, $args) {
     try {
-        include_once('lib/libCTI.php');
         $results = getCTIPermissionProfiles(false,true);
         if (!$results) {
             throw new Exception('Empty profile config');
@@ -295,7 +289,6 @@ $app->post('/cti/configuration/profiles', function (Request $request, Response $
  */
 $app->post('/cti/configuration/astobjconfig', function (Request $request, Response $response, $args) {
     try {
-        include_once('lib/libCTI.php');
         $obj = new stdClass();
         $obj->trunks = getTrunksConfiguration();
         $obj->queues = getQueuesConfiguration();
