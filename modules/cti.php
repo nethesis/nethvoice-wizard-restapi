@@ -60,6 +60,7 @@ $app->post('/cti/profiles/{id}', function (Request $request, Response $response,
         $id = $route->getArgument('id');
         $profile = $request->getParsedBody();
         if (postCTIProfile($profile,$id)) {
+            fwconsole('r');
             return $response->withJson(array('status' => true), 200);
         } else {
             throw new Exception('Error editing profile');
@@ -77,6 +78,7 @@ $app->post('/cti/profiles', function (Request $request, Response $response, $arg
         $profile = $request->getParsedBody();
         $id = postCTIProfile($profile);
         if ($id) {
+            fwconsole('r');
             return $response->withJson(array('id' => $id ), 200);
         } else {
             throw new Exception('Error creating new profile');
@@ -121,6 +123,7 @@ $app->post('/cti/profiles/users/{user_id}', function (Request $request, Response
                 ' ON DUPLICATE KEY UPDATE profile_id = ?';
         $stmt = $dbh->prepare($sql);
         $stmt->execute(array($user_id, $profile_id, $profile_id));
+        fwconsole('r');
         return $response->withJson(array('status' => true), 200);
     } catch (Exception $e) {
         error_log($e->getMessage());
@@ -137,6 +140,7 @@ $app->delete('/cti/profiles/{id}', function (Request $request, Response $respons
         $sql = 'DELETE FROM `rest_cti_profiles` WHERE `id` = ?';
         $sth = $dbh->prepare($sql);
         $sth->execute(array($id));
+        fwconsole('r');
         return $response->withJson(array('status' => true), 200);
     } catch (Exception $e) {
         error_log($e->getMessage());
