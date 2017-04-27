@@ -62,6 +62,6 @@ $app->post('/mobiles', function (Request $request, Response $response, $args) {
         error_log($e->getMessage());
         return $response->withStatus(500);
     }
-
+    fwconsole('r');
     return $response->withStatus(200);
 });
