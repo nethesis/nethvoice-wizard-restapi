@@ -177,19 +177,28 @@ $app->post('/users/{username}/password', function (Request $request, Response $r
     $username = $request->getAttribute('username');
     $password = $params['password'];
 
-    if ( ! userExists($username) ) {
-        return $response->withJson(['result' => "$username user doesn't exist"], 422);
+    if ($username === 'admin') { # change freepbx admin password
+        $dbh = FreePBX::Database();
+        $dbh->sql('UPDATE ampusers SET password_sha1 = sha1(\''. $password. '\')'.
+            ' WHERE username = \'admin\'');
     } else {
-        $tmp = tempnam("/tmp","ASTPWD");
-        file_put_contents($tmp, $password);
+        if ( ! userExists($username) ) {
+            return $response->withJson(['result' => "$username user doesn't exist"], 422);
+        } else {
+            $tmp = tempnam("/tmp","ASTPWD");
+            file_put_contents($tmp, $password);
 
-        exec("/usr/bin/sudo /sbin/e-smith/signal-event password-modify '".getUser($username)."' $tmp", $out, $ret);
-        if ($ret === 0) {
-            setPassword($username, $password);
-            return $response->withStatus(201);
+            exec("/usr/bin/sudo /sbin/e-smith/signal-event password-modify '".getUser($username)."' $tmp", $out, $ret);
+            if ($ret === 0) {
+                setPassword($username, $password);
+                return $response->withStatus(201);
+            }
         }
+
+        return $response->withStatus(422);
     }
-    return $response->withStatus(422);
+
+    return $response->withStatus(201);
 });
 
 # Return the password givent user in clear text
