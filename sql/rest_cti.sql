@@ -78,17 +78,13 @@ INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (9,'remote_sites','Remote
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (1,'call_waiting','Call Waiting','Configure call waiting');
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (2,'dnd','DND','Configure do Not Disturb');
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (3,'call_forward','Call Forward','Configure Call Forward');
-INSERT IGNORE INTO `rest_cti_permissions` VALUES (4,'recording','Recording','Record own conversations. View/liste
-n/delete own recording');
+INSERT IGNORE INTO `rest_cti_permissions` VALUES (4,'recording','Recording','Record own conversations. View/listen/delete own recording');
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (5,'conference','Conference','Make a conference call');
-INSERT IGNORE INTO `rest_cti_permissions` VALUES (6,'parkings','Parkings','View parkings state and pickup parked
-calls');
+INSERT IGNORE INTO `rest_cti_permissions` VALUES (6,'parkings','Parkings','View parkings state and pickup parked calls');
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (7,'sms','SMS','Send SMS and view own sent SMS history');
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (8,'chat','Chat','Use chat service');
-INSERT IGNORE INTO `rest_cti_permissions` VALUES (9,'privacy','Privacy','Obfuscate called and caller numbers for
-other users');
-INSERT IGNORE INTO `rest_cti_permissions` VALUES (10,'oppanel','Operation Panel','Enable Operation Panel access')
-;
+INSERT IGNORE INTO `rest_cti_permissions` VALUES (9,'privacy','Privacy','Obfuscate called and caller numbers for other users');
+INSERT IGNORE INTO `rest_cti_permissions` VALUES (10,'oppanel','Operation Panel','Enable Operation Panel access');
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (11,'queueman','QueueMan','Enable QueueMan access');
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (12,'ad_phonebook','Advanced Phonebook','Modify and delete all contacts');
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (13,'ad_cdr','PBX CDR','View all users call history');
@@ -135,9 +131,11 @@ INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (6,24);
 INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (8,25);
 
 /*Permissions enabled by default for each profile*/
+/*Base*/
 INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (1,1);
 INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (1,2);
 INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (1,9);
+/*Standard*/
 INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (2,1);
 INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (2,2);
 INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (2,3);
@@ -148,6 +146,7 @@ INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (2,8);
 INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (2,9);
 INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (2,10);
 INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (2,23);
+/*Advanced*/
 INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (3,1);
 INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (3,2);
 INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (3,3);
@@ -156,7 +155,6 @@ INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (3,5);
 INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (3,6);
 INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (3,7);
 INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (3,8);
-INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (3,9);
 INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (3,10);
 INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (3,11);
 INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (3,12);
