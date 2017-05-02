@@ -116,60 +116,60 @@ function useExtensionAsWebRTC($extension) {
 }
 
 function useExtensionAsPhysical($extension,$mac,$model,$line=false) {
-   try {
-       //enable call waiting
-       global $astman;
-       $astman->database_put("CW",$extension,"ENABLED");
-       // insert created physical extension in password table
-       $extension_secret = sql('SELECT data FROM `sip` WHERE id = "' . $extension . '" AND keyword="secret"', "getOne");
-       $dbh = FreePBX::Database();
-       if ( isset($line) && $line ) {
-           $sql = 'UPDATE `rest_devices_phones` SET user_id = ( '.
-                  'SELECT userman_users.id FROM userman_users WHERE userman_users.default_extension = ? '.
-                  '), extension = ?, secret= ?, type = "physical" WHERE mac = ? AND line = ?';
-           $stmt = $dbh->prepare($sql);
-           $res = $stmt->execute(array(getMainExtension($extension),$extension,$extension_secret,$mac,$line));
-       } else {
-           $sql = 'UPDATE `rest_devices_phones` SET user_id = ( '.
-                  'SELECT userman_users.id FROM userman_users WHERE userman_users.default_extension = ? '.
-                  '), extension = ?, secret= ?, type = "physical" WHERE mac = ?';
-           $stmt = $dbh->prepare($sql);
-           $res = $stmt->execute(array(getMainExtension($extension),$extension,$extension_secret,$mac));
-       }
-       $stmt = $dbh->prepare($sql);
-       if ($res) {
-           // Add extension to endpointman
-           $endpoint = new endpointmanager();
-           // Get model id by mac
-           $brand = $endpoint->get_brand_from_mac($mac);
-           $models = $endpoint->models_available(null, $brand['id']);
-           $model_id = null;
-           foreach ($models as $m) {
-               if ($m['text'] === $model) {
-                   $model_id = $m['value'];
-                   break;
-               }
-           }
-           if (!$model_id) {
-               throw new Exception('model not found');
-           } else {
-               $mac_id = $dbh->sql('SELECT id FROM endpointman_mac_list WHERE mac = "'.preg_replace('/:/', '', $mac).'"', "getOne");
-               if ($mac_id) {
-                    // add line if device already exist
-                   $endpoint->add_line($mac_id, $line, $extension, $mainextension['name']);
-               } else {
-                   // add device to endpointman module
-                   $mac_id = $endpoint->add_device($mac, $model_id, $extension, null, $line, $mainextension['name']);
-               }
-           }
-       } else {
-           throw new Exception("Error adding device");
-       }
-       return true;
-    } catch (Exception $e) {
-       error_log($e->getMessage());
-       return false;
-   }
+    try {
+        //enable call waiting
+        global $astman;
+        $astman->database_put("CW",$extension,"ENABLED");
+        // insert created physical extension in password table
+        $extension_secret = sql('SELECT data FROM `sip` WHERE id = "' . $extension . '" AND keyword="secret"', "getOne");
+        $dbh = FreePBX::Database();
+        if ( isset($line) && $line ) {
+            $sql = 'UPDATE `rest_devices_phones` SET user_id = ( '.
+                   'SELECT userman_users.id FROM userman_users WHERE userman_users.default_extension = ? '.
+                   '), extension = ?, secret= ?, type = "physical" WHERE mac = ? AND line = ?';
+            $stmt = $dbh->prepare($sql);
+            $res = $stmt->execute(array(getMainExtension($extension),$extension,$extension_secret,$mac,$line));
+        } else {
+            $sql = 'UPDATE `rest_devices_phones` SET user_id = ( '.
+                   'SELECT userman_users.id FROM userman_users WHERE userman_users.default_extension = ? '.
+                   '), extension = ?, secret= ?, type = "physical" WHERE mac = ?';
+            $stmt = $dbh->prepare($sql);
+            $res = $stmt->execute(array(getMainExtension($extension),$extension,$extension_secret,$mac));
+        }
+        $stmt = $dbh->prepare($sql);
+        if ($res) {
+            // Add extension to endpointman
+            $endpoint = new endpointmanager();
+            // Get model id by mac
+            $brand = $endpoint->get_brand_from_mac($mac);
+            $models = $endpoint->models_available(null, $brand['id']);
+            $model_id = null;
+            foreach ($models as $m) {
+                if ($m['text'] === $model) {
+                    $model_id = $m['value'];
+                    break;
+                }
+            }
+            if (!$model_id) {
+                throw new Exception('model not found');
+            } else {
+                $mac_id = $dbh->sql('SELECT id FROM endpointman_mac_list WHERE mac = "'.preg_replace('/:/', '', $mac).'"', "getOne");
+                if ($mac_id) {
+                     // add line if device already exist
+                    $endpoint->add_line($mac_id, $line, $extension, $mainextension['name']);
+                } else {
+                    // add device to endpointman module
+                    $mac_id = $endpoint->add_device($mac, $model_id, $extension, null, $line, $mainextension['name']);
+                }
+            }
+        } else {
+            throw new Exception("Error adding device");
+        }
+        return true;
+     } catch (Exception $e) {
+        error_log($e->getMessage());
+        return false;
+    }
 }
 
 function isMainExtension($extension) {
