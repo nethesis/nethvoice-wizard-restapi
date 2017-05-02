@@ -12,6 +12,7 @@ function extensionExists($e, $extensions)
 
 function createExtension($mainextensionnumber){
     try {
+        global $astman;
         $fpbx = FreePBX::create();
         $dbh = FreePBX::Database();
         $stmt = $dbh->prepare("SELECT * FROM `rest_devices_phones` WHERE `extension` = ?");
@@ -57,8 +58,10 @@ function createExtension($mainextensionnumber){
             $stmt = $dbh->prepare($sql);
             $stmt->execute(array($mainextensionnumber,$extension));
 
+            //Set cid_masquerade (CID Num Alias)
+	    $astman->database_put("AMPUSER",$extension."/cidnum",$mainextensionnumber);
+
             //Add device to main extension devices
-            global $astman;
             $existingdevices = $astman->database_get("AMPUSER", $mainextensionnumber."/device");
             if (empty($existingdevices)) {
                 $astman->database_put("AMPUSER", $mainextensionnumber."/device", $extension);
