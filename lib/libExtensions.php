@@ -80,9 +80,12 @@ function createExtension($mainextensionnumber){
 
 function useExtensionAsWebRTC($extension) {
     try {
+	//disable call waiting
+        global $astman;
+        $astman->database_del("CW",$extension);
         // insert WebRTC extension in password table
         $extension_secret = sql('SELECT data FROM `sip` WHERE id = "' . $extension . '" AND keyword="secret"', "getOne");
-        $dbh = FreePBX::Database();
+	$dbh = FreePBX::Database();
         $sql = 'SELECT id FROM rest_devices_phones WHERE extension = ?';
         $stmt = $dbh->prepare($sql);
         $stmt->execute(array($extension));
@@ -113,7 +116,10 @@ function useExtensionAsWebRTC($extension) {
 }
 
 function useExtensionAsPhysical($extension,$mac,$model,$line=false) {
-    try {
+   try {
+       //enable call waiting
+       global $astman;
+       $astman->database_put("CW",$extension,"ENABLED");
        // insert created physical extension in password table
        $extension_secret = sql('SELECT data FROM `sip` WHERE id = "' . $extension . '" AND keyword="secret"', "getOne");
        $dbh = FreePBX::Database();
