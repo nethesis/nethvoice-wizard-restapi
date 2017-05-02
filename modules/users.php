@@ -14,7 +14,7 @@ function getUser($username) {
 
 function userExists($username) {
     $needle = getUser($username);
-    $users = shell_exec("/usr/bin/sudo /usr/libexec/nethserver/ldap-list-users");
+    $users = shell_exec("/usr/bin/sudo /usr/libexec/nethserver/list-users");
     foreach (json_decode($users) as $user => $props) {
         if ($user == $needle) {
             return true;
