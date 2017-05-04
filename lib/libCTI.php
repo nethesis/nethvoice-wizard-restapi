@@ -49,6 +49,18 @@ function getAllAvailableMacroPermissionsPermissions() {
 
 }
 
+function getCTIGroups() {
+    try {
+        $dbh = FreePBX::Database();
+        $sql = 'select uu.username, cg.name from rest_cti_users_groups ug join rest_cti_groups cg on ug.group_id = cg.id join rest_users ru on ru.id = ug.user_id join userman_users uu on uu.id = ru.user_id;';
+        $result = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC);
+        return $result;
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return false;
+    }
+}
+
 function getCTIPermissionProfiles($profileId=false, $minified=false){
     try {
         $dbh = FreePBX::Database();
