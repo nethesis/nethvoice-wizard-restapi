@@ -148,4 +148,37 @@ $app->delete('/cti/profiles/{id}', function (Request $request, Response $respons
     }
 });
 
+/* GET /cti/groups
+Return: [{id:1, name: support}, {id:2, name:development}]
+*/
+$app->get('/cti/groups', function (Request $request, Response $response, $args) {
+    try {
+        $dbh = FreePBX::Database();
+        $sql = 'SELECT id, name FROM `rest_cti_groups`';
+        $res = $dbh->sql($sql, 'getAll', \PDO::FETCH_ASSOC);
+
+        return $response->withJson($res, 200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
+/* POST /cti/groups {"name": "sviluppo"}
+*/
+$app->post('/cti/groups', function (Request $request, Response $response, $args) {
+    try {
+        $data = $request->getParsedBody();
+        $dbh = FreePBX::Database();
+        $sql = 'INSERT INTO rest_cti_groups VALUES (NULL, ?)';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array($data['name']));
+
+        return $response->withJson($data, 200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
 
