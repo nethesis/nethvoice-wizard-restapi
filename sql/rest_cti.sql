@@ -58,6 +58,28 @@ CREATE TABLE IF NOT EXISTS `rest_cti_macro_permissions_permissions`(
   UNIQUE KEY `line` (`macro_permission_id`,`permission_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS `rest_cti_groups` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(65) NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name_key` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `rest_cti_users_groups` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `group_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_group` (`user_id`,`group_id`),
+  KEY `group_id` (`group_id`),
+  FOREIGN KEY (`group_id`) REFERENCES `rest_cti_groups` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  FOREIGN KEY (`user_id`) REFERENCES `userman_users` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 /*Default profiles*/
 INSERT IGNORE INTO `rest_cti_profiles` VALUES (1,'Base');
 INSERT IGNORE INTO `rest_cti_profiles` VALUES (2,'Standard');

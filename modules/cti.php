@@ -148,4 +148,119 @@ $app->delete('/cti/profiles/{id}', function (Request $request, Response $respons
     }
 });
 
+/* GET /cti/groups
+Return: [{id:1, name: support}, {id:2, name:development}]
+*/
+$app->get('/cti/groups', function (Request $request, Response $response, $args) {
+    try {
+        $dbh = FreePBX::Database();
+        $sql = 'SELECT id, name FROM `rest_cti_groups`';
+        $res = $dbh->sql($sql, 'getAll', \PDO::FETCH_ASSOC);
 
+        return $response->withJson($res, 200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
+/* GET /cti/groups/users/:id
+Return: {id:1, name: support}
+*/
+$app->get('/cti/groups/users/{id}', function (Request $request, Response $response, $args) {
+    try {
+        $route = $request->getAttribute('route');
+        $id = $route->getArgument('id');
+
+        $dbh = FreePBX::Database();
+        $sql = 'SELECT rest_cti_groups.id, rest_cti_groups.name'.
+            ' FROM rest_cti_groups'.
+            ' JOIN rest_cti_users_groups ON rest_cti_users_groups.group_id = rest_cti_groups.id'.
+            ' WHERE rest_cti_users_groups.user_id = ?';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array($id));
+
+        $data = array();
+
+        while ($res = $sth->fetchObject()) {
+            $data[] = $res->id;
+        }
+
+        return $response->withJson($data, 200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
+/* POST /cti/groups {"name": "sviluppo"}
+*/
+$app->post('/cti/groups', function (Request $request, Response $response, $args) {
+    try {
+        $data = $request->getParsedBody();
+        $dbh = FreePBX::Database();
+        $sql = 'INSERT INTO rest_cti_groups VALUES (NULL, ?)';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array($data['name']));
+
+        $query = 'SELECT id FROM rest_cti_groups WHERE name = ?';
+        $sth = $dbh->prepare($query);
+        $sth->execute(array($data['name']));
+        $group_id = $sth->fetchObject();
+        fwconsole('r');
+
+        return $response->withJson($group_id, 200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
+/* DELETE /cti/groups/{id} */
+$app->delete('/cti/groups/{id}', function (Request $request, Response $response, $args) {
+    try {
+        $dbh = FreePBX::Database();
+        $route = $request->getAttribute('route');
+        $id = $route->getArgument('id');
+        $sql = 'DELETE FROM `rest_cti_groups` WHERE `id` = ?';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array($id));
+        fwconsole('r');
+
+        return $response->withJson(array('status' => true), 200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
+/*
+ * POST /cti/groups/users/3 groups: [1, 4, 5]
+*/
+$app->post('/cti/groups/users/{id}', function (Request $request, Response $response, $args) {
+    try {
+        $route = $request->getAttribute('route');
+        $user_id = $route->getArgument('id');
+        $data = $request->getParsedBody();
+
+        // Delete previous assignments
+        $dbh = FreePBX::Database();
+        $sql = 'DELETE FROM rest_cti_users_groups WHERE user_id = ?';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array($user_id));
+
+        // Add groups for user
+        foreach ($data['groups'] as $group_id) {
+            $sql = 'INSERT INTO rest_cti_users_groups VALUES (NULL, ?, ?)';
+            $sth = $dbh->prepare($sql);
+            $sth->execute(array($user_id, $group_id));
+        }
+
+        fwconsole('r');
+
+        return $response->withStatus(200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
