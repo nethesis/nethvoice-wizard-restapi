@@ -183,7 +183,7 @@ $app->get('/cti/groups/users/{id}', function (Request $request, Response $respon
         $data = array();
 
         while ($res = $sth->fetchObject()) {
-            $data[] = $res;
+            $data[] = $res->id;
         }
 
         return $response->withJson($data, 200);
