@@ -181,4 +181,19 @@ $app->post('/cti/groups', function (Request $request, Response $response, $args)
     }
 });
 
-
+/* DELETE /cti/groups/{id} */
+$app->delete('/cti/groups/{id}', function (Request $request, Response $response, $args) {
+    try {
+        $dbh = FreePBX::Database();
+        $route = $request->getAttribute('route');
+        $id = $route->getArgument('id');
+        $sql = 'DELETE FROM `rest_cti_groups` WHERE `id` = ?';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array($id));
+        fwconsole('r');
+        return $response->withJson(array('status' => true), 200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
