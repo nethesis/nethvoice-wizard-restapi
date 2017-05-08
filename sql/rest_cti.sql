@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS `rest_cti_groups` (
 
 CREATE TABLE IF NOT EXISTS `rest_cti_users_groups` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) NOT NULL,
+  `user_id` int(11) NOT NULL,
   `group_id` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_group` (`user_id`,`group_id`),
@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS `rest_cti_users_groups` (
   FOREIGN KEY (`group_id`) REFERENCES `rest_cti_groups` (`id`)
     ON DELETE CASCADE
     ON UPDATE CASCADE,
-  FOREIGN KEY (`user_id`) REFERENCES `rest_users` (`id`)
+  FOREIGN KEY (`user_id`) REFERENCES `userman_users` (`id`)
     ON DELETE CASCADE
     ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
