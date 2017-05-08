@@ -54,8 +54,7 @@ function getCTIGroups() {
         $dbh = FreePBX::Database();
         $sql = 'SELECT uu.username, cg.name FROM rest_cti_users_groups ug'.
                ' JOIN rest_cti_groups cg ON ug.group_id = cg.id'.
-               ' JOIN rest_users ru ON ru.id = ug.user_id'.
-               ' JOIN userman_users uu on uu.id = ru.user_id;';
+               ' JOIN userman_users uu on uu.id = ug.user_id;';
         $result = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC);
         return $result;
     } catch (Exception $e) {
