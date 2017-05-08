@@ -174,7 +174,12 @@ $app->post('/cti/groups', function (Request $request, Response $response, $args)
         $sth = $dbh->prepare($sql);
         $sth->execute(array($data['name']));
 
-        return $response->withJson($data, 200);
+        $query = 'SELECT id FROM rest_cti_groups WHERE name = ?';
+        $sth = $dbh->prepare($query);
+        $sth->execute(array($data['name']));
+        $group_id = $sth->fetchObject();
+
+        return $response->withJson($group_id, 200);
     } catch (Exception $e) {
         error_log($e->getMessage());
         return $response->withStatus(500);
