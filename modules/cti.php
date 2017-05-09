@@ -203,6 +203,24 @@ $app->post('/cti/groups', function (Request $request, Response $response, $args)
         $sth = $dbh->prepare($sql);
         $sth->execute(array($data['name']));
 
+        $sql = 'INSERT INTO rest_cti_permissions VALUES (NULL, ?, ?, ?)';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array("grp_".trim(strtolower(preg_replace('/[^a-zA-Z0-9]/','',$data['name']))), "Group: ".trim($data['name']), "Group: ".trim($data['name']).": of presence panel"));
+
+        $query = 'SELECT id FROM rest_cti_macro_permissions WHERE name = "presence_panel"';
+        $sth = $dbh->prepare($query);
+        $sth->execute();
+        $macro_group_id = $sth->fetchObject();
+
+        $query = 'SELECT id FROM rest_cti_permissions WHERE name = ?';
+        $sth = $dbh->prepare($query);
+        $sth->execute(array("grp_".trim(strtolower(preg_replace('/[^a-zA-Z0-9]/','',$data['name'])))));
+        $perm_id = $sth->fetchObject();
+
+        $sql = 'INSERT INTO rest_cti_macro_permissions_permissions VALUES (?, ?)';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array($macro_group_id->id, $perm_id->id));
+
         $query = 'SELECT id FROM rest_cti_groups WHERE name = ?';
         $sth = $dbh->prepare($query);
         $sth->execute(array($data['name']));
@@ -222,9 +240,20 @@ $app->delete('/cti/groups/{id}', function (Request $request, Response $response,
         $dbh = FreePBX::Database();
         $route = $request->getAttribute('route');
         $id = $route->getArgument('id');
+
+        $query = 'SELECT name FROM rest_cti_groups WHERE id = ?';
+        $sth = $dbh->prepare($query);
+        $sth->execute(array($id));
+        $group_name = $sth->fetchObject();
+
         $sql = 'DELETE FROM `rest_cti_groups` WHERE `id` = ?';
         $sth = $dbh->prepare($sql);
         $sth->execute(array($id));
+
+        $sql = 'DELETE FROM `rest_cti_permissions` WHERE `name` = ?';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array("grp_".trim(strtolower(preg_replace('/[^a-zA-Z0-9]/','',$group_name->name)))));
+
         fwconsole('r');
 
         return $response->withJson(array('status' => true), 200);
