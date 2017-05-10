@@ -293,3 +293,108 @@ $app->post('/cti/groups/users/{id}', function (Request $request, Response $respo
         return $response->withStatus(500);
     }
 });
+
+/*
+ * POST /cti/dbconn { host: string, port: numeric, type: string, user: string, pass: string, name: string }
+*/
+$app->post('/cti/dbconn', function (Request $request, Response $response, $args) {
+    try {
+        $route = $request->getAttribute('route');
+        $data = $request->getParsedBody();
+
+        // Delete previous assignments
+        $dbh = NethCTI::Database();
+        $sql = 'INSERT INTO user_dbconn(host, port, type, user, pass, name, creation)'.
+            ' VALUES (?, ?, ?, ?, ?, ?, NOW())';
+        $sth = $dbh->prepare($sql);
+        $res = $sth->execute(array(
+            $data['host'],
+            $data['port'],
+            $data['type'],
+            $data['user'],
+            $data['pass'],
+            $data['name']
+        ));
+
+        if ($res === FALSE) {
+            throw new Exception($sth->errorInfo()[2]);
+        }
+
+        return $response->withStatus(200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
+/*
+ * GET /cti/dbconn { host: string, port: numeric, type: string, user: string, pass: string, name: string }
+*/
+$app->get('/cti/dbconn', function (Request $request, Response $response, $args) {
+    try {
+        $route = $request->getAttribute('route');
+        $data = $request->getParsedBody();
+
+        // Delete previous assignments
+        $dbh = NethCTI::Database();
+        $sql = 'SELECT * FROM user_dbconn';
+        $sth = $dbh->prepare($sql);
+        $sth->execute();
+
+        $res = $sth->fetchAll(PDO::FETCH_ASSOC);
+
+        return $response->withJson($res);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
+/*
+ * DELETE /cti/dbconn/:id
+*/
+$app->delete('/cti/dbconn/{id}', function (Request $request, Response $response, $args) {
+    try {
+        $route = $request->getAttribute('route');
+        $id = $route->getArgument('id');
+        $data = $request->getParsedBody();
+
+        // Delete previous assignments
+        $dbh = NethCTI::Database();
+        $sql = 'DELETE FROM user_dbconn WHERE id = ?';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array($id));
+
+        if ($res === FALSE) {
+            throw new Exception($sth->errorInfo()[2]);
+        }
+
+        return $response->withJson($res);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
+/*
+ * GET /cti/dbconn/type
+*/
+$app->get('/cti/dbconn/type', function (Request $request, Response $response, $args) {
+    try {
+        $route = $request->getAttribute('route');
+        $data = $request->getParsedBody();
+
+        return $response->withJson(array(
+            'mysql',
+            'postgres',
+            'mssql:7_4',
+            'mssql:7_3_A',
+            'mssql:7_3_B',
+            'mssql:7_2',
+            'mssql:7_1'
+        ));
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
