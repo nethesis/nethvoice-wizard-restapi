@@ -415,7 +415,7 @@ $app->get('/cti/customer_card/template', function (Request $request, Response $r
             while (false !== ($name = readdir($handle))) {
                 if ($name != "." && $name != "..") {
                     $templates[] = array(
-                        'name' => str_replace('_custom', '', $name),
+                        'name' => str_replace('.ejs', '', str_replace('_custom', '', $name)),
                         'custom' => (strpos($name, '_custom') !== FALSE),
                         'html' => base64_encode(file_get_contents($tpl_path. '/'. $name))
                     );
@@ -466,9 +466,13 @@ $app->delete('/cti/customer_card/template/{name}', function (Request $request, R
 
         $tpl_path = '/var/lib/nethserver/nethcti/templates/customer_card';
 
-        if (file_exists($tpl_path. '/'. $name. '.ejs')) {
+        if (file_exists($tpl_path. '/'. $name. '_custom'. '.ejs')) {
+            unlink($tpl_path. '/'. $name. '_custom'. '.ejs');
+        }
+        else if (file_exists($tpl_path. '/'. $name. '.ejs')) {
             unlink($tpl_path. '/'. $name. '.ejs');
-        } else {
+        }
+        else {
             throw new Exception('template not found');
         }
 
