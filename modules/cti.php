@@ -442,7 +442,7 @@ $app->post('/cti/customer_card/template', function (Request $request, Response $
         $custom = $data['custom'];
         $name = trim(strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $data['name']))).
             ($custom ? '_custom' : ''). '.ejs';
-        $html = $data['html'];
+        $html = base64_decode($data['html']);
         $tpl_path = '/var/lib/nethserver/nethcti/templates/customer_card';
 
         if (!is_writable($tpl_path) || !file_put_contents($tpl_path. '/'. $name, $html)) {
@@ -492,7 +492,13 @@ $app->get('/cti/customer_card', function (Request $request, Response $response, 
         $sth = $dbh->prepare($sql);
         $sth->execute();
 
-        $res = $sth->fetchAll(PDO::FETCH_ASSOC);
+        $rows = $sth->fetchAll(PDO::FETCH_ASSOC);
+
+        $res = array();
+        foreach ($rows as $r) {
+            $r['query'] = base64_encode($r['query']);
+            $res[] = $r;
+        }
 
         return $response->withJson($res);
     } catch (Exception $e) {
