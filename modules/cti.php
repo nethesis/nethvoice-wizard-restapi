@@ -508,22 +508,59 @@ $app->get('/cti/customer_card', function (Request $request, Response $response, 
 });
 
 /*
- * POST /cti/customer_card { query: string, template: string, dbconn_id: integer }
+ * POST /cti/customer_card { name: string, query: string, template: string, dbconn_id: integer, profiles: [int, ...] }
 */
 $app->post('/cti/customer_card', function (Request $request, Response $response, $args) {
     try {
         $route = $request->getAttribute('route');
         $data = $request->getParsedBody();
 
+        $name = $data['name'];
         $query = base64_decode($data['query']);
         $template = $data['template'];
         $dbconn_id = $data['dbconn_id'];
+        $profiles = $data['profiles'];
+
+        $dbi = FreePBX::Database();
+        // Insert into cti permissions
+        $permname = 'cc_'. strtolower(str_replace(' ', '_', preg_replace('/[^a-zA-Z0-9\s]/','',$name)));
+        $sql = 'INSERT INTO rest_cti_permissions(name, displayname, description) VALUES (?, ?, ?)';
+        $sth = $dbi->prepare($sql);
+        $res = $sth->execute(array($permname, $name, 'Enable the customer card for this profile'));
+
+        if ($res === FALSE) {
+            throw new Exception($sth->errorInfo()[2]);
+        }
+
+        // Add permission to customer card macro permission
+        $sql = 'INSERT INTO rest_cti_macro_permissions_permissions'.
+            ' SELECT id,'.
+            ' (SELECT id FROM rest_cti_permissions WHERE name = ?)'.
+            ' FROM rest_cti_macro_permissions WHERE name = ?';
+        $sth = $dbi->prepare($sql);
+        $res = $sth->execute(array($permname, 'customer_card'));
+
+        if ($res === FALSE) {
+            throw new Exception($sth->errorInfo()[2]);
+        }
+
+        // Enable permission for profiles
+        $sql = 'INSERT INTO rest_cti_profiles_permissions'.
+            ' SELECT ?, id FROM rest_cti_permissions WHERE name = ?';
+        $sth = $dbi->prepare($sql);
+        foreach ($profiles as $p) {
+            $res = $sth->execute(array($p, $permname));
+
+            if ($res === FALSE) {
+                throw new Exception($sth->errorInfo()[2]);
+            }
+        }
 
         $dbh = NethCTI::Database();
-        $sql = 'INSERT INTO customer_card(creation, query, template, dbconn_id)'.
-            ' VALUES (NOW(), ?, ?, ?)';
+        $sql = 'INSERT INTO customer_card(name, creation, query, template, dbconn_id)'.
+            ' VALUES (?, NOW(), ?, ?, ?)';
         $sth = $dbh->prepare($sql);
-        $sth->execute(array($query, $template, $dbconn_id));
+        $sth->execute(array($name, $query, $template, $dbconn_id));
 
         if ($res === FALSE) {
             throw new Exception($sth->errorInfo()[2]);
@@ -545,6 +582,28 @@ $app->delete('/cti/customer_card/{id}', function (Request $request, Response $re
         $id = $route->getArgument('id');
 
         $dbh = NethCTI::Database();
+        // Insert into cti permissions
+        $sql = 'SELECT name FROM customer_card WHERE id = ?';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array($id));
+
+        $obj = $sth->fetch(PDO::FETCH_ASSOC);
+
+        if (!$obj) {
+            throw new Exception('no customer card found');
+        }
+
+        $permname = 'cc_'. strtolower(str_replace(' ', '_', preg_replace('/[^a-zA-Z0-9\s]/','', $obj['name'])));
+
+        $dbi = FreePBX::Database();
+        $sql = 'DELETE FROM rest_cti_permissions WHERE name = ?';
+        $sth = $dbi->prepare($sql);
+        $sth->execute(array($permname));
+
+        if ($res === FALSE) {
+            throw new Exception($sth->errorInfo()[2]);
+        }
+
         $sql = 'DELETE FROM customer_card WHERE id = ?';
         $sth = $dbh->prepare($sql);
         $sth->execute(array($id));
