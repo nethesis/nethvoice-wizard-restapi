@@ -478,3 +478,78 @@ $app->delete('/cti/customer_card/template/{name}', function (Request $request, R
         return $response->withStatus(500);
     }
 });
+
+/*
+ * GET /cti/customer_card { id: numeric, query: string, template: string, dbconn_id: integer, creation: datetime }
+*/
+$app->get('/cti/customer_card', function (Request $request, Response $response, $args) {
+    try {
+        $route = $request->getAttribute('route');
+        $data = $request->getParsedBody();
+
+        $dbh = NethCTI::Database();
+        $sql = 'SELECT * FROM customer_card';
+        $sth = $dbh->prepare($sql);
+        $sth->execute();
+
+        $res = $sth->fetchAll(PDO::FETCH_ASSOC);
+
+        return $response->withJson($res);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
+/*
+ * POST /cti/customer_card { query: string, template: string, dbconn_id: integer }
+*/
+$app->post('/cti/customer_card', function (Request $request, Response $response, $args) {
+    try {
+        $route = $request->getAttribute('route');
+        $data = $request->getParsedBody();
+
+        $query = base64_decode($data['query']);
+        $template = $data['template'];
+        $dbconn_id = $data['dbconn_id'];
+
+        $dbh = NethCTI::Database();
+        $sql = 'INSERT INTO customer_card(creation, query, template, dbconn_id)'.
+            ' VALUES (NOW(), ?, ?, ?)';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array($query, $template, $dbconn_id));
+
+        if ($res === FALSE) {
+            throw new Exception($sth->errorInfo()[2]);
+        }
+
+        return $response->withStatus(200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
+/*
+ * DELETE /cti/customer_card/:id
+*/
+$app->delete('/cti/customer_card/{id}', function (Request $request, Response $response, $args) {
+    try {
+        $route = $request->getAttribute('route');
+        $id = $route->getArgument('id');
+
+        $dbh = NethCTI::Database();
+        $sql = 'DELETE FROM customer_card WHERE id = ?';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array($id));
+
+        if ($res === FALSE) {
+            throw new Exception($sth->errorInfo()[2]);
+        }
+
+        return $response->withStatus(200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
