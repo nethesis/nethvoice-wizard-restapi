@@ -491,12 +491,23 @@ $app->get('/cti/customer_card', function (Request $request, Response $response, 
         $sql = 'SELECT * FROM customer_card';
         $sth = $dbh->prepare($sql);
         $sth->execute();
-
         $rows = $sth->fetchAll(PDO::FETCH_ASSOC);
+
+        $dbi = FreePBX::Database();
+        $sql = 'SELECT pp.profile_id FROM rest_cti_profiles_permissions pp'.
+        ' JOIN rest_cti_permissions p ON p.id = pp.permission_id'.
+        ' WHERE p.name = ?';
+        $sth = $dbi->prepare($sql);
 
         $res = array();
         foreach ($rows as $r) {
+            $permname = 'cc_'. strtolower(str_replace(' ', '_', preg_replace('/[^a-zA-Z0-9\s]/','', $r['name'])));
+            $sth->execute(array($permname));
+            $profiles = $sth->fetchAll(PDO::FETCH_COLUMN);
+
             $r['query'] = base64_encode($r['query']);
+            $r['profiles'] = $profiles;
+
             $res[] = $r;
         }
 
