@@ -398,3 +398,83 @@ $app->get('/cti/dbconn/type', function (Request $request, Response $response, $a
         return $response->withStatus(500);
     }
 });
+
+/*
+ * GET /cti/template { name: string, custom: bool, html: string }
+*/
+$app->get('/cti/customer_card/template', function (Request $request, Response $response, $args) {
+    try {
+        $route = $request->getAttribute('route');
+        $data = $request->getParsedBody();
+
+        $tpl_path = '/var/lib/nethserver/nethcti/templates/customer_card';
+
+        $templates = array();
+
+        if ($handle = opendir($tpl_path)) {
+            while (false !== ($name = readdir($handle))) {
+                if ($name != "." && $name != "..") {
+                    $templates[] = array(
+                        'name' => str_replace('_custom', '', $name),
+                        'custom' => (strpos($name, '_custom') !== FALSE),
+                        'html' => base64_encode(file_get_contents($tpl_path. '/'. $name))
+                    );
+                }
+            }
+            closedir($handle);
+        }
+
+        return $response->withJson($templates);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
+/*
+ * POST /cti/template { name: string, custom: bool, html: string }
+*/
+$app->post('/cti/customer_card/template', function (Request $request, Response $response, $args) {
+    try {
+        $route = $request->getAttribute('route');
+        $data = $request->getParsedBody();
+
+        $custom = $data['custom'];
+        $name = trim(strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $data['name']))).
+            ($custom ? '_custom' : ''). '.ejs';
+        $html = $data['html'];
+        $tpl_path = '/var/lib/nethserver/nethcti/templates/customer_card';
+
+        if (!is_writable($tpl_path) || !file_put_contents($tpl_path. '/'. $name, $html)) {
+            throw new Exception('template write error');
+        }
+
+        return $response->withStatus(200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
+/*
+ * DELETE /cti/template/:name
+*/
+$app->delete('/cti/customer_card/template/{name}', function (Request $request, Response $response, $args) {
+    try {
+        $route = $request->getAttribute('route');
+        $name = $route->getArgument('name');
+
+        $tpl_path = '/var/lib/nethserver/nethcti/templates/customer_card';
+
+        if (file_exists($tpl_path. '/'. $name. '.ejs')) {
+            unlink($tpl_path. '/'. $name. '.ejs');
+        } else {
+            throw new Exception('template not found');
+        }
+
+        return $response->withStatus(200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
