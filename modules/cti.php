@@ -385,13 +385,13 @@ $app->get('/cti/dbconn/type', function (Request $request, Response $response, $a
         $data = $request->getParsedBody();
 
         return $response->withJson(array(
-            'mysql',
-            'postgres',
-            'mssql:7_4',
-            'mssql:7_3_A',
-            'mssql:7_3_B',
-            'mssql:7_2',
-            'mssql:7_1'
+            'mysql' => 'MySQL',
+            'postgres' => 'PostgreSQL',
+            'mssql:7_4' => 'SQL Server 2012/2014',
+            'mssql:7_3_A' => 'SQL Server 2008 R2',
+            'mssql:7_3_B' => 'SQL Server 2008',
+            'mssql:7_2' => 'SQL Server 2005',
+            'mssql:7_1' =>  'SQL Server 2000'
         ));
     } catch (Exception $e) {
         error_log($e->getMessage());
