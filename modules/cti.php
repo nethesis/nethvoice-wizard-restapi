@@ -328,6 +328,40 @@ $app->post('/cti/dbconn', function (Request $request, Response $response, $args)
 });
 
 /*
+ * PUT /cti/dbconn { host: string, port: numeric, type: string, user: string, pass: string, name: string }
+*/
+$app->put('/cti/dbconn/{id}', function (Request $request, Response $response, $args) {
+    try {
+        $route = $request->getAttribute('route');
+        $id = $route->getArgument('id');
+        $data = $request->getParsedBody();
+        $args = array();
+        $fields = array();
+
+        foreach ($data as $p=>$v) {
+            $fields[] = $p. ' = ?';
+            $args[] = $v;
+        }
+
+        $args[] = $id;
+
+        $dbh = NethCTI::Database();
+        $sql = 'UPDATE user_dbconn SET '. implode(', ', $fields). ' WHERE id = ?';
+        $sth = $dbh->prepare($sql);
+        $res = $sth->execute($args);
+
+        if ($res === FALSE) {
+            throw new Exception($sth->errorInfo()[2]);
+        }
+
+        return $response->withStatus(200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
+/*
  * GET /cti/dbconn { host: string, port: numeric, type: string, user: string, pass: string, name: string }
 */
 $app->get('/cti/dbconn', function (Request $request, Response $response, $args) {
