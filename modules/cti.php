@@ -448,10 +448,15 @@ $app->get('/cti/customer_card/template', function (Request $request, Response $r
         if ($handle = opendir($tpl_path)) {
             while (false !== ($name = readdir($handle))) {
                 if ($name != "." && $name != "..") {
+                    $content = file_get_contents($tpl_path. '/'. $name);
+                    $matches = null;
+                    preg_match('/<!-- color: (.+) -->/', $content, $matches);
+
                     $templates[] = array(
                         'name' => str_replace('.ejs', '', str_replace('_custom', '', $name)),
                         'custom' => (strpos($name, '_custom') !== FALSE),
-                        'html' => base64_encode(file_get_contents($tpl_path. '/'. $name))
+                        'html' => base64_encode($content),
+                        'color' => ($matches ? $matches[1] : null)
                     );
                 }
             }
