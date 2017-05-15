@@ -491,6 +491,35 @@ $app->post('/cti/customer_card/template', function (Request $request, Response $
 });
 
 /*
+ * PUT /cti/template/:name { name: string, custom: bool, html: string }
+*/
+$app->put('/cti/customer_card/template/{name}', function (Request $request, Response $response, $args) {
+    try {
+        $route = $request->getAttribute('route');
+        $data = $request->getParsedBody();
+
+        $tpl_path = '/var/lib/nethserver/nethcti/templates/customer_card';
+        $custom = $data['custom'];
+        $name = trim(strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $data['name']))).
+            ($custom ? '_custom' : ''). '.ejs';
+
+        if (file_exists($tpl_path. '/'. $name)) {
+            $html = base64_decode($data['html']);
+            if (!is_writable($tpl_path) || !file_put_contents($tpl_path. '/'. $name, $html)) {
+                throw new Exception('template write error');
+            }
+        } else {
+            return $response->withStatus(404);
+        }
+
+        return $response->withStatus(200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
+/*
  * DELETE /cti/template/:name
 */
 $app->delete('/cti/customer_card/template/{name}', function (Request $request, Response $response, $args) {
