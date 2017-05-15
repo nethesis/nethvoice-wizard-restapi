@@ -633,3 +633,25 @@ $app->delete('/cti/customer_card/{id}', function (Request $request, Response $re
         return $response->withStatus(500);
     }
 });
+
+/*
+ * GET /cti/customer_card/:dbconn_id { id: numeric, query: string, template: string, dbconn_id: integer, creation: datetime }
+*/
+$app->get('/cti/customer_card/{dbconn_id}', function (Request $request, Response $response, $args) {
+    try {
+        $route = $request->getAttribute('route');
+        $dbconn_id = $route->getArgument('dbconn_id');
+        $data = $request->getParsedBody();
+
+        $dbh = NethCTI::Database();
+        $sql = 'SELECT id, name FROM customer_card WHERE dbconn_id = ?';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array($dbconn_id));
+        $res = $sth->fetchAll(PDO::FETCH_ASSOC);
+
+        return $response->withJson($res);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
