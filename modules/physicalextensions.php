@@ -31,6 +31,8 @@ $app->post('/physicalextensions', function (Request $request, Response $response
         $mainextensionnumber = $params['mainextension'];
         $mac = $params['mac'];
         $model = $params['model'];
+        $web_user = $params['web_user'];
+        $web_password = $params['web_password'];
         $line = $params['line'];
 
         $extension = createExtension($mainextensionnumber);
@@ -44,7 +46,7 @@ $app->post('/physicalextensions', function (Request $request, Response $response
                 $response->withJson(array("status"=>"Error associating physical extension"), 500);
             }
         } else {
-            if (useExtensionAsCustomPhysical($extension) === false) {
+            if (useExtensionAsCustomPhysical($extension,$web_user,$web_password) === false) {
                 $response->withJson(array("status"=>"Error creating custom extension"), 500);
             }
         }

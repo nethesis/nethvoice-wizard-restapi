@@ -157,7 +157,7 @@ $app->get('/devices/phones/list', function (Request $request, Response $response
         $dbh = FreePBX::Database();
         /*Get custom extensions*/
         $sql = 'SELECT userman_users.default_extension'.
-            ' , rest_devices_phones.model, rest_devices_phones.extension, rest_devices_phones.line, rest_devices_phones.secret'.
+            ' , rest_devices_phones.model, rest_devices_phones.extension, rest_devices_phones.line, rest_devices_phones.secret, rest_devices_phones.web_user, rest_devices_phones.web_password'.
             ' FROM `rest_devices_phones`'.
             ' LEFT JOIN userman_users ON userman_users.id = rest_devices_phones.user_id'.
             ' WHERE mac IS NULL AND type = "physical"';
@@ -168,7 +168,9 @@ $app->get('/devices/phones/list', function (Request $request, Response $response
                 "extension"=>$obj['extension'],
                 "mainextension"=>$obj['default_extension'],
                 "line"=>$obj['line'],
-                "secret"=>$obj['secret']
+                "secret"=>$obj['secret'],
+                "web_user"=>$obj['web_user'],
+                "web_password"=>$obj['web_password']
             );
             $res[] = $phone;
         }

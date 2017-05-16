@@ -118,7 +118,7 @@ function useExtensionAsWebRTC($extension) {
     }
 }
 
-function useExtensionAsCustomPhysical($extension) {
+function useExtensionAsCustomPhysical($extension,$web_user = null ,$web_password = null) {
     try {
         //enable call waiting
         global $astman;
@@ -128,9 +128,9 @@ function useExtensionAsCustomPhysical($extension) {
         $dbh = FreePBX::Database();
         $sql = 'INSERT INTO `rest_devices_phones` SET user_id = ( '.
                'SELECT userman_users.id FROM userman_users WHERE userman_users.default_extension = ? '.
-               '), extension = ?, secret= ?, type = "physical"';
+               '), extension = ?, secret= ?, web_user = ?, web_password = ?, type = "physical"';
         $stmt = $dbh->prepare($sql);
-        $res = $stmt->execute(array(getMainExtension($extension),$extension,$extension_secret));
+        $res = $stmt->execute(array(getMainExtension($extension),$extension,$extension_secret,$web_user,$web_password));
         if (!$res) {
             throw new Exception("Error creating custom device");
         }
