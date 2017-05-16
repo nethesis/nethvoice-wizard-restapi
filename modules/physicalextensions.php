@@ -39,8 +39,14 @@ $app->post('/physicalextensions', function (Request $request, Response $response
             $response->withJson(array("status"=>"Error creating extension"), 500);
         }
 
-        if (useExtensionAsPhysical($extension,$mac,$model,$line) === false) {
-            $response->withJson(array("status"=>"Error associating physical extension"), 500);
+        if (isset($mac) && isset($model) && isset($line)) {
+            if (useExtensionAsPhysical($extension,$mac,$model,$line) === false) {
+                $response->withJson(array("status"=>"Error associating physical extension"), 500);
+            }
+        } else {
+            if (useExtensionAsCustomPhysical($extension) === false) {
+                $response->withJson(array("status"=>"Error creating custom extension"), 500);
+            }
         }
 
         fwconsole('r');

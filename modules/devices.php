@@ -155,13 +155,30 @@ $app->get('/devices/phones/list', function (Request $request, Response $response
         $files = scandir($basedir);
         $res=array();
         $dbh = FreePBX::Database();
+        /*Get custom extensions*/
+        $sql = 'SELECT userman_users.default_extension'.
+            ' , rest_devices_phones.model, rest_devices_phones.extension, rest_devices_phones.line, rest_devices_phones.secret'.
+            ' FROM `rest_devices_phones`'.
+            ' LEFT JOIN userman_users ON userman_users.id = rest_devices_phones.user_id'.
+            ' WHERE mac IS NULL AND type = "physical"';
+        $objs = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC);
+        foreach ($objs as $obj){
+            $phone['model'] = "custom";
+            $phone['lines'][] = (object)array(
+                "extension"=>$obj['extension'],
+                "mainextension"=>$obj['default_extension'],
+                "line"=>$obj['line'],
+                "secret"=>$obj['secret']
+            );
+            $res[] = $phone;
+        }
         foreach ($files as $file) {
             if (preg_match('/\.phones\.scan$/', $file)) {
                 if (file_exists($basedir."/".$file)) {
                     $phones = json_decode(file_get_contents($basedir."/".$file), true);
                     foreach ($phones as $key => $value) {
                         $sql = 'SELECT userman_users.default_extension'.
-                            ' , rest_devices_phones.model, rest_devices_phones.extension, rest_devices_phones.line'.
+                            ' , rest_devices_phones.model, rest_devices_phones.extension, rest_devices_phones.line, rest_devices_phones.secret'.
                           ' FROM `rest_devices_phones`'.
                           ' LEFT JOIN userman_users ON userman_users.id = rest_devices_phones.user_id'.
                           ' WHERE mac = "' . $phones[$key]['mac'] . '"';
@@ -173,6 +190,7 @@ $app->get('/devices/phones/list', function (Request $request, Response $response
                                                         "extension"=>$obj['extension'],
                                                         "mainextension"=>$obj['default_extension'],
                                                         "line"=>$obj['line'],
+							"secret"=>$obj['secret']
                                                         );
                         }
                         if($phones[$key]['model']) {
