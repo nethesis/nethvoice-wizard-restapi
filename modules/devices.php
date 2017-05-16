@@ -163,6 +163,7 @@ $app->get('/devices/phones/list', function (Request $request, Response $response
             ' WHERE mac IS NULL AND type = "physical"';
         $objs = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC);
         foreach ($objs as $obj){
+            $phone = array();
             $phone['model'] = "custom";
             $phone['lines'][] = (object)array(
                 "extension"=>$obj['extension'],
