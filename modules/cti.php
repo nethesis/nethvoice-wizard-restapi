@@ -671,7 +671,7 @@ $app->post('/cti/customer_card', function (Request $request, Response $response,
 
             throw new Exception($sth->errorInfo()[2]);
         }
-
+        fwconsole('r');
         return $response->withStatus(200);
     } catch (Exception $e) {
         error_log($e->getMessage());
@@ -743,7 +743,7 @@ $app->put('/cti/customer_card/{id}', function (Request $request, Response $respo
                 }
             }
         }
-
+        fwconsole('r');
         return $response->withStatus(200);
     } catch (Exception $e) {
         error_log($e->getMessage());
@@ -787,7 +787,7 @@ $app->delete('/cti/customer_card/{id}', function (Request $request, Response $re
         if ($res === FALSE) {
             throw new Exception($sth->errorInfo()[2]);
         }
-
+        fwconsole('r');
         return $response->withStatus(200);
     } catch (Exception $e) {
         error_log($e->getMessage());
