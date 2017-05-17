@@ -447,7 +447,7 @@ $app->get('/cti/customer_card/template', function (Request $request, Response $r
 
         if ($handle = opendir($tpl_path)) {
             while (false !== ($name = readdir($handle))) {
-                if ($name != "." && $name != "..") {
+                if (preg_match('/^.+\.ejs$/', $name)) {
                     $content = file_get_contents($tpl_path. '/'. $name);
                     $matches = null;
                     preg_match('/<!-- color: (.+) -->/', $content, $matches);
