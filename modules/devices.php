@@ -165,6 +165,7 @@ $app->get('/devices/phones/list', function (Request $request, Response $response
         foreach ($objs as $obj){
             $phone = array();
             $phone['model'] = "custom";
+            $phone['manufacturer'] = " _";
             $phone['lines'][] = (object)array(
                 "extension"=>$obj['extension'],
                 "mainextension"=>$obj['default_extension'],
