@@ -700,9 +700,47 @@ $app->put('/cti/customer_card/{id}', function (Request $request, Response $respo
             return $response->withStatus(404);
         }
 
+        $name = $res[0]['name'];
+        $permission_id = $res[0]['permission_id'];
+
+        if(!$permission_id) {
+            $dbi = FreePBX::Database();
+            // Insert into cti permissions
+            $permname = 'cc_'. strtolower(str_replace(' ', '_', preg_replace('/[^a-zA-Z0-9\s]/','',$name)));
+            $sql = 'INSERT INTO rest_cti_permissions(name, displayname, description) VALUES (?, ?, ?)';
+            $sth = $dbi->prepare($sql);
+            $res = $sth->execute(array($permname, $name, 'Enable the customer card for this profile'));
+
+            if ($res === FALSE) {
+                throw new Exception($sth->errorInfo()[2]);
+            }
+
+            $sql = 'SELECT id FROM rest_cti_permissions WHERE name = ?';
+            $sth = $dbi->prepare($sql);
+            $sth->execute(array($permname));
+            $res = $sth->fetchObject();
+            $permission_id = null;
+
+            if ($res) {
+                $permission_id = $res->id;
+                $data['permission_id'] = $permission_id;
+                 // Add permission to customer card macro permission
+                $sql = 'INSERT INTO rest_cti_macro_permissions_permissions'.
+                    ' SELECT id, ? FROM rest_cti_macro_permissions WHERE name = ?';
+                $sth = $dbi->prepare($sql);
+                $res = $sth->execute(array($permission_id, 'customer_card'));
+
+                if ($res === FALSE) {
+                    throw new Exception($sth->errorInfo()[2]);
+                }
+            } else {
+                throw new Exception('no permission stored for customer card');
+            }
+        }
+
         foreach ($data as $p=>$v) {
             // Exclude profiles from simple params updating
-            if ($p === 'profiles' || $p === 'permission_id') {
+            if ($p === 'profiles') {
                 continue;
             }
 
@@ -711,8 +749,7 @@ $app->put('/cti/customer_card/{id}', function (Request $request, Response $respo
         }
 
         $args[] = $id;
-        $name = $res[0]['name'];
-        $permission_id = $res[0]['permission_id'];
+
         $sql = 'UPDATE customer_card SET '. implode(', ', $fields). ' WHERE id = ?';
         $sth = $dbh->prepare($sql);
         $res = $sth->execute($args);
