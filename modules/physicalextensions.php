@@ -51,7 +51,7 @@ $app->post('/physicalextensions', function (Request $request, Response $response
             }
         }
 
-        fwconsole('r');
+        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh&');
         return $response->withJson(array('extension'=>$created_extension), 200);
    } catch (Exception $e) {
        error_log($e->getMessage());
@@ -66,7 +66,7 @@ $app->delete('/physicalextensions/{extension}', function (Request $request, Resp
         $extension = $route->getArgument('extension');
 
         if (deletePhysicalExtension($extension) && deleteExtension($extension)) {
-            fwconsole('r');
+            system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh&');
             return $response->withStatus(200);
         } else {
             throw new Exception("Error deleting extension");

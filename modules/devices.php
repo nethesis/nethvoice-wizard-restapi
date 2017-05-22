@@ -471,7 +471,7 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
 
         system("/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/tftpGenerateConfig.php ".escapeshellarg($params['name']), $ret);
         if ($ret === 0) {
-            fwconsole('r');
+            system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh&');
             return $response->withJson(array('id'=>$configId), 200);
         } else {
             throw new Exception('Error generating configuration');
@@ -529,7 +529,7 @@ $app->delete('/devices/gateways/{id}', function (Request $request, Response $res
         $sql = "DELETE IGNORE FROM `gateway_config` WHERE `id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($id));
-        fwconsole('r');
+        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh&');
         return $response->withJson(array('status' => true), 200);
     } catch (Exception $e) {
         error_log($e->getMessage());

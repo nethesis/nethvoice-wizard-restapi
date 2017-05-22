@@ -49,7 +49,7 @@ $app->post('/inboundroutes', function (Request $request, Response $response, $ar
       return $response->withJson('An error occurred', 500);
     }
 
-    fwconsole('r');
+    system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh&');
     return $response->withStatus(200);
 });
 
@@ -75,7 +75,7 @@ $app->delete('/inboundroutes/{id}', function (Request $request, Response $respon
     return $response->withJson('An error occurred', 500);
   }
 
-  fwconsole('r');
+  system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh&');
   return $response;
 });
 
@@ -228,7 +228,7 @@ $app->get('/outboundroutes/count', function (Request $request, Response $respons
                 );
             }
         }
-        fwconsole('r');
+        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh&');
         return $response->withStatus(200);
     } catch (Exception $e) {
       error_log($e->getMessage());
@@ -252,7 +252,7 @@ $app->get('/outboundroutes/count', function (Request $request, Response $respons
      return $response->withJson('An error occurred', 500);
    }
 
-   fwconsole('r');
+   system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh&');
    return $response;
  });
 

@@ -117,7 +117,7 @@ $app->post('/trunks', function (Request $request, Response $response, $args) {
     return $response->withStatus(500);
   }
 
-  fwconsole('r');
+  system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh&');
 
   return $response->withStatus(200);
 });

@@ -62,6 +62,6 @@ $app->post('/mobiles', function (Request $request, Response $response, $args) {
         error_log($e->getMessage());
         return $response->withStatus(500);
     }
-    fwconsole('r');
+    system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh&');
     return $response->withStatus(200);
 });
