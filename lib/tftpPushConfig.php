@@ -33,9 +33,14 @@ try{
         $script = "sangoma-tftp";
         $deviceUsername = 'admin';
         $devicePassword = 'admin';
-    } elseif ($config['manufacturer'] == 'Patton'){
+    } elseif ($config['manufacturer'] == 'Patton' && !preg_match ('/^TRI_/', $config['model'])){
         $filename = preg_replace('/:/','',$config['mac']).".cfg";
         $script = "patton-tftp";
+        $deviceUsername = '.';
+        $devicePassword = '';
+    } elseif ($config['manufacturer'] == 'Patton' && preg_match ('/^TRI_/', $config['model'])){
+        $filename = preg_replace('/:/','',$config['mac']).".cfg";
+        $script = "trinity-tftp";
         $deviceUsername = '.';
         $devicePassword = '';
     } elseif ($config['manufacturer'] == 'Mediatrix'){
