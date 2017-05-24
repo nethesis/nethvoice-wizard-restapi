@@ -60,7 +60,7 @@ $app->post('/physicalextensions', function (Request $request, Response $response
             $response->withJson(array("status"=>"Error creating extension"), 500);
         }
 
-        if (isset($mac) && isset($model) && isset($line)) {
+        if (isset($mac) && isset($model)) {
             if (useExtensionAsPhysical($extension,$mac,$model,$line) === false) {
                 $response->withJson(array("status"=>"Error associating physical extension"), 500);
             }
