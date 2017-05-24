@@ -89,7 +89,7 @@ INSERT IGNORE INTO `rest_cti_profiles` VALUES (3,'Advanced');
 INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (1,'settings','Settings','General and notifications settings');
 INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (2,'phonebook','Phonebook','View Phonebook, add contacts, modify and delete own contacts');
 INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (3,'cdr','CDR','View own call history');
-INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (4,'customerd_card','Customerd Card','Allow to view Customer Cards');
+INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (4,'customer_card','Customer Card','Allow to view Customer Cards');
 INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (5,'presence_panel','Presence Panel','Allow to view Presence Panel');
 INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (6,'queue_agent','Use queue agent panel','View Queues and queues info, login/logout from queues, enable or disable pause state');
 INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (7,'streaming','Streaming','Allow to view Streaming Panel');
