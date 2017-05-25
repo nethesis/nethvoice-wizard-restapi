@@ -101,7 +101,7 @@ $app->post('/trunks', function (Request $request, Response $response, $args) {
     $channelid    = $params['name'];
     $peerdetails  = str_replace("USERNAME", $params['username'], $provider_param['dettpeer']);
     $peerdetails  = str_replace("PASSWORD", $params['password'], $peerdetails);
-    $peerdetails  = str_replace("CODECS", $params['codec'], $peerdetails);
+    $peerdetails  = str_replace("CODECS", implode(',',$params['codecs']), $peerdetails);
     $usercontext  = $params['username'];
     $userconfig   = str_replace("PASSWORD", $params['password'], $provider_param['dettuser']);
     $userconfig   = str_replace("CODECS", $params['codec'], $userconfig);
