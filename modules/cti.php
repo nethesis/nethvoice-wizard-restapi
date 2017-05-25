@@ -508,6 +508,7 @@ $app->post('/cti/customer_card/template', function (Request $request, Response $
             throw new Exception('template write error');
         }
 
+        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh&');
         return $response->withStatus(200);
     } catch (Exception $e) {
         error_log($e->getMessage());
@@ -537,6 +538,7 @@ $app->put('/cti/customer_card/template/{name}', function (Request $request, Resp
             return $response->withStatus(404);
         }
 
+        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh&');
         return $response->withStatus(200);
     } catch (Exception $e) {
         error_log($e->getMessage());
@@ -564,6 +566,7 @@ $app->delete('/cti/customer_card/template/{name}', function (Request $request, R
             throw new Exception('template not found');
         }
 
+        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh&');
         return $response->withStatus(200);
     } catch (Exception $e) {
         error_log($e->getMessage());
@@ -609,6 +612,10 @@ $app->get('/cti/customer_card', function (Request $request, Response $response, 
 
             $r['query'] = base64_encode($r['query']);
             $r['profiles'] = $profiles;
+            $r['template'] = array(
+                'name' => $r['template'],
+                'custom' => (strpos($r['template'], '_custom') !== FALSE)
+            );
 
             $res[] = $r;
         }
