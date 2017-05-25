@@ -81,6 +81,7 @@ $app->post('/cti/profiles/{id}', function (Request $request, Response $response,
         $profile = $request->getParsedBody();
         if (postCTIProfile($profile,$id)) {
             system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
+
             return $response->withJson(array('status' => true), 200);
         } else {
             throw new Exception('Error editing profile');
@@ -99,6 +100,7 @@ $app->post('/cti/profiles', function (Request $request, Response $response, $arg
         $id = postCTIProfile($profile);
         if ($id) {
             system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
+
             return $response->withJson(array('id' => $id ), 200);
         } else {
             throw new Exception('Error creating new profile');
@@ -144,6 +146,7 @@ $app->post('/cti/profiles/users/{user_id}', function (Request $request, Response
         $stmt = $dbh->prepare($sql);
         $stmt->execute(array($user_id, $profile_id, $profile_id));
         system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
+
         return $response->withJson(array('status' => true), 200);
     } catch (Exception $e) {
         error_log($e->getMessage());
@@ -161,6 +164,7 @@ $app->delete('/cti/profiles/{id}', function (Request $request, Response $respons
         $sth = $dbh->prepare($sql);
         $sth->execute(array($id));
         system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
+
         return $response->withJson(array('status' => true), 200);
     } catch (Exception $e) {
         error_log($e->getMessage());
@@ -273,7 +277,6 @@ $app->delete('/cti/groups/{id}', function (Request $request, Response $response,
         $sql = 'DELETE FROM `rest_cti_permissions` WHERE `name` = ?';
         $sth = $dbh->prepare($sql);
         $sth->execute(array("grp_".trim(strtolower(preg_replace('/[^a-zA-Z0-9]/','',$group_name->name)))));
-
         system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
 
         return $response->withJson(array('status' => true), 200);
@@ -304,7 +307,6 @@ $app->post('/cti/groups/users/{id}', function (Request $request, Response $respo
             $sth = $dbh->prepare($sql);
             $sth->execute(array($user_id, $group_id));
         }
-
         system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
 
         return $response->withStatus(200);
@@ -507,8 +509,8 @@ $app->post('/cti/customer_card/template', function (Request $request, Response $
         if (!is_writable($tpl_path) || !file_put_contents($tpl_path. '/'. $name, $html)) {
             throw new Exception('template write error');
         }
+        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
 
-        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh&');
         return $response->withStatus(200);
     } catch (Exception $e) {
         error_log($e->getMessage());
@@ -537,8 +539,8 @@ $app->put('/cti/customer_card/template/{name}', function (Request $request, Resp
         } else {
             return $response->withStatus(404);
         }
+        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
 
-        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh&');
         return $response->withStatus(200);
     } catch (Exception $e) {
         error_log($e->getMessage());
@@ -565,8 +567,8 @@ $app->delete('/cti/customer_card/template/{name}', function (Request $request, R
         else {
             throw new Exception('template not found');
         }
+        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
 
-        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh&');
         return $response->withStatus(200);
     } catch (Exception $e) {
         error_log($e->getMessage());
@@ -699,6 +701,7 @@ $app->post('/cti/customer_card', function (Request $request, Response $response,
             throw new Exception($sth->errorInfo()[2]);
         }
         system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
+
         return $response->withStatus(200);
     } catch (Exception $e) {
         error_log($e->getMessage());
@@ -808,6 +811,7 @@ $app->put('/cti/customer_card/{id}', function (Request $request, Response $respo
             }
         }
         system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
+
         return $response->withStatus(200);
     } catch (Exception $e) {
         error_log($e->getMessage());
@@ -852,6 +856,7 @@ $app->delete('/cti/customer_card/{id}', function (Request $request, Response $re
             throw new Exception($sth->errorInfo()[2]);
         }
         system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
+
         return $response->withStatus(200);
     } catch (Exception $e) {
         error_log($e->getMessage());
