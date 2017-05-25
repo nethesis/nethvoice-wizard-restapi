@@ -55,7 +55,7 @@ $app->post('/webrtc', function (Request $request, Response $response, $args) {
             $response->withJson(array("status"=>"Error associating webrtc extension"), 500);
         }
 
-        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh&');
+        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
         return $response->withJson(array('extension'=>$extension), 200);
     } catch (Exception $e) {
         error_log($e->getMessage());
@@ -69,7 +69,7 @@ $app->delete('/webrtc/{mainextension}', function (Request $request, Response $re
         $mainextension = $route->getArgument('mainextension');
         $extension = getWebRTCExtension($mainextension);
         if (deleteExtension($extension)) {
-            system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh&');
+            system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
             return $response->withStatus(200);
         } else {
             throw new Exception ("Error deleting extension");

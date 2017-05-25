@@ -136,7 +136,7 @@ $app->post('/trunks', function (Request $request, Response $response, $args) {
     return $response->withStatus(500);
   }
 
-  system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh&');
+  system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
 
   return $response->withStatus(200);
 });

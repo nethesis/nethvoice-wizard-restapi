@@ -81,6 +81,6 @@ $app->post('/mobiles', function (Request $request, Response $response, $args) {
         error_log($e->getMessage());
         return $response->withStatus(500);
     }
-    system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh&');
+    system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
     return $response->withStatus(200);
 });

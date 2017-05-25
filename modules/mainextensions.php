@@ -129,7 +129,7 @@ $app->post('/mainextensions', function (Request $request, Response $response, $a
     $fpbx->Findmefollow->addSettingById($mainextension, 'dring', '<http://www.notused >;info=ring2');
     $fpbx->Findmefollow->addSettingById($mainextension, 'postdest', 'app-blackhole,hangup,1');
 
-    system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh&');
+    system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
     return $response->withStatus(201);
 });
 

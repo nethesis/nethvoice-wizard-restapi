@@ -83,7 +83,7 @@ $app->post('/voicemails', function (Request $request, Response $response, $args)
             FreePBX::create()->Voicemail->delMailbox($extension['extension']);
         }
 
-        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh&');
+        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
 
         return $response->withJson(array('status' => true), 200);
     } catch (Exception $e) {
