@@ -615,7 +615,7 @@ $app->get('/cti/customer_card', function (Request $request, Response $response, 
             $r['query'] = base64_encode($r['query']);
             $r['profiles'] = $profiles;
             $r['template'] = array(
-                'name' => $r['template'],
+                'name' => str_replace('_custom', '', $r['template']),
                 'custom' => (strpos($r['template'], '_custom') !== FALSE)
             );
 
