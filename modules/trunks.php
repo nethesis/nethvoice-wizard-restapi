@@ -113,7 +113,7 @@ $app->post('/trunks', function (Request $request, Response $response, $args) {
     if($params['forceCodec'] !== true)
       $peerdetails  = str_replace("disallow=all\n", '', $peerdetails);
 
-    $outcid = preg_match('/^[0-9]*$/', $params['username']) ? $params['username'] : '';
+    $outcid = $params['phone'];
 
     $trunknum = core_trunks_add(
       $tech,
