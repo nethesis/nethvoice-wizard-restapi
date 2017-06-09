@@ -154,8 +154,8 @@ function gateway_generate_configuration_file($name){
         if (!empty($config['trunks_fxs'])){
             $i=0;
             foreach ($config['trunks_fxs'] as $trunk){
-                $output = str_replace("FXSEXTENSION$i",$trunk['extension'],$output);
-                $output = str_replace("FXSPASS$i",$trunk['secret'],$output);
+                $output = preg_replace("/FXSEXTENSION{$i}([^0-9])/",$trunk['extension'].'\1',$output);
+                $output = preg_replace("/FXSPASS{$i}([^0-9])/",$trunk['secret'].'\1',$output);
                 $i++;
             }
         }
