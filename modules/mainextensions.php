@@ -80,14 +80,21 @@ $app->post('/mainextensions', function (Request $request, Response $response, $a
         foreach ($ext_to_del as $extension) {
             $fpbx->Core->delUser($extension);
             $fpbx->Core->delDevice($extension);
-            $sql = 'UPDATE rest_devices_phones'.
-              ' SET extension = NULL'.
-              ', secret = NULL'.
-              ' WHERE extension = ?';
-            $stmt = $dbh->prepare($sql);
-            $stmt->execute(array($extension));
 
-            //Remove association between main extension and user
+            // set values to NULL for physical devices
+            $sql = 'UPDATE rest_devices_phones'.
+              ' SET user_id = NULL'.
+              ', extension = NULL'.
+              ', secret = NULL'.
+              ' WHERE user_id = ? AND mac IS NOT NULL';
+            $stmt = $dbh->prepare($sql);
+            $stmt->execute(array($uid));
+
+            // remove user's webrtc phone and custom devices
+            $sql = 'DELETE FROM rest_devices_phones'.
+              ' WHERE user_id = ? AND mac IS NULL';
+            $stmt = $dbh->prepare($sql);
+            $stmt->execute(array($uid));
         }
         $fpbx->Userman->updateUser($uid, $username, $username);
     }
