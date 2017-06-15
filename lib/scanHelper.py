@@ -27,6 +27,7 @@ import json
 import nmap                         # import nmap.py module
 import urllib2
 import hashlib
+import socket
 
 try:
     nm = nmap.PortScanner()         # instantiate nmap.PortScanner object
@@ -80,12 +81,12 @@ for host in nm.all_hosts():
     if manufacturer[identifier] == 'Sangoma' and types[manufacturer[identifier]] == 'unknown':
         try:
             req = urllib2.Request('http://'+nm[host]['addresses']['ipv4']+'/index.htm')
-            res = urllib2.urlopen(req)
+            res = urllib2.urlopen(req,timeout = 5)
             if "Gateway" in res.read():
                 row['type'] = 'gateway'
             else:
                 row['type'] = 'phone'
-        except urllib2.HTTPError:
+        except urllib2.HTTPError, socket.timeout:
             row['type'] = 'phone'
     if row['type'] == 'phone':
         phonesout.append(row)
