@@ -81,14 +81,14 @@ CREATE TABLE IF NOT EXISTS `rest_cti_users_groups` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `rest_cti_streaming` (
-  `name` varchar(50) NOT NULL,
+  `descr` varchar(50) NOT NULL,
   `url` varchar(8000) NOT NULL DEFAULT 'localhost',
   `user` varchar(30) DEFAULT '',
   `secret` varchar(90) DEFAULT '',
-  `framerate` int(11) DEFAULT '1000',
+  `frame-rate` int(11) DEFAULT '1000',
   `exten` int(11) DEFAULT NULL,
   `open` varchar(10) DEFAULT '',
-  PRIMARY KEY (`name`)
+  PRIMARY KEY (`descr`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 /*Default profiles*/

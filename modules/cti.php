@@ -942,7 +942,7 @@ $app->post('/cti/streaming', function (Request $request, Response $response, $ar
         }
 
         $dbh = FreePBX::Database();
-        $sql = 'INSERT INTO rest_cti_streaming(name, url, exten, open)'.
+        $sql = 'INSERT INTO rest_cti_streaming(descr, url, exten, open)'.
             ' VALUES (?, ?, ?, ?)';
         $sth = $dbh->prepare($sql);
         $sth->execute(array($name, $url, $exten, $open));
@@ -980,7 +980,7 @@ $app->delete('/cti/streaming/{name}', function (Request $request, Response $resp
             throw new Exception($sth->errorInfo()[2]);
         }
 
-        $sql = 'DELETE FROM rest_cti_streaming WHERE name = ?';
+        $sql = 'DELETE FROM rest_cti_streaming WHERE descr = ?';
         $sth = $dbi->prepare($sql);
         $sth->execute(array($name));
 
