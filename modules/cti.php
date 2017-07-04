@@ -963,6 +963,30 @@ $app->post('/cti/streaming', function (Request $request, Response $response, $ar
     }
 });
 
+$app->post('/cti/sources/test', function (Request $request, Response $response, $args) {
+    try {
+        $route = $request->getAttribute('route');
+        $data = $request->getParsedBody();
+
+        $url = $data['url'];
+
+        $curl = curl_init($url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true );
+        $ret_val = curl_exec($curl);
+
+        if (strpos($ret_val, '<!DOCTYPE html PUBLIC') !== false) {
+            return $response->withStatus(500);
+        } else {
+            $b64_image_data =  chunk_split(base64_encode($ret_val));
+            curl_close($curl);
+            return $response->withJson($b64_image_data);
+        }
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
 /*
  * DELETE /cti/customer_card/name
 */
