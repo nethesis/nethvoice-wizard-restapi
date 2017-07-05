@@ -863,3 +863,160 @@ $app->delete('/cti/customer_card/{id}', function (Request $request, Response $re
         return $response->withStatus(500);
     }
 });
+
+/*
+ * GET /cti/streaming { name: string, url: string, user: string, secret: string, framerate: integer, exten: integer, open: string }
+*/
+$app->get('/cti/streaming', function (Request $request, Response $response, $args) {
+    try {
+        $dbh = FreePBX::Database();
+        $sql = 'SELECT * FROM rest_cti_streaming';
+        $sth = $dbh->prepare($sql);
+        $sth->execute();
+
+        $res = $sth->fetchAll(PDO::FETCH_ASSOC);
+
+        return $response->withJson($res);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
+/*
+ * POST /cti/streaming {"name": string,"url": string, "user": string,"secret": string,"framerate": int,"exten": int,"open": string}
+*/
+$app->post('/cti/streaming', function (Request $request, Response $response, $args) {
+    try {
+        $route = $request->getAttribute('route');
+        $data = $request->getParsedBody();
+
+        $name = $data['name'];
+        $url = $data['url'];
+        $exten = $data['exten'];
+        $open = $data['open'];
+        $profiles = $data['profiles'];
+
+        $dbi = FreePBX::Database();
+        // Insert into cti permissions
+        $permname = 'vs_'. strtolower(str_replace(' ', '_', preg_replace('/[^a-zA-Z0-9\s]/','',$name)));
+        $sql = 'INSERT INTO rest_cti_permissions(name, displayname, description) VALUES (?, ?, ?)';
+        $sth = $dbi->prepare($sql);
+        $res = $sth->execute(array($permname, $name, 'Enable the video source for this profile'));
+
+        if ($res === FALSE) {
+            throw new Exception($sth->errorInfo()[2]);
+        }
+
+        $sql = 'SELECT id FROM rest_cti_permissions WHERE name = ?';
+        $sth = $dbi->prepare($sql);
+        $sth->execute(array($permname));
+        $res = $sth->fetchObject();
+        $permission_id = null;
+
+        if ($res) {
+            $permission_id = $res->id;
+        } else {
+            throw new Exception('no permission stored for customer card');
+        }
+
+        // Add permission to streaming macro permission
+        $sql = 'INSERT INTO rest_cti_macro_permissions_permissions'.
+            ' SELECT id, ? FROM rest_cti_macro_permissions WHERE name = ?';
+        $sth = $dbi->prepare($sql);
+        $res = $sth->execute(array($permission_id, 'streaming'));
+
+        if ($res === FALSE) {
+            throw new Exception($sth->errorInfo()[2]);
+        }
+
+        // Enable permission for profiles
+        $sql = 'INSERT INTO rest_cti_profiles_permissions VALUES(?, ?)';
+        $sth = $dbi->prepare($sql);
+        foreach ($profiles as $p) {
+            $res = $sth->execute(array($p, $permission_id));
+
+            if ($res === FALSE) {
+                throw new Exception($sth->errorInfo()[2]);
+            }
+        }
+
+        $dbh = FreePBX::Database();
+        $sql = 'INSERT INTO rest_cti_streaming(descr, url, exten, open)'.
+            ' VALUES (?, ?, ?, ?)';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array($name, $url, $exten, $open));
+
+        if ($res === FALSE) {
+            $sql = 'DELETE FROM rest_cti_permissions WHERE id = ?';
+            $sth = $dbi->prepare($sql);
+            $res = $sth->execute(array($permission_id));
+
+            throw new Exception($sth->errorInfo()[2]);
+        }
+        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
+
+        return $response->withStatus(200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
+$app->post('/cti/sources/test', function (Request $request, Response $response, $args) {
+    try {
+        $route = $request->getAttribute('route');
+        $data = $request->getParsedBody();
+
+        $url = $data['url'];
+
+        $curl = curl_init($url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true );
+        $ret_val = curl_exec($curl);
+
+        if (strpos($ret_val, '<!DOCTYPE html PUBLIC') !== false) {
+            return $response->withStatus(500);
+        } else {
+            $b64_image_data =  chunk_split(base64_encode($ret_val));
+            curl_close($curl);
+            return $response->withJson($b64_image_data);
+        }
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
+/*
+ * DELETE /cti/customer_card/name
+*/
+$app->delete('/cti/streaming/{name}', function (Request $request, Response $response, $args) {
+    try {
+        $route = $request->getAttribute('route');
+        $name = $route->getArgument('name');
+
+        $dbi = FreePBX::Database();
+        $sql = 'DELETE FROM rest_cti_permissions WHERE name = ?';
+        $sth = $dbi->prepare($sql);
+        $sth->execute(array('vs_'. strtolower(str_replace(' ', '_', preg_replace('/[^a-zA-Z0-9\s]/','',$name)))));
+
+        if ($res === FALSE) {
+            throw new Exception($sth->errorInfo()[2]);
+        }
+
+        $sql = 'DELETE FROM rest_cti_streaming WHERE descr = ?';
+        $sth = $dbi->prepare($sql);
+        $sth->execute(array($name));
+
+        if ($res === FALSE) {
+            throw new Exception($sth->errorInfo()[2]);
+        }
+        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
+
+        return $response->withStatus(200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+

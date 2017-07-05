@@ -80,6 +80,17 @@ CREATE TABLE IF NOT EXISTS `rest_cti_users_groups` (
     ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS `rest_cti_streaming` (
+  `descr` varchar(50) NOT NULL,
+  `url` varchar(8000) NOT NULL DEFAULT 'localhost',
+  `user` varchar(30) DEFAULT '',
+  `secret` varchar(90) DEFAULT '',
+  `frame-rate` int(11) DEFAULT '1000',
+  `exten` int(11) DEFAULT NULL,
+  `open` varchar(10) DEFAULT '',
+  PRIMARY KEY (`descr`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 /*Default profiles*/
 INSERT IGNORE INTO `rest_cti_profiles` VALUES (1,'Base');
 INSERT IGNORE INTO `rest_cti_profiles` VALUES (2,'Standard');
