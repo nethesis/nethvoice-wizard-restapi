@@ -145,6 +145,25 @@ $app->post('/cti/profiles/users/{user_id}', function (Request $request, Response
                 ' ON DUPLICATE KEY UPDATE profile_id = ?';
         $stmt = $dbh->prepare($sql);
         $stmt->execute(array($user_id, $profile_id, $profile_id));
+
+        /*Configure user defaults*/
+        //get username
+        $sql =  'SELECT username ' .
+                ' FROM rest_users JOIN userman_users ON rest_users.user_id = userman_users.id ' .
+                ' WHERE userman_users.id = ?';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array($user_id));
+        $username = $sth->fetchAll()[0][0];
+        $dbhcti = NethCTI::Database();
+        $sql =  'INSERT IGNORE INTO user_settings (username,key_name,value) ' .
+                ' VALUES (?,"desktop_notifications","true")';
+        $stmt = $dbhcti->prepare($sql);
+        $stmt->execute(array($username));
+        $sql =  'INSERT IGNORE INTO user_settings (username,key_name,value) ' .
+                ' VALUES (?,"ccard_show_incoming","true")';
+        $stmt = $dbhcti->prepare($sql);
+        $stmt->execute(array($username));
+
         system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
 
         return $response->withJson(array('status' => true), 200);
