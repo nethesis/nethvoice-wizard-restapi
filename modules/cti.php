@@ -910,7 +910,7 @@ $app->post('/cti/streaming', function (Request $request, Response $response, $ar
         $route = $request->getAttribute('route');
         $data = $request->getParsedBody();
 
-        $name = $data['name'];
+        $name = $data['descr'];
         $url = $data['url'];
         $exten = $data['exten'];
         $open = $data['open'];
