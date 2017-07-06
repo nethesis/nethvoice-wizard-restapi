@@ -80,6 +80,11 @@ $app->get('/final', function (Request $request, Response $response, $args) {
                  WHERE u.default_extension != "none"
                  ORDER BY u.default_extension ';
         $final = $dbh->sql($sql, 'getAll', \PDO::FETCH_ASSOC);
+        //get voicemail password
+        $vm = FreePBX::Voicemail();
+        foreach ($final as $key => $value) {
+            $final[$key]['voicemailpwd'] = $vm->getVoicemailBoxByExtension($value['default_extension'])['pwd'] ;
+        }
         return $response->withJson($final, 200);
     } catch (Exception $e) {
         error_log($e->getMessage());
