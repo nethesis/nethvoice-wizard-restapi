@@ -40,7 +40,7 @@ function createExtension($mainextensionnumber){
         $res = $stmt->fetchAll();
         if (count($res)===0) {
            //Main extension isn't already used use mainextension as extension
-           return $mainextensionnumber;
+           $extension = $mainextensionnumber;
         } else {
             //create new extension
             $mainextensions = $fpbx->Core->getAllUsers();
@@ -73,11 +73,6 @@ function createExtension($mainextensionnumber){
             if (!$res['status']) {
                 throw ("Error creating extension");
             }
-            //set accountcode = mainextension
-            $sql = 'UPDATE IGNORE `sip` SET `data` = ? WHERE `id` = ? AND `keyword` = "accountcode"';
-            $stmt = $dbh->prepare($sql);
-            $stmt->execute(array($mainextensionnumber,$extension));
-
             //Set cid_masquerade (CID Num Alias)
 	    $astman->database_put("AMPUSER",$extension."/cidnum",$mainextensionnumber);
 
@@ -94,6 +89,16 @@ function createExtension($mainextensionnumber){
                 }
             }
         }
+        //set accountcode = mainextension
+        $sql = 'UPDATE IGNORE `sip` SET `data` = ? WHERE `id` = ? AND `keyword` = "accountcode"';
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute(array($mainextensionnumber,$extension));
+
+        //set callgroup and pickupgroup to 1
+        $sql = 'UPDATE IGNORE `sip` SET `data` = "1" WHERE `id` = ? AND (`keyword` = "namedcallgroup" OR `keyword` = "namedpickupgroup")';
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute(array($extension));
+
         return $extension;
     } catch (Exception $e) {
        error_log($e->getMessage());
