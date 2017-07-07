@@ -83,7 +83,12 @@ $app->get('/final', function (Request $request, Response $response, $args) {
         //get voicemail password
         $vm = FreePBX::Voicemail();
         foreach ($final as $key => $value) {
-            $final[$key]['voicemailpwd'] = $vm->getVoicemailBoxByExtension($value['default_extension'])['pwd'] ;
+            $vmpwd = $vm->getVoicemailBoxByExtension($value['default_extension'])['pwd'];
+            if (isset($vmpwd) && !is_null($vmpwd)) {
+                $final[$key]['voicemailpwd'] = $vmpwd;
+            } else {
+                $final[$key]['voicemailpwd'] = '';
+            }
         }
         return $response->withJson($final, 200);
     } catch (Exception $e) {
