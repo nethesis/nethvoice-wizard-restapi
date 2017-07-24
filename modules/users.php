@@ -132,16 +132,22 @@ $app->get('/users/{all}', function (Request $request, Response $response, $args)
                 unset($users[$i]);
             } else {
                 $users[$i]['password'] = getPassword(getUser($users[$i]['username']));
-                $users[$i]['devices'] = $dbh->sql('SELECT rest_devices_phones.*'.
+                $sql = 'SELECT rest_devices_phones.*'.
                   ' FROM rest_devices_phones'.
                   ' JOIN userman_users ON rest_devices_phones.user_id = userman_users.id'.
-                  ' WHERE userman_users.default_extension = "' . $users[$i]['default_extension'] . '"'
-                  , 'getAll', \PDO::FETCH_ASSOC);
-                $users[$i]['profile'] = $dbh->sql('SELECT rest_users.profile_id'.
+                  ' WHERE userman_users.default_extension = ?';
+                $stmt = $dbh->prepare($sql);
+                $stmt->execute(array($users[$i]['default_extension']));
+                $users[$i]['devices'] = array();
+                while ($d = $stmt->fetch(\PDO::FETCH_ASSOC))
+                    $users[$i]['devices'][] = $d;
+                error_log (print_r($users[$i]['devices'],true));
+                $sql = 'SELECT rest_users.profile_id'.
                   ' FROM rest_users'.
                   ' JOIN userman_users ON rest_users.user_id = userman_users.id'.
-                  ' WHERE userman_users.username = "' . $users[$i]['username'] . '"'
-                  , 'getOne', \PDO::FETCH_ASSOC);
+                  ' WHERE userman_users.username = ?';
+                $stmt = $dbh->prepare($sql);$stmt->execute(array($users[$i]['username']));
+                $users[$i]['profile'] = $stmt->fetch(\PDO::FETCH_ASSOC)['profile_id'];
             }
         }
         $i++;
