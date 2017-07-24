@@ -125,7 +125,10 @@ $app->post('/mainextensions', function (Request $request, Response $response, $a
     }
 
     //update user with $extension as default extension
-    $fpbx->Userman->updateUser($uid, $username, $username, $mainextension);
+    $res = $fpbx->Userman->updateUser($uid, $username, $username, $mainextension);
+    if (!$res['status']) {
+        return $response->withJson(array('message'=>$res['message']), 500);
+    }
 
     //Configure Follow me for the extension
     $data['fmfm']='yes';
