@@ -163,6 +163,10 @@ $app->post('/cti/profiles/users/{user_id}', function (Request $request, Response
                 ' VALUES (?,"ccard_show_incoming","true")';
         $stmt = $dbhcti->prepare($sql);
         $stmt->execute(array($username));
+        $sql =  'INSERT IGNORE INTO user_settings (username,key_name,value) ' .
+                ' VALUES (?,"open_ccard","connected")';
+        $stmt = $dbhcti->prepare($sql);
+        $stmt->execute(array($username));
 
         system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
 
