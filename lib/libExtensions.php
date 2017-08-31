@@ -106,8 +106,17 @@ function createExtension($mainextensionnumber){
     }
 }
 
-function useExtensionAsWebRTC($extension) {
+function useExtensionAsWebRTCMobile($extension) {
+    return useExtensionAsWebRTC($extension,true);
+}
+
+function useExtensionAsWebRTC($extension,$isMobile = false) {
     try {
+        if ($isMobile) {
+            $type = 'webrtc_mobile';
+        } else {
+            $type = 'webrtc';
+        }
 	//disable call waiting
         global $astman;
         $dbh = FreePBX::Database();
@@ -129,17 +138,17 @@ function useExtensionAsWebRTC($extension) {
                 ' WHERE userman_users.default_extension = ? LIMIT 1';
         if (empty($res)) {
             $sql = 'INSERT INTO `rest_devices_phones`'.
-                ' SET user_id = ('. $uidquery. '), extension = ?, secret= ?, type = "webrtc", mac = NULL, line = NULL';
+                ' SET user_id = ('. $uidquery. '), extension = ?, secret= ?, type = ?, mac = NULL, line = NULL';
             $stmt = $dbh->prepare($sql);
 
-            if ($stmt->execute(array(getMainExtension($extension),$extension,$extension_secret))) {
+            if ($stmt->execute(array(getMainExtension($extension),$extension,$extension_secret,$type))) {
                 return true;
             }
         } else {
             $sql = 'UPDATE `rest_devices_phones`'. 
-                ' SET user_id = ('. $uidquery. '), secret= ?, type = "webrtc"' .
+                ' SET user_id = ('. $uidquery. '), secret= ?, type = ?' .
                 ' WHERE extension = ?';
-            if ($stmt->execute(array(getMainExtension($extension),$extension_secret,$extension))) {
+            if ($stmt->execute(array(getMainExtension($extension),$extension_secret,$extension,$type))) {
                 return true;
             }
         } 
@@ -333,6 +342,17 @@ function getWebRTCExtension($mainextension) {
        ' FROM userman_users'.
        ' WHERE userman_users.default_extension = ?';
     $sql = 'SELECT extension FROM `rest_devices_phones` WHERE user_id = ('. $uidquery. ') AND type = "webrtc" AND `extension`';
+    $stmt = $dbh->prepare($sql);
+    $stmt->execute(array($mainextension));
+    return $stmt->fetchAll()[0][0];
+}
+
+function getWebRTCMobileExtension($mainextension) {
+    $dbh = FreePBX::Database();
+    $uidquery = 'SELECT userman_users.id'.
+       ' FROM userman_users'.
+       ' WHERE userman_users.default_extension = ?';
+    $sql = 'SELECT extension FROM `rest_devices_phones` WHERE user_id = ('. $uidquery. ') AND type = "webrtc_mobile" AND `extension`';
     $stmt = $dbh->prepare($sql);
     $stmt->execute(array($mainextension));
     return $stmt->fetchAll()[0][0];
