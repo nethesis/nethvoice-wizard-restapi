@@ -55,8 +55,19 @@ $app->post('/webrtc', function (Request $request, Response $response, $args) {
             $response->withJson(array("status"=>"Error associating webrtc extension"), 500);
         }
 
+        # Create extension for WebRTC Mobile
+        $extensionm = createExtension($extensionnumber);
+
+        if ($extensionm === false ) {
+            $response->withJson(array("status"=>"Error creating webrtc mobile extension"), 500);
+        }
+
+        if (useExtensionAsWebRTCMobile($extensionm) === false) {
+            $response->withJson(array("status"=>"Error associating webrtc mobile extension"), 500);
+        }
+
         system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
-        return $response->withJson(array('extension'=>$extension), 200);
+        return $response->withJson(array('extension'=>$extension,'mobile_extension'=>$extensionm), 200);
     } catch (Exception $e) {
         error_log($e->getMessage());
         return $response->withStatus(500);
@@ -68,7 +79,8 @@ $app->delete('/webrtc/{mainextension}', function (Request $request, Response $re
         $route = $request->getAttribute('route');
         $mainextension = $route->getArgument('mainextension');
         $extension = getWebRTCExtension($mainextension);
-        if (deleteExtension($extension)) {
+        $mobile_extension = getWebRTCMobileExtension($mainextension);
+        if (deleteExtension($extension) && deleteExtension($mobile_extension)) {
             system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
             return $response->withStatus(200);
         } else {
