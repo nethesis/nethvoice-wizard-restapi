@@ -40,7 +40,7 @@ $app->post('/testauth', function (Request $request, Response $response, $args) {
     $username = $params['username'];
     $password = $params['password'];
 
-    $url = "https://nethpanico.nethesis.it/freepbx/admin/config.php?" .
+    $url = "https://".$_SERVER['SERVER_NAME']."/freepbx/admin/config.php?" .
         "username=" . $username . "&password=" . $password;
 
     $ch = curl_init($url);
