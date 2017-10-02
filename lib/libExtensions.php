@@ -184,12 +184,21 @@ function useExtensionAsCustomPhysical($extension,$web_user = null ,$web_password
 
 function useExtensionAsPhysical($extension,$mac,$model,$line=false) {
     try {
+        require_once(__DIR__. '/../lib/modelRetrieve.php');
         //enable call waiting
         global $astman;
         $astman->database_put("CW",$extension,"ENABLED");
         // insert created physical extension in password table
         $extension_secret = sql('SELECT data FROM `sip` WHERE id = "' . $extension . '" AND keyword="secret"', "getOne");
         $dbh = FreePBX::Database();
+        $vendor = json_decode(file_get_contents(__DIR__. '/../lib/macAddressMap.json'), true);
+        $vendor = $vendor[substr($mac,0,8)];
+        $stmt = $dbh->prepare('SELECT COUNT(*) AS num FROM `rest_devices_phones` WHERE mac = ?');
+        $stmt->execute(array($mac));
+        $res = $stmt->fetchAll()[0]['num'];
+        if ($res == 0) {
+            addPhone($mac, $vendor, $model);
+        }
         if ( isset($line) && $line ) {
             $sql = 'UPDATE `rest_devices_phones` SET user_id = ( '.
                    'SELECT userman_users.id FROM userman_users WHERE userman_users.default_extension = ? '.
@@ -203,7 +212,7 @@ function useExtensionAsPhysical($extension,$mac,$model,$line=false) {
             $stmt = $dbh->prepare($sql);
             $res = $stmt->execute(array(getMainExtension($extension),$extension,$extension_secret,$mac));
         }
-        $stmt = $dbh->prepare($sql);
+
         if ($res) {
             // Add extension to endpointman
             $endpoint = new endpointmanager();
