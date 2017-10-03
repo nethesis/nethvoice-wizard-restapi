@@ -196,6 +196,7 @@ $app->get('/devices/phones/list', function (Request $request, Response $response
             );
             $res[] = $phone;
         }
+        /*Get scanned phones*/
         foreach ($files as $file) {
             if (preg_match('/\.phones\.scan$/', $file)) {
                 if (file_exists($basedir."/".$file)) {
@@ -223,6 +224,38 @@ $app->get('/devices/phones/list', function (Request $request, Response $response
                     }
                 }
             }
+        }
+        /*Get phones from db not in scanned phone list*/
+        $sql = 'SELECT userman_users.default_extension'.
+            ' , rest_devices_phones.model, rest_devices_phones.extension, rest_devices_phones.line, rest_devices_phones.secret, rest_devices_phones.mac, rest_devices_phones.vendor'.
+            ' FROM `rest_devices_phones`'.
+            ' LEFT JOIN userman_users ON userman_users.id = rest_devices_phones.user_id'.
+            ' WHERE rest_devices_phones.type="physical" AND rest_devices_phones.mac IS NOT NULL';
+        $objs = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC);
+        foreach ($objs as $obj){
+            // check if mac is already in list
+            $exists = false;
+            foreach ($res as $r) {
+                if ($r['mac'] == $obj['mac']) {
+                    $exists = true;
+                    continue;
+                }
+            }
+            if ($exists) {
+                continue;
+            }
+
+            $phone['mac'] = $obj['mac'];
+            $phone['model'] = $obj['model'];
+            $phone['manufacturer'] = $obj['vendor'];
+            $phone['lines'] = array();
+            $phone['lines'][] = (object)array(
+                                 "extension"=>$obj['extension'],
+                                 "mainextension"=>$obj['default_extension'],
+                                 "line"=>$obj['line'],
+                                 "secret"=>$obj['secret']
+                                 );
+            $res[] = $phone;
         }
         return $response->withJson($res,200);
     } catch (Exception $e) {
