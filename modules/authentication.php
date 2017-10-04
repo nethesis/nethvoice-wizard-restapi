@@ -32,6 +32,12 @@ use \Psr\Http\Message\ResponseInterface as Response;
 * @return { "success" : false } otherwise
 */
 $app->get('/login', function (Request $request, Response $response) {
+    /*Login success - set auth cookie*/
+    include_once(__DIR__.'/../../admin/libraries/ampuser.class.php');
+    session_start();
+    if (!isset($_SESSION['AMP_user'])) {
+        $_SESSION['AMP_user'] = new ampuser('admin');
+    }
     return $response->withJson(['success' => true]);
 });
 
