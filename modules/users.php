@@ -141,7 +141,6 @@ $app->get('/users/{all}', function (Request $request, Response $response, $args)
                 $users[$i]['devices'] = array();
                 while ($d = $stmt->fetch(\PDO::FETCH_ASSOC))
                     $users[$i]['devices'][] = $d;
-                error_log (print_r($users[$i]['devices'],true));
                 $sql = 'SELECT rest_users.profile_id'.
                   ' FROM rest_users'.
                   ' JOIN userman_users ON rest_users.user_id = userman_users.id'.
