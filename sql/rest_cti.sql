@@ -132,8 +132,9 @@ INSERT IGNORE INTO `rest_cti_permissions` VALUES (21,'hangup','Hangup','Hangup e
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (22,'trunks','PBX lines','View PBX lines');
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (23,'ad_queue_agent','Advanced queue agent panel','View more queue information and manage every agent queue state');
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (24,'lost_queue_call','Lost Queue Calls','Allow to view Queue Recall panel');
-INSERT IGNORE INTO `rest_cti_permissions` VALUES (25,'ad_off_hour','Advanced Off Hour','Allow to change of all incoming call paths');
+INSERT IGNORE INTO `rest_cti_permissions` VALUES (25,'advanced_off_hour','Advanced Off Hour','Allow to change user\'s incoming call path and generic inbound routes');
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (26,'ad_phone','Advanced Phone','Use phone features (hangup, call, answer) on conversations not owned by the user');
+INSERT IGNORE INTO `rest_cti_permissions` VALUES (27,'ad_off_hour','Admin Off Hour','Allow to change all incoming call paths');
 
 /*Permission inside macro permissions*/
 INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (1,1);
@@ -162,6 +163,7 @@ INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (5,26);
 INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (6,23);
 INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (6,24);
 INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (8,25);
+INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (8,27);
 
 /*Permissions enabled by default for each profile*/
 /*Base*/
@@ -222,3 +224,7 @@ INSERT IGNORE INTO `rest_cti_profiles_macro_permissions` VALUES (3,7);
 INSERT IGNORE INTO `rest_cti_profiles_macro_permissions` VALUES (3,8);
 INSERT IGNORE INTO `rest_cti_profiles_macro_permissions` VALUES (3,9);
 
+/*Permissions updates*/
+UPDATE IGNORE `rest_cti_permissions` SET `name`='advanced_off_hour_tmp',`displayname`='Advanced Off Hour',`description`='Allow to change user\'s incoming call path and generic inbound routes' WHERE id = 25;
+UPDATE IGNORE `rest_cti_permissions` SET `name`='ad_off_hour',`displayname`='Admin Off Hour',`description`='Allow to change all incoming call paths' WHERE id = 27;
+UPDATE IGNORE `rest_cti_permissions` SET `name`='advanced_off_hour',`displayname`='Advanced Off Hour',`description`='Allow to change user\'s incoming call path and generic inbound routes' WHERE id = 25;
