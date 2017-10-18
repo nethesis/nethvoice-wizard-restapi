@@ -102,7 +102,7 @@ INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (2,'phonebook','Phonebook
 INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (3,'cdr','CDR','View own call history');
 INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (4,'customer_card','Customer Card','Allow to view Customer Cards');
 INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (5,'presence_panel','Presence Panel','Allow to view Presence Panel');
-INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (6,'queue_agent','Use queue agent panel','View Queues and queues info, login/logout from queues, enable or disable pause state');
+INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (6,'queue_agent','Use queue agent panel','View Queues and queues info of the user, login/logout from queues, enable or disable pause state');
 INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (7,'streaming','Streaming','Allow to view Streaming Panel');
 INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (8,'off_hour','Off Hour','Allow to change of his incoming call paths');
 INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (9,'remote_sites','Remote Sites','Allow to view Remote Sites information');
@@ -130,7 +130,7 @@ INSERT IGNORE INTO `rest_cti_permissions` VALUES (19,'transfer','Transfer','Tran
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (20,'ad_parking','Advanced Parking','Allow to park any call and to pickup them using any extension');
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (21,'hangup','Hangup','Hangup everyone call');
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (22,'trunks','PBX lines','View PBX lines');
-INSERT IGNORE INTO `rest_cti_permissions` VALUES (23,'ad_queue_agent','Advanced queue agent panel','View more queue information and manage every agent queue state');
+INSERT IGNORE INTO `rest_cti_permissions` VALUES (23,'ad_queue_agent','Advanced queue agent panel','View more queue information');
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (24,'lost_queue_call','Lost Queue Calls','Allow to view Queue Recall panel');
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (25,'advanced_off_hour','Advanced Off Hour','Allow to change user\'s incoming call path and generic inbound routes');
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (26,'ad_phone','Advanced Phone','Use phone features (hangup, call, answer) on conversations not owned by the user');
