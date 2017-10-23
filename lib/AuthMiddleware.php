@@ -49,7 +49,7 @@ class AuthMiddleware
             $given_user = $request->getHeaderLine('User');
             $given_secret = $request->getHeaderLine('Secretkey');
 
-	    $stmt = $dbh->prepare("SELECT * FROM ampusers WHERE sections='*' AND username = ?");
+	    $stmt = $dbh->prepare("SELECT * FROM ampusers WHERE sections LIKE '%*%' AND username = ?");
 	    $stmt->execute(array($given_user));
 	    $user = $stmt->fetchAll();
             $password_sha1 = $user[0]['password_sha1'];
