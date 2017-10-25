@@ -28,6 +28,7 @@ require_once(__DIR__. '/../../admin/modules/core/functions.inc.php');
 include_once(__DIR__. '/../lib/gateway/functions.inc.php');
 require_once(__DIR__. '/../lib/freepbxFwConsole.php');
 require_once(__DIR__. '/../../admin/modules/endpointman/includes/functions.inc');
+include_once(__DIR__. '/../lib/libExtensions.php');
 
 /*
 *  Launch a scan: POST/devices/scan
@@ -462,62 +463,17 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
                     $sth->execute(array($configId,$trunkId,$trunk['trunknumber'],$trunk['number'],$secret));
                 } elseif ($type === 'fxs' && isset($params['trunks_fxs'])) {
                     /* create physical extension */
-                //get associated main extension
-                $mainextensions = $fpbx->Core->getAllUsers();
                     $mainextensionnumber = $trunk['linked_extension'];
-                    foreach ($mainextensions as $ve) {
-                        if ($ve['extension'] == $mainextensionnumber) {
-                            $mainextension = $ve;
-                            break;
-                        }
-                    }
-                //error if main extension number doesn't exist
-                if (!isset($mainextension)) {
-                    return $response->withJson(array("status"=>"Main extension ".$mainextensionnumber." doesn't exist"), 400);
-                }
-
-                    if (isset($params['extension'])) {
-                        //use given extension number
-                    if (!preg_match('/9[1-7]'.$mainextensionnumber.'/', $params['extension'])) {
-                        return $response->withJson(array("status"=>"Wrong physical extension number supplied"), 400);
-                    } else {
-                        $extension = $params['extension'];
-                    }
-                    } else {
-                        //get first free physical extension number for this main extension
-                    $extensions = $fpbx->Core->getAllUsersByDeviceType();
-                        for ($i=91; $i<=97; $i++) {
-                            if (!extensionExists($i.$mainextensionnumber, $extensions)) {
-                                $extension = $i.$mainextensionnumber;
-                                break;
-                            }
-                        }
-                    //error if there aren't available extension numbers
-                    if (!isset($extension)) {
-                        return $response->withJson(array("status"=>"There aren't available extension numbers"), 500);
-                    }
+                    $extension = createExtension($mainextensionnumber);
+                    if (useExtensionAsCustomPhysical($extension,$web_user,$web_password) === false) {
+                        $response->withJson(array("status"=>"Error creating custom extension"), 500);
                     }
 
-                //delete extension
-                $fpbx->Core->delDevice($extension, true);
-                    $fpbx->Core->delUser($extension, true);
-
-                //create physical extension
-                $data['name'] = $mainextension['name'];
-                    $mainextdata = $fpbx->Core->getUser($mainextension['extension']);
-                    $data['outboundcid'] = $mainextdata['outboundcid'];
-                    $res = $fpbx->Core->processQuickCreate('pjsip', $extension, $data);
-                    if (!$res['status']) {
-                        return $response->withJson(array('message'=>$res['message']), 500);
-                    }
-
-                    $created_extension = $res['ext'];
-                    $created_extension_secret = sql('SELECT data FROM `sip` WHERE id = "' . $created_extension . '" AND keyword="secret"', "getOne");
-
-                /*Save fxs trunks parameters*/
-                $sql = "REPLACE INTO `gateway_config_fxs` (`config_id`,`extension`,`physical_extension`,`secret`) VALUES (?,?,?,?)";
+                    /*Save fxs trunks parameters*/
+                    $extension_secret = sql('SELECT data FROM `sip` WHERE id = "' . $extension . '" AND keyword="secret"', "getOne");
+                    $sql = "REPLACE INTO `gateway_config_fxs` (`config_id`,`extension`,`physical_extension`,`secret`) VALUES (?,?,?,?)";
                     $sth = FreePBX::Database()->prepare($sql);
-                    $sth->execute(array($configId,$trunk['linked_extension'],$created_extension,$created_extension_secret));
+                    $sth->execute(array($configId,$trunk['linked_extension'],$extension,$extension_secret));
                 }
             }
         }
@@ -576,9 +532,10 @@ $app->delete('/devices/gateways/{id}', function (Request $request, Response $res
             core_trunks_del($row['trunk']);
             core_trunks_delete_dialrules($row['trunk']);
             core_routing_trunk_delbyid($row['trunk']);
-            $fpbx->Core->delDevice($row['trunk'], true);
-            $fpbx->Core->delUser($row['trunk'], true);
+            deletePhysicalExtension($row['trunk']);
+            deleteExtension($row['trunk']);
         }
+
         $sql = "DELETE IGNORE FROM `gateway_config` WHERE `id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($id));
