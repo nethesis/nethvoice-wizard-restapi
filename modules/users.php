@@ -187,6 +187,7 @@ $app->post('/users', function (Request $request, Response $response, $args) {
     if ( ! $username || ! $fullname ) {
         return $response->withJson(['result' => 'User name or full name invalid'], 422);
     }
+    $username = strtolower($username);
     if ( userExists($username) ) {
         exec("/usr/bin/sudo /sbin/e-smith/signal-event user-modify '$username' '$fullname' '/bin/false'", $out, $ret);
     } else {
