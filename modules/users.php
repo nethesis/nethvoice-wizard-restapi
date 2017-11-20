@@ -210,7 +210,7 @@ $app->post('/users', function (Request $request, Response $response, $args) {
 
 $app->post('/users/{username}/password', function (Request $request, Response $response, $args) {
     $params = $request->getParsedBody();
-    $username = $request->getAttribute('username');
+    $username = strtolower($request->getAttribute('username'));
     $password = $params['password'];
 
     if ($username === 'admin') { # change freepbx admin password
@@ -242,7 +242,7 @@ $app->post('/users/{username}/password', function (Request $request, Response $r
 
 $app->get('/users/{username}/password', function (Request $request, Response $response, $args) {
     $params = $request->getParsedBody();
-    $username = $request->getAttribute('username');
+    $username = strtolower($request->getAttribute('username'));
     $password = getPassword($username);
     if ($password) {
         return $response->withJson(['result' => $password]);
