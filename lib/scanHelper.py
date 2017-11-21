@@ -86,7 +86,7 @@ for host in nm.all_hosts():
                 row['type'] = 'gateway'
             else:
                 row['type'] = 'phone'
-        except urllib2.HTTPError, socket.timeout:
+        except:
             row['type'] = 'phone'
     if row['type'] == 'phone':
         phonesout.append(row)
