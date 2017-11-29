@@ -19,6 +19,8 @@
 # along with NethServer.  If not, see COPYING.
 #
 
+require_once(__DIR__. '/../lib/freepbxFwConsole.php');
+
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
@@ -53,7 +55,7 @@ function getPassword($username) {
 }
 
 function setPassword($username, $password) {
-    sync();
+    fwconsole('userman sync');
     $dbh = FreePBX::Database();
     $sql =  'INSERT INTO rest_users (user_id,password)'.
             ' SELECT id, ?'.
@@ -62,12 +64,6 @@ function setPassword($username, $password) {
             ' ON DUPLICATE KEY UPDATE password = ?';
     $stmt = $dbh->prepare($sql);
     $stmt->execute(array($password, $username, $password));
-}
-
-function sync() {
-    $userman = FreePBX::create()->Userman;
-    $auth = $userman->getAuthObject();
-    $auth->sync($output);
 }
 
 # Get final wizard report for created users
@@ -119,7 +115,7 @@ $app->get('/users/{all}', function (Request $request, Response $response, $args)
     $all = $request->getAttribute('all');
     $blacklist = ['admin', 'administrator', 'guest', 'krbtgt'];
     if($all == "true") {
-        sync(); // force FreePBX user sync
+        fwconsole('userman sync'); // force FreePBX user sync
     }
     $users = FreePBX::create()->Userman->getAllUsers();
     $dbh = FreePBX::Database();
@@ -257,7 +253,7 @@ $app->get('/users/{username}/password', function (Request $request, Response $re
 #
 
 $app->post('/users/sync', function (Request $request, Response $response, $args) {
-    sync();
+    fwconsole('userman sync');
     return $response->withStatus(200);
 });
 
