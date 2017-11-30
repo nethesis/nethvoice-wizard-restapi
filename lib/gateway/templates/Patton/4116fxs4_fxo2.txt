@@ -76,12 +76,6 @@ context cs switch
   routing-table called-e164 from_if_fxo-01
     route default dest-interface IF_VOIP_ASTERISK2 FXO_01
 
-  mapping-table called-e164 to called-e164 FXO_00
-    map default to LINENUMBER1
-
-  mapping-table called-e164 to called-e164 FXO_01
-    map default to LINENUMBER2
-
   routing-table called-e164 TAB-IN
     route FXSEXTENSION0 dest-interface fxs-00
     route FXSEXTENSION1 dest-interface fxs-01
@@ -91,15 +85,29 @@ context cs switch
   routing-table called-e164 TAB-OUT
     route .T dest-interface IF_VOIP_ASTERISK5
 
+  routing-table called-e164 to_fxo
+    route TRUNKNUMBER1.% dest-interface fxo-00 cutpref
+    route TRUNKNUMBER2.% dest-interface fxo-01 cutpref
+
+  mapping-table called-e164 to called-e164 FXO_00
+    map default to LINENUMBER1
+
+  mapping-table called-e164 to called-e164 FXO_01
+    map default to LINENUMBER2
+
+  mapping-table called-e164 to called-e164 cutpref
+    map TRUNKNUMBER1(.%) to \1
+    map TRUNKNUMBER2(.%) to \1
+
   interface sip IF_VOIP_ASTERISK
     bind context sip-gateway ASTERISK
-    route call dest-interface fxo-00
+    route call dest-table to_fxo
     remote ASTERISKIP 5060
     early-disconnect
 
   interface sip IF_VOIP_ASTERISK2
     bind context sip-gateway ASTERISK2
-    route call dest-interface fxo-01
+    route call dest-table to_fxo
     remote ASTERISKIP 5060
     early-disconnect
 
@@ -172,9 +180,6 @@ location-service LOC_SERV_TRAIN
     authentication outbound
       authenticate 1 authentication-service AUTH_TRAIN username TRUNKNUMBER1
 
-    registration outbound
-      register auto
-
 location-service LOC_SERV_TRAIN2
   domain 1 ASTERISKIP
 
@@ -183,9 +188,6 @@ location-service LOC_SERV_TRAIN2
     authentication outbound
       authenticate 1 authentication-service AUTH_TRAIN username TRUNKNUMBER2
 
-    registration outbound
-      register auto
-
 location-service LOC_SERV_TRAIN5
   domain 1 ASTERISKIP
 
@@ -193,7 +195,6 @@ location-service LOC_SERV_TRAIN5
 
     authentication outbound
       authenticate 1 authentication-service AUTH_TRAIN username FXSEXTENSION0
-
 
     registration outbound
       register auto
@@ -205,7 +206,6 @@ location-service LOC_SERV_TRAIN5
 
     registration outbound
       register auto
-
 
   identity FXSEXTENSION2
 
