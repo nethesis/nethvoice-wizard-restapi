@@ -322,7 +322,7 @@
   set ._advanced.sip.disable_sdp_ver_inc_on_retransmit="0"
   set ._advanced.sip.disc_if_progress_with_cause="0"
   set ._advanced.sip.disc_with_progress="0"
-  set ._advanced.sip.early_ok_timer="10"
+  set ._advanced.sip.early_ok_timer="0"
   set ._advanced.sip.escape_chars_in_uri="0"
   set ._advanced.sip.from_header_uri_params="NULL"
   set ._advanced.sip.ignore_udp_bye="0"

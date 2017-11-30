@@ -76,17 +76,26 @@ context cs SWITCH
   international-prefix 00
   no shutdown
 
+  mapping-table called-e164 to called-e164 cutpref
+    map TRUNKNUMBER1(.%) to \1
+    map TRUNKNUMBER2(.%) to \1
+
   routing-table called-e164 to-IF_VOIP_ASTERISK_00
     route .%T dest-interface IF_VOIP_ASTERISK_00
 
   routing-table called-e164 to-IF_VOIP_ASTERISK_01
     route .%T dest-interface IF_VOIP_ASTERISK_01
 
+  routing-table called-e164 to_isdn
+    route TRUNKNUMBER1.% dest-interface IF_ISDN_00 cutpref
+    route TRUNKNUMBER2.% dest-interface IF_ISDN_01 cutpref
+
   interface isdn IF_ISDN_00
     route call dest-table to-IF_VOIP_ASTERISK_00
     call-reroute emit
     diversion emit
     caller-name    
+    caller-name ignore-absence 0
     user-side-ringback-tone
 
   interface isdn IF_ISDN_01
@@ -94,17 +103,19 @@ context cs SWITCH
     call-reroute emit
     diversion emit
     caller-name
+    caller-name ignore-absence 0
     user-side-ringback-tone
 
   interface sip IF_VOIP_ASTERISK_00
     bind context sip-gateway ASTERISK_00
-    route call dest-interface IF_ISDN_00
+    route call dest-table to_isdn
     remote ASTERISKIP 5060
     early-disconnect
     trust remote
 
   interface sip IF_VOIP_ASTERISK_01
     bind context sip-gateway ASTERISK_01
+    route call dest-table to_isdn
     route call dest-interface IF_ISDN_01
     remote ASTERISKIP 5060
     early-disconnect
@@ -122,10 +133,6 @@ location-service SER_LOC_00
     authentication outbound
       authenticate 1 authentication-service AUTH_SRV username TRUNKNUMBER1
 
-    registration outbound
-      registrar ASTERISKIP
-      register auto
-
 location-service SER_LOC_01
   domain 1 ASTERISKIP
 
@@ -133,10 +140,6 @@ location-service SER_LOC_01
 
     authentication outbound
       authenticate 1 authentication-service AUTH_SRV username TRUNKNUMBER2
-
-    registration outbound
-      registrar ASTERISKIP
-      register auto
 
 context sip-gateway ASTERISK_00
   bind location-service SER_LOC_00
