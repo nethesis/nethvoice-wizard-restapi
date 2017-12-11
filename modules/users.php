@@ -55,7 +55,7 @@ function getPassword($username) {
 }
 
 function setPassword($username, $password) {
-    fwconsole('userman sync');
+    fwconsole('userman --syncall --force');
     $dbh = FreePBX::Database();
     $sql =  'INSERT INTO rest_users (user_id,password)'.
             ' SELECT id, ?'.
@@ -115,7 +115,7 @@ $app->get('/users/{all}', function (Request $request, Response $response, $args)
     $all = $request->getAttribute('all');
     $blacklist = ['admin', 'administrator', 'guest', 'krbtgt'];
     if($all == "true") {
-        fwconsole('userman sync'); // force FreePBX user sync
+        fwconsole('userman --syncall --force'); // force FreePBX user sync
     }
     $users = FreePBX::create()->Userman->getAllUsers();
     $dbh = FreePBX::Database();
@@ -190,6 +190,7 @@ $app->post('/users', function (Request $request, Response $response, $args) {
         exec("/usr/bin/sudo /sbin/e-smith/signal-event user-create '$username' '$fullname' '/bin/false'", $out, $ret);
     }
     if ( $ret === 0 ) {
+        system("/usr/bin/scl enable rh-php56 '/usr/sbin/fwconsole userman --syncall --force'");
         return $response->withStatus(201);
     } else {
         return $response->withStatus(422);
@@ -253,7 +254,7 @@ $app->get('/users/{username}/password', function (Request $request, Response $re
 #
 
 $app->post('/users/sync', function (Request $request, Response $response, $args) {
-    fwconsole('userman sync');
+    fwconsole('userman --syncall --force');
     return $response->withStatus(200);
 });
 
