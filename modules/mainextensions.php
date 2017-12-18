@@ -231,6 +231,6 @@ function checkFreeExtension($extension){
         return true;
     } catch (Exception $e) {
         error_log($e->getMessage());
-        return "Extension already in use";
+        return $e->getMessage();
     }
 }

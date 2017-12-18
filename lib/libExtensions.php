@@ -74,7 +74,7 @@ function createExtension($mainextensionnumber){
                 throw ("Error creating extension");
             }
             //Set cid_masquerade (CID Num Alias)
-	    $astman->database_put("AMPUSER",$extension."/cidnum",$mainextensionnumber);
+            $astman->database_put("AMPUSER",$extension."/cidnum",$mainextensionnumber);
 
             //Add device to main extension devices
             $existingdevices = $astman->database_get("AMPUSER", $mainextensionnumber."/device");
@@ -117,7 +117,7 @@ function useExtensionAsWebRTC($extension,$isMobile = false) {
         } else {
             $type = 'webrtc';
         }
-	//disable call waiting
+        //disable call waiting
         global $astman;
         $dbh = FreePBX::Database();
         $astman->database_del("CW",$extension);
