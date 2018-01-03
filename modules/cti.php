@@ -997,7 +997,7 @@ $app->post('/cti/sources/test', function (Request $request, Response $response, 
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true );
         $ret_val = curl_exec($curl);
 
-        if (strpos($ret_val, '<!DOCTYPE html PUBLIC') !== false) {
+        if (strpos($ret_val, '<!DOCTYPE html PUBLIC') !== false || $ret_val === false) {
             return $response->withStatus(500);
         } else {
             $b64_image_data =  chunk_split(base64_encode($ret_val));
