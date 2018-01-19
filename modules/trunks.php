@@ -105,7 +105,7 @@ $app->post('/trunks', function (Request $request, Response $response, $args) {
     $peerdetails  = str_replace("NUMERO", $params['phone'], $peerdetails);
     $usercontext  = $params['username'];
     $userconfig   = str_replace("PASSWORD", $params['password'], $provider_param['dettuser']);
-    $userconfig   = str_replace("CODECS", $params['codec'], $userconfig);
+    $userconfig   = str_replace("CODECS", implode(',',$params['codecs']), $userconfig);
     $register     = str_replace("USERNAME", $params['username'], $provider_param['registration']);
     $register     = str_replace("PASSWORD", $params['password'], $register);
     $register     = str_replace("NUMERO", $params['phone'], $register);
