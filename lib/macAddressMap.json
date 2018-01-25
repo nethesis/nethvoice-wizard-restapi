@@ -59,5 +59,7 @@
 "00:1F:9F":"Thomson",
 "64:24:00":"Xorcom",
 "00:15:65":"Yealink/Dreamwave",
+"80:5E:0C":"Yealink/Dreamwave",
+"80:5E:C0":"Yealink/Dreamwave",
 "9C:75:14":"Yealink/Wildix"
 }
