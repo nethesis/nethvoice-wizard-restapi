@@ -98,6 +98,11 @@ $app->post('/trunks', function (Request $request, Response $response, $args) {
     $provider_param = $dbh->sql('SELECT * FROM `providers` WHERE `provider` = \''. $params['provider']. '\'',
       "getRow", DB_FETCHMODE_ASSOC);
 
+    //Make sure name is != username by adding provider name to it if necessary
+    if ($params['name'] == $params['username']){
+        $params['name'] = $params['provider'].'_'.$params['name'];
+    }
+
     $channelid    = $params['name'];
     $peerdetails  = str_replace("USERNAME", $params['username'], $provider_param['dettpeer']);
     $peerdetails  = str_replace("PASSWORD", $params['password'], $peerdetails);
