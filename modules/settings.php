@@ -75,11 +75,11 @@ $app->post('/settings/defaultlanguage', function (Request $request, Response $re
 */
 $app->get('/settings/languages', function (Request $request, Response $response, $args) {
     try {
-        exec('/usr/bin/rpm -qa | grep nethserver-lang', $out, $ret);
+        exec('/usr/bin/rpm -qa | grep nethvoice-lang', $out, $ret);
         $defaultLanguage = FreePBX::create()->Soundlang->getLanguage();
         $res = array();
         foreach ($out as $package) {
-            $lang = preg_replace('/^nethserver-lang-([a-z]*)-.*\.noarch$/', '${1}',$package);
+            $lang = preg_replace('/^nethvoice-lang-([a-z]*)-.*\.noarch$/', '${1}',$package);
             if ($lang == $defaultLanguage) {
                 $res[$lang] = array('default' => true);
             } else {
