@@ -70,3 +70,26 @@ $app->post('/settings/defaultlanguage', function (Request $request, Response $re
     }
 });
 
+/*
+* GET /settings/languages return installed languages default
+*/
+$app->get('/settings/languages', function (Request $request, Response $response, $args) {
+    try {
+        exec('/usr/bin/rpm -qa | grep nethserver-lang', $out, $ret);
+        $defaultLanguage = FreePBX::create()->Soundlang->getLanguage();
+        $res = array();
+        foreach ($out as $package) {
+            $lang = preg_replace('/^nethserver-lang-([a-z]*)-.*\.noarch$/', '${1}',$package);
+            if ($lang == $defaultLanguage) {
+                $res[$lang] = array('default' => true);
+            } else {
+                $res[$lang] = array('default' => false);
+            }
+        }
+        return $response->withJson($res,200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
