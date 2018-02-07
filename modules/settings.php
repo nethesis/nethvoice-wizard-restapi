@@ -75,11 +75,11 @@ $app->post('/settings/defaultlanguage', function (Request $request, Response $re
 */
 $app->get('/settings/languages', function (Request $request, Response $response, $args) {
     try {
-        exec('/usr/bin/rpm -qa | grep nethvoice-lang', $out, $ret);
+        exec('/usr/bin/rpm -qa | grep "nethvoice-lang\|asterisk-sounds-extra"', $out, $ret);
         $defaultLanguage = FreePBX::create()->Soundlang->getLanguage();
         $res = array();
         foreach ($out as $package) {
-            $lang = preg_replace('/^nethvoice-lang-([a-z]*)-.*\.noarch$/', '${1}',$package);
+            $lang = preg_replace('/^nethvoice-lang-([a-z]*)-.*\.noarch$|^asterisk-sounds-extra-([a-z]*)-.*\.noarch$/', '${1}${2}',$package);
             if ($lang == $defaultLanguage) {
                 $res[$lang] = array('default' => true);
             } else {
@@ -92,4 +92,3 @@ $app->get('/settings/languages', function (Request $request, Response $response,
         return $response->withStatus(500);
     }
 });
-
