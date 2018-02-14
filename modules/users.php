@@ -185,9 +185,9 @@ $app->post('/users', function (Request $request, Response $response, $args) {
     }
     $username = strtolower($username);
     if ( userExists($username) ) {
-        exec("/usr/bin/sudo /sbin/e-smith/signal-event user-modify ".escapeshellcmd($username)." ".escapeshellcmd($fullname)." '/bin/false'", $out, $ret);
+        exec("/usr/bin/sudo /sbin/e-smith/signal-event user-modify ".escapeshellcmd($username)." '".escapeshellcmd($fullname)."' '/bin/false'", $out, $ret);
     } else {
-        exec("/usr/bin/sudo /sbin/e-smith/signal-event user-create ".escapeshellcmd($username)." ".escapeshellcmd($fullname)." '/bin/false'", $out, $ret);
+        exec("/usr/bin/sudo /sbin/e-smith/signal-event user-create ".escapeshellcmd($username)." '".escapeshellcmd($fullname)."' '/bin/false'", $out, $ret);
     }
     if ( $ret === 0 ) {
         system("/usr/bin/scl enable rh-php56 '/usr/sbin/fwconsole userman --syncall --force'");
