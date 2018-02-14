@@ -85,6 +85,11 @@ $app->get('/settings/languages', function (Request $request, Response $response,
             } else {
                 $res[$lang] = array('default' => false);
             }
+            # Set lang as installed in soundlang module
+            $dbh = FreePBX::Database();
+            $sql="REPLACE INTO soundlang_packages set type='asterisk',module='extra-sounds',language=?,license='',author='www.asterisksounds.org',authorlink='www.asterisksounds.org',format='',version='1.9.0',installed='1.9.0'";
+            $stmt = $dbh->prepare($sql);
+            $stmt->execute(array($lang));
         }
         return $response->withJson($res,200);
     } catch (Exception $e) {
