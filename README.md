@@ -695,3 +695,15 @@ Get allowed codecs for VoIP trunks, ordered and enabled
 GET /codecs/voip
 ```
 
+
+# How to build
+
+This module is embedded into nethserver-nethvoice14 build
+
+building nethserver-nethvoice14 without signing key embed this module last master
+
+To embed this module into nethserver-nethvoice14 release build
+- create a new release on github in the repo of this module
+- make a PR on nethserver-nethvoice14 changing module version in retrieve_modules.sh
+- as commit message, include release changelog
+- now, builds and automatic builds for testing and relese (with signing passphrase) will include specified version
