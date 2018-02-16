@@ -63,6 +63,13 @@ $app->post('/settings/defaultlanguage', function (Request $request, Response $re
             break;
         }
         FreePBX::create()->Core->config->set_conf_values(array('TONEZONE'=>$tonescheme),true,$amp_conf['AS_OVERRIDE_READONLY']);
+
+        # Set lang as installed in soundlang module
+        $dbh = FreePBX::Database();
+        $sql="REPLACE INTO soundlang_packages set type='asterisk',module='extra-sounds',language=?,license='',author='www.asterisksounds.org',authorlink='www.asterisksounds.org',format='',version='1.9.0',installed='1.9.0'";
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute(array($lang));
+
         system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
     } catch (Exception $e) {
         error_log($e->getMessage());
