@@ -7,3 +7,6 @@ event_actions($event, qw(
     initialize-default-databases 00
 ));
 
+event_templates($event, qw(
+    /var/www/html/freepbx/rest/config.inc.php
+));

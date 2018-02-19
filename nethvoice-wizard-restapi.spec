@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.0.3
+Version: 14.0.0
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -17,6 +17,7 @@ Rest API for FreePBX
 
 
 %build
+perl createlinks
 
 %install
 rm -rf %{buildroot}
@@ -31,8 +32,10 @@ rm -rf %{buildroot}
 
 %files -f %{name}-%{version}-filelist
 %defattr(-,root,root,-)
+%dir %{_nseventsdir}/%{name}-update
+%attr (0774,root,root) /var/www/html/freepbx/rest/lib/scanHelper.py
+%attr (0754,root,asterisk) /var/www/html/freepbx/rest/lib/retrieveHelper.sh
 
 %doc
-%dir %{_nseventsdir}/%{name}-update
 
 %changelog
