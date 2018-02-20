@@ -476,12 +476,13 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
                     $trunk_number = (strtolower($res['manufacturer']) === 'patton' ? 0 : 2);
                     $trunk_name = $vendor. '_'. $uid. '_fxo_'. $trunk_number;
                     $trunk_pjsip_id = sql('SELECT id FROM `pjsip` WHERE keyword ="trunk_name" AND data = "' . $trunk_name . '"' , "getOne");
-                    $trunk_pjsip_aor = sql('SELECT data FROM `pjsip` WHERE keyword ="aors" AND id = "' . $trunk_pjsip_id . '"', "getOne");
-                    $trunk_pjsip_aor .= ",".$extension;
-                    $sql = "REPLACE INTO `pjsip` (`id`,`keyword`,`data`,`flags`) VALUES (?,?,?,?)";
-                    $sth = FreePBX::Database()->prepare($sql);
-                    $sth->execute(array($trunk_pjsip_id,'aors',$trunk_pjsip_aor,'0'));
-
+                    if (!empty($trunk_pjsip_id)) {
+                        $trunk_pjsip_aor = sql('SELECT data FROM `pjsip` WHERE keyword ="aors" AND id = "' . $trunk_pjsip_id . '"', "getOne");
+                        $trunk_pjsip_aor .= ",".$extension;
+                        $sql = "REPLACE INTO `pjsip` (`id`,`keyword`,`data`,`flags`) VALUES (?,?,?,?)";
+                        $sth = FreePBX::Database()->prepare($sql);
+                        $sth->execute(array($trunk_pjsip_id,'aors',$trunk_pjsip_aor,'0'));
+                    }
                     /*Save fxs trunks parameters*/
                     $extension_secret = sql('SELECT data FROM `sip` WHERE id = "' . $extension . '" AND keyword="secret"', "getOne");
                     $sql = "REPLACE INTO `gateway_config_fxs` (`config_id`,`extension`,`physical_extension`,`secret`) VALUES (?,?,?,?)";
