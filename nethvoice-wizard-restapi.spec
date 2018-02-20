@@ -35,7 +35,6 @@ rm -rf %{buildroot}
 %dir %{_nseventsdir}/%{name}-update
 %attr (0774,root,root) /var/www/html/freepbx/rest/lib/scanHelper.py
 %attr (0754,root,asterisk) /var/www/html/freepbx/rest/lib/retrieveHelper.sh
-
 %doc
 
 %changelog
