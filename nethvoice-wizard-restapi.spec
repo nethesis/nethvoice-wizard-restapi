@@ -38,3 +38,7 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Fri Feb 23 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.0.0-1
+- Don't configure AORs if gateway is only FXS. Nethesis/dev#5342
+- Package separated from nethserver-nethvoice14. Nethesis/dev#5341
+
