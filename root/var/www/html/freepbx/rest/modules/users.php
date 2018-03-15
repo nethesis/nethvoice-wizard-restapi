@@ -96,7 +96,7 @@ $app->get('/final', function (Request $request, Response $response, $args) {
 # Count all users
 
 $app->get('/users/count', function (Request $request, Response $response, $args) {
-    $blacklist = ['admin', 'administrator', 'guest', 'krbtgt'];
+    $blacklist = ['admin', 'administrator', 'guest', 'krbtgt','ldapservice'];
     $users = FreePBX::create()->Userman->getAllUsers();
     $dbh = FreePBX::Database();
     $i = 0;
@@ -113,7 +113,7 @@ $app->get('/users/count', function (Request $request, Response $response, $args)
 
 $app->get('/users/{all}', function (Request $request, Response $response, $args) {
     $all = $request->getAttribute('all');
-    $blacklist = ['admin', 'administrator', 'guest', 'krbtgt'];
+    $blacklist = ['admin', 'administrator', 'guest', 'krbtgt','ldapservice'];
     if($all == "true") {
         fwconsole('userman --syncall --force'); // force FreePBX user sync
     }
