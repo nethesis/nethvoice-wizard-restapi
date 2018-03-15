@@ -82,7 +82,8 @@ for host in nm.all_hosts():
         try:
             req = urllib2.Request('http://'+nm[host]['addresses']['ipv4']+'/index.htm')
             res = urllib2.urlopen(req,timeout = 5)
-            if "Gateway" in res.read():
+            res = res.read()
+            if "Gateway" in res or "Sangoma Vega " in res:
                 row['type'] = 'gateway'
             else:
                 row['type'] = 'phone'
