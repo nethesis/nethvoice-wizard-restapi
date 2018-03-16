@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.0.0
+Version: 14.0.1
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -38,6 +38,10 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Fri Mar 16 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.0.1-1
+- Hide ldapservice user from wizard interface nethesis/dev#5357
+- Recognize Sangoma Vega 60 Gateways nethesis/dev#5357
+
 * Fri Feb 23 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.0.0-1
 - Don't configure AORs if gateway is only FXS. Nethesis/dev#5342
 - Package separated from nethserver-nethvoice14. Nethesis/dev#5341
