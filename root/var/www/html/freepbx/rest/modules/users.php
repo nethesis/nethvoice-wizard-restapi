@@ -20,54 +20,13 @@
 #
 
 require_once(__DIR__. '/../lib/freepbxFwConsole.php');
+include_once('lib/libUsers.php');
+include_once('lib/libExtensions.php');
 
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
-function getUser($username) {
-    # add domain part if needed
-    if (strpos($username, '@') === false) {
-        exec('/usr/bin/hostname -d', $out, $ret);
-        $domain = $out[0];
-        return "$username@$domain";
-    }
-    return $username;
-}
-
-function userExists($username) {
-    $needle = getUser($username);
-    $users = shell_exec("/usr/bin/sudo /usr/libexec/nethserver/list-users");
-    foreach (json_decode($users) as $user => $props) {
-        if ($user == $needle) {
-            return true;
-        }
-    }
-    return false;
-}
-
-function getPassword($username) {
-    return sql(
-      'SELECT rest_users.password'.
-      ' FROM rest_users'.
-      ' JOIN userman_users ON rest_users.user_id = userman_users.id'.
-      ' WHERE userman_users.username = \''. getUser($username). '\'', 'getOne'
-    );
-}
-
-function setPassword($username, $password) {
-    fwconsole('userman --syncall --force');
-    $dbh = FreePBX::Database();
-    $sql =  'INSERT INTO rest_users (user_id,password)'.
-            ' SELECT id, ?'.
-            ' FROM userman_users'.
-            ' WHERE username = ?'.
-            ' ON DUPLICATE KEY UPDATE password = ?';
-    $stmt = $dbh->prepare($sql);
-    $stmt->execute(array($password, $username, $password));
-}
-
 # Get final wizard report for created users
-
 $app->get('/final', function (Request $request, Response $response, $args) {
     try {
         $dbh = FreePBX::Database();
@@ -149,23 +108,6 @@ $app->get('/users/{all}', function (Request $request, Response $response, $args)
     }
     return $response->withJson(array_values($users),200);
 });
-
-
-# Return the selected user
-
-/*$app->get('/users/{username}', function (Request $request, Response $response, $args) {
-    $username = $request->getAttribute('username');
-    if (userExists($username)) {
-        $users = FreePBX::create()->Userman->getAllUsers();
-        foreach ($users as $u) {
-            if ($u['username'] == $username) {
-                $u['password'] = getPassword(getUser($u['username']));
-                return $response->withJson($u);
-            }
-        }
-    }
-    return $response->withStatus(404);
-});*/
 
 
 # Create or edit a system user inside OpenLDAP
@@ -256,5 +198,80 @@ $app->get('/users/{username}/password', function (Request $request, Response $re
 $app->post('/users/sync', function (Request $request, Response $response, $args) {
     fwconsole('userman --syncall --force');
     return $response->withStatus(200);
+});
+
+$app->post('/users/csvimport', function (Request $request, Response $response, $args) {
+    try {
+        $params = $request->getParsedBody();
+        $file = $params['file'];
+        $handle = fopen($file, "r");
+        # create user array readin from csv
+        for ($i = 0; $row = fgetcsv($handle); ++$i) {
+            $csv[] = array('username'=>$row[0],'fullname'=>$row[1],'extension'=>$row[2],'password'=>$row[3]);
+        }
+        fclose($handle);
+
+        # create users
+        $result = 0;
+        $err = '';
+        foreach ($csv as $k => $row) {
+            if (! $row['username'] || ! $row['fullname']) {
+                $result += 1;
+                $err .= "Error creating user: username and fullname can't be empty: ".implode(",",$row) ."\n";
+                unset($csv[$k]);
+                continue;
+            }
+            if (userExists($row['username'])) {
+                $result += 1;
+                $err .= "Error creating user ".$row['username'].": user already exists"."\n";
+                unset($csv[$k]);
+                continue;
+            }
+            $row['username'] = strtolower($row['username']);
+            if (!userExists($row['username'])) {
+                exec("/usr/bin/sudo /sbin/e-smith/signal-event user-create ".escapeshellcmd($row['username'])." '".escapeshellcmd($row['fullname'])."' '/bin/false'", $out, $ret);
+                $result += $ret;
+                if ($ret > 0 ) {
+                    $err .= "Error creating user ".$row['username'].": ".print_r($out,true)."\n";
+                    unset($csv[$k]);
+                    continue;
+                }
+            }
+            # Set password
+            if (isset($row['password']) && ! empty($row['password']) ){
+                $tmp = tempnam("/tmp","ASTPWD");
+                file_put_contents($tmp, $password);
+                exec("/usr/bin/sudo /sbin/e-smith/signal-event password-modify '".getUser($row['username'])."' $tmp", $out, $ret);
+                $result += $ret;
+                if ($ret > 0 ) {
+                    $err .= "Error setting password for user ".$row['username'].": ".print_r($out,true)."\n";
+                    unset($csv[$k]);
+                    continue;
+                } else {
+                    setPassword($username, $password);
+                }
+            }
+        }
+        # sync users
+        system("/usr/bin/scl enable rh-php56 '/usr/sbin/fwconsole userman --syncall --force'");
+
+        foreach ($csv as $k => $row) {
+            $create = createMainExtensionForUser($row['username'],$row['extension']);
+            if ($create !== true) {
+                $result += 1;
+                $err .= "Error adding main extension ".$row['extension']." to user ".$row['username']."\n";
+            }
+        }
+
+        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
+
+        if ($result > 0) {
+            throw new Exception("Something went wrong: \n".$err);
+        }
+        return $response->withJson($csv);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withJson(['result' => $e->getMessage()], 500);
+    }
 });
 
