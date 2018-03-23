@@ -365,6 +365,8 @@ $app->post('/cti/dbconn', function (Request $request, Response $response, $args)
             throw new Exception($sth->errorInfo()[2]);
         }
 
+        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
+
         return $response->withStatus(200);
     } catch (Exception $e) {
         error_log($e->getMessage());
