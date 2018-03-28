@@ -367,3 +367,99 @@ function getWebRTCMobileExtension($mainextension) {
     return $stmt->fetchAll()[0][0];
 }
 
+function createMainExtensionForUser($username,$mainextension,$outboundcid='') {
+    $fpbx = FreePBX::create();
+    $dbh = FreePBX::Database();
+
+    //Update user to add this extension as default extension
+    //get uid
+    $user = $fpbx->Userman->getUserByUsername($username);
+    $uid = $user['id'];
+
+    if (!isset($uid)) {
+        return [array('message'=>'User not found' ), 404];
+    }
+
+    //Delete user old extension and all his extensions
+    $sql = 'SELECT `default_extension` FROM `userman_users` WHERE `username` = ?';
+    $stmt = $dbh->prepare($sql);
+    $stmt->execute(array($username));
+    $res = $stmt->fetch(\PDO::FETCH_ASSOC);
+    if (isset($res)){
+        $oldmain = $res['default_extension'];
+        $ext_to_del = array();
+        $ext_to_del[] = $oldmain;
+        //Get all associated extensions
+        $all_extensions = $fpbx->Core->getAllUsers();
+        foreach ($fpbx->Core->getAllUsers() as $ext) {
+            if (substr($ext['extension'], 2) === $oldmain) {
+                $ext_to_del[] = $ext['extension'];
+            }
+        }
+        // clean extension and associated extensions
+        foreach ($ext_to_del as $extension) {
+            $fpbx->Core->delUser($extension);
+            $fpbx->Core->delDevice($extension);
+
+            // set values to NULL for physical devices
+            $sql = 'UPDATE rest_devices_phones'.
+              ' SET user_id = NULL'.
+              ', extension = NULL'.
+              ', secret = NULL'.
+              ' WHERE user_id = ? AND mac IS NOT NULL';
+            $stmt = $dbh->prepare($sql);
+            $stmt->execute(array($uid));
+
+            // remove user's webrtc phone and custom devices
+            $sql = 'DELETE FROM rest_devices_phones'.
+              ' WHERE user_id = ? AND mac IS NULL';
+            $stmt = $dbh->prepare($sql);
+            $stmt->execute(array($uid));
+        }
+        $fpbx->Userman->updateUser($uid, $username, $username);
+    }
+
+
+    //exit if extension is empty
+    error_log(print_r($mainextension,true));
+    if (!isset($mainextension) || empty($mainextension) || $mainextension=='none') {
+        return [array('message'=>'No extension specified' ), 200];
+    }
+
+    //Make sure extension is not in use
+    $free = checkFreeExtension($mainextension);
+    if ($free !== true ) {
+        return [array('message'=>$free ), 422];
+    }
+
+    if (isset($user['displayname']) && $user['displayname'] != '') {
+        $data['name'] = $user['displayname'];
+    } else {
+        $data['name'] = $user['username'];
+    }
+
+    $data['outboundcid']=$outboundcid;
+    //create main extension
+    $res = $fpbx->Core->processQuickCreate('pjsip', $mainextension, $data);
+    if (!$res['status']) {
+        return [array('message'=>$res['message']), 500];
+    }
+
+    //update user with $extension as default extension
+    $res = $fpbx->Userman->updateUser($uid, $username, $username, $mainextension);
+    if (!$res['status']) {
+        return [array('message'=>$res['message']), 500];
+    }
+
+    //Configure Follow me for the extension
+    $data['fmfm']='yes';
+    $fpbx->Findmefollow->processQuickCreate('pjsip', $mainextension, $data);
+    $fpbx->Findmefollow->addSettingById($mainextension, 'strategy', $fpbx->Config->get('FOLLOWME_RG_STRATEGY'));
+    $fpbx->Findmefollow->addSettingById($mainextension, 'pre_ring', '0');
+    $fpbx->Findmefollow->addSettingById($mainextension, 'grptime', $fpbx->Config->get('FOLLOWME_TIME'));
+    $fpbx->Findmefollow->addSettingById($mainextension, 'dring', '<http://www.notused >;info=ring2');
+    $fpbx->Findmefollow->addSettingById($mainextension, 'postdest', 'app-blackhole,hangup,1');
+
+    return true;
+}
+
