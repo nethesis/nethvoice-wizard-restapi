@@ -122,7 +122,7 @@ $app->post('/users', function (Request $request, Response $response, $args) {
     $params = $request->getParsedBody();
     $username = $params['username'];
     $fullname = $params['fullname'];
-    if ( ! $username || ! $fullname ) {
+    if ( ! $username || ! $fullname || preg_match('/^[0-9]/',$username) ) {
         return $response->withJson(['result' => 'User name or full name invalid'], 422);
     }
     $username = strtolower($username);
