@@ -49,6 +49,23 @@ $app->post('/mainextensions', function (Request $request, Response $response, $a
     $mainextension = $params['extension'];
     $outboundcid = $params['outboundcid'];
 
+    // Check if user directory is locked, wait if it is and exit fail
+    $locked=1;
+    $dbh = FreePBX::Database();
+    for ($i=0; $i<10; $i++) {
+        $sql = 'SELECT `locked` FROM userman_directories WHERE `name` LIKE "NethServer %"';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array());
+        $locked = $sth->fetchAll()[0][0];
+        if ($locked == 0) {
+            break;
+        }
+        sleep(1);
+    }
+    if ($locked == 1) {
+        return $response->withJson(array("status"=>'ERROR: directory is locked'), 500);
+    }
+
     $ret = createMainExtensionForUser($username,$mainextension,$outboundcid);
 
     if ($ret !== true) {

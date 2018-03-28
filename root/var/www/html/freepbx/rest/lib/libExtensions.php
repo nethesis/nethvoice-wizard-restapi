@@ -448,6 +448,12 @@ function createMainExtensionForUser($username,$mainextension,$outboundcid='') {
     //update user with $extension as default extension
     $res = $fpbx->Userman->updateUser($uid, $username, $username, $mainextension);
     if (!$res['status']) {
+        //Can't assign extension to user, delete extension
+        deleteExtension($mainextension);
+        $fpbx = FreePBX::create();
+        $fpbx->Core->delUser($extension);
+        $fpbx->Core->delDevice($extension);
+
         return [array('message'=>$res['message']), 500];
     }
 
