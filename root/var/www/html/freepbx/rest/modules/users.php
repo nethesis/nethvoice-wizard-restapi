@@ -203,58 +203,76 @@ $app->post('/users/sync', function (Request $request, Response $response, $args)
 $app->post('/users/csvimport', function (Request $request, Response $response, $args) {
     try {
         $params = $request->getParsedBody();
-        $csv = base64_decode($params['csv']);
-        $handle = fopen($file, "r");
 
+        $str = base64_decode(preg_replace('/^data:text\/csv;base64,/','',$params['file']));
+        $rowarr = explode(PHP_EOL, trim($str));
+        $csv = array();
+        foreach ($rowarr as $r) {
+            $csv[] = str_getcsv($r);
+        }
+
+        #error_log(print_r($csv,true));
         # create users
         $result = 0;
         $err = '';
         foreach ($csv as $k => $row) {
-            if (! $row['username'] || ! $row['fullname']) {
+            # trim fields
+            foreach ($row as $index => $field) {
+                $row[$index] = trim($field);
+            }
+
+            # check that row has usrname and fullname field
+            if (! $row['0'] || ! $row['1']) {
                 $result += 1;
                 $err .= "Error creating user: username and fullname can't be empty: ".implode(",",$row) ."\n";
                 unset($csv[$k]);
                 continue;
             }
-            if (userExists($row['username'])) {
-                $result += 1;
-                $err .= "Error creating user ".$row['username'].": user already exists"."\n";
+            #lowercase username
+            $row[0] = strtolower($row[0]);
+
+            # create user 
+            if (!userExists($row[0])) {
+                exec("/usr/bin/sudo /sbin/e-smith/signal-event user-create ".escapeshellcmd($row[0])." '".escapeshellcmd($row[1])."' '/bin/false'", $out, $ret);
+                $result += $ret;
+                if ($ret > 0 ) {
+                    $err .= "Error creating user ".$row[0].": ".$out."\n";
+                    unset($csv[$k]);
+                    continue;
+                }
+            }
+
+            # Set password
+            $tmp = tempnam("/tmp","ASTPWD");
+            if (isset($row[3]) && ! empty($row[3]) ){
+                $password = $row[3];
+            } else {
+                $password = generateRandomPassword();
+            }
+            file_put_contents($tmp, $password);
+            exec("/usr/bin/sudo /sbin/e-smith/signal-event password-modify '".getUser($row[0])."' $tmp", $out, $ret);
+            $result += $ret;
+            if ($ret > 0 ) {
+                $err .= "Error setting password for user ".$row[0].": ".print_r($out,true)."\n";
                 unset($csv[$k]);
                 continue;
+            } else {
+                setPassword($username, $password);
             }
-            $row['username'] = strtolower($row['username']);
-            if (!userExists($row['username'])) {
-                exec("/usr/bin/sudo /sbin/e-smith/signal-event user-create ".escapeshellcmd($row['username'])." '".escapeshellcmd($row['fullname'])."' '/bin/false'", $out, $ret);
-                $result += $ret;
-                if ($ret > 0 ) {
-                    $err .= "Error creating user ".$row['username'].": ".print_r($out,true)."\n";
-                    unset($csv[$k]);
-                    continue;
-                }
-            }
-            # Set password
-            if (isset($row['password']) && ! empty($row['password']) ){
-                $tmp = tempnam("/tmp","ASTPWD");
-                file_put_contents($tmp, $password);
-                exec("/usr/bin/sudo /sbin/e-smith/signal-event password-modify '".getUser($row['username'])."' $tmp", $out, $ret);
-                $result += $ret;
-                if ($ret > 0 ) {
-                    $err .= "Error setting password for user ".$row['username'].": ".print_r($out,true)."\n";
-                    unset($csv[$k]);
-                    continue;
-                } else {
-                    setPassword($username, $password);
-                }
-            }
+            
+            $csv[$k] = $row;
         }
         # sync users
-        system("/usr/bin/scl enable rh-php56 '/usr/sbin/fwconsole userman --syncall --force'");
+        system("/usr/bin/scl enable rh-php56 '/usr/sbin/fwconsole userman --syncall --force' &> /dev/null");
 
+        # create extensions
         foreach ($csv as $k => $row) {
-            $create = createMainExtensionForUser($row['username'],$row['extension']);
-            if ($create !== true) {
-                $result += 1;
-                $err .= "Error adding main extension ".$row['extension']." to user ".$row['username']."\n";
+            if (isset($row[2]) && preg_match('/^[0-9]*$/',$row[2])) {
+                $create = createMainExtensionForUser($row[0],$row[2]);
+                if ($create !== true) {
+                    $result += 1;
+                    $err .= "Error adding main extension ".$row['extension']." to user ".$row['username']."\n";
+                }
             }
         }
 
