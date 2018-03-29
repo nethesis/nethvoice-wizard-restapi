@@ -122,7 +122,7 @@ $app->post('/users', function (Request $request, Response $response, $args) {
     $params = $request->getParsedBody();
     $username = $params['username'];
     $fullname = $params['fullname'];
-    if ( ! $username || ! $fullname || preg_match('/^[0-9]/',$username) ) {
+    if ( ! $username || ! $fullname || preg_match('/^[0-9]/',$username)) {
         return $response->withJson(['result' => 'User name or full name invalid'], 422);
     }
     $username = strtolower($username);
@@ -203,13 +203,8 @@ $app->post('/users/sync', function (Request $request, Response $response, $args)
 $app->post('/users/csvimport', function (Request $request, Response $response, $args) {
     try {
         $params = $request->getParsedBody();
-        $file = $params['file'];
+        $csv = base64_decode($params['csv']);
         $handle = fopen($file, "r");
-        # create user array readin from csv
-        for ($i = 0; $row = fgetcsv($handle); ++$i) {
-            $csv[] = array('username'=>$row[0],'fullname'=>$row[1],'extension'=>$row[2],'password'=>$row[3]);
-        }
-        fclose($handle);
 
         # create users
         $result = 0;
@@ -274,4 +269,10 @@ $app->post('/users/csvimport', function (Request $request, Response $response, $
         return $response->withJson(['result' => $e->getMessage()], 500);
     }
 });
+
+
+
+
+
+
 
