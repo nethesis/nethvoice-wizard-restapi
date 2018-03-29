@@ -1,0 +1,8 @@
+#!/bin/bash
+mysql_password=$(perl -mNethServer::Password -e "print NethServer::Password::store('mysql')")
+
+# Create rest module sql tables
+for i in $(ls /var/www/html/freepbx/rest/sql/*.sql); do
+    mysql -uroot -p$mysql_password asterisk < ${i}
+done
+

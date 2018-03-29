@@ -5,6 +5,7 @@ my $event = 'nethvoice-wizard-restapi-update';
 
 event_actions($event, qw(
     initialize-default-databases 00
+    nethvoice-wizard-restapi-update 60
 ));
 
 event_templates($event, qw(
