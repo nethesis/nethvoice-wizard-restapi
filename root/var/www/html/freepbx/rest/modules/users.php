@@ -241,6 +241,13 @@ $app->post('/users/csvimport', function (Request $request, Response $response, $
                     continue;
                 }
             }
+            $csv[$k] = $row;
+        }
+        # sync users
+        system("/usr/bin/scl enable rh-php56 '/usr/sbin/fwconsole userman --syncall --force' &> /dev/null");
+
+        # create extensions
+        foreach ($csv as $k => $row) {
 
             # Set password
             $tmp = tempnam("/tmp","ASTPWD");
@@ -257,16 +264,10 @@ $app->post('/users/csvimport', function (Request $request, Response $response, $
                 unset($csv[$k]);
                 continue;
             } else {
-                setPassword($username, $password);
+                setPassword($row[0], $password);
             }
             
-            $csv[$k] = $row;
-        }
-        # sync users
-        system("/usr/bin/scl enable rh-php56 '/usr/sbin/fwconsole userman --syncall --force' &> /dev/null");
-
-        # create extensions
-        foreach ($csv as $k => $row) {
+            #create extension
             if (isset($row[2]) && preg_match('/^[0-9]*$/',$row[2])) {
                 $create = createMainExtensionForUser($row[0],$row[2]);
                 if ($create !== true) {
