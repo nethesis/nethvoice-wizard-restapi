@@ -449,7 +449,10 @@ function createMainExtensionForUser($username,$mainextension,$outboundcid='') {
     }
 
     //update user with $extension as default extension
-    $res = $fpbx->Userman->updateUser($uid, $username, $username, $mainextension);
+    $res['status'] = false;
+    if (checkUsermanIsUnlocked()) {
+        $res = $fpbx->Userman->updateUser($uid, $username, $username, $mainextension);
+    }
     if (!$res['status']) {
         //Can't assign extension to user, delete extension
         deleteExtension($mainextension);
@@ -484,9 +487,101 @@ function checkUsermanIsUnlocked(){
         if ($locked == 0) {
             return true;
         }
-        sleep(0.1*$i);
+        sleep(1*$i);
     }
     if ($locked == 1) {
         return false;
+    }
+}
+
+function checkTableExists($table) {
+    try {
+        $dbh = FreePBX::Database();
+        $sql = 'SHOW TABLES LIKE ?';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array($table));
+        if($sth->fetch(\PDO::FETCH_ASSOC)) {
+            return true;
+        }
+        return false;
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return false;
+    }
+}
+
+function checkFreeExtension($extension){
+    try {
+        $dbh = FreePBX::Database();
+        $extensions = array();
+        $extensions[] = $extension;
+        for ($i=90; $i<=99; $i++) {
+            $extensions[]=$i.$extension;
+        }
+        foreach ($extensions as $extension) {
+            //Check extensions
+            $sql = 'SELECT * FROM `sip` WHERE `id`= ?';
+            $sth = $dbh->prepare($sql);
+            $sth->execute(array($extension));
+            if($sth->fetch(\PDO::FETCH_ASSOC)) {
+                throw new Exception("Extension $extension already in use");
+            }
+
+            //Check ringgroups
+            $sql = 'SELECT * FROM `ringgroups` WHERE `grpnum`= ?';
+            $sth = $dbh->prepare($sql);
+            $sth->execute(array($extension));
+            if($sth->fetch(\PDO::FETCH_ASSOC)) {
+               throw new Exception("Extension $extension already in use in groups");
+            }
+
+            //check custom featurecodes
+            $sql = 'SELECT * FROM `featurecodes` WHERE `customcode` = ?';
+            $sth = $dbh->prepare($sql);
+            $sth->execute(array($extension));
+            if($sth->fetch(\PDO::FETCH_ASSOC)) {
+                throw new Exception("Extension $extension already in use as custom code");
+            }
+
+            //check defaul feturecodes
+            if (checkTableExists("featurecodes")){
+                $sql = 'SELECT * FROM `featurecodes` WHERE `defaultcode` = ? AND `customcode` IS NULL';
+                $sth = $dbh->prepare($sql);
+                $sth->execute(array($extension));
+                if($sth->fetch(\PDO::FETCH_ASSOC)) {
+                    throw new Exception("Extension $extension already in use as default code");
+                }
+            }
+
+            //check queues
+            $sql = 'SELECT * FROM `queues_details` WHERE `id` = ?';
+            $sth = $dbh->prepare($sql);
+            $sth->execute(array($extension));
+            if($sth->fetch(\PDO::FETCH_ASSOC)) {
+                throw new Exception("Extension $extension already in use as queue");
+            }
+
+            //check trunks
+            $sql = 'SELECT * FROM `trunks` WHERE `channelid` = ?';
+            $sth = $dbh->prepare($sql);
+            $sth->execute(array($extension));
+            if($sth->fetch(\PDO::FETCH_ASSOC)) {
+                throw new Exception("Extension $extension already in use as trunk");
+            }
+
+            //check parkings
+            if (checkTableExists("parkplus")){
+                $sql = 'SELECT * FROM `parkplus` WHERE `parkext` = ?';
+                $sth = $dbh->prepare($sql);
+                $sth->execute(array($extension));
+                if($sth->fetch(\PDO::FETCH_ASSOC)) {
+                    throw new Exception("Extension $extension already in use as parking");
+                }
+            }
+        }
+        return true;
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $e->getMessage();
     }
 }
