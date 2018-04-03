@@ -62,7 +62,7 @@ try {
         exec("/usr/bin/sudo /sbin/e-smith/signal-event password-modify '".getUser($row[0])."' $tmp", $out, $ret);
         $result += $ret;
         if ($ret > 0 ) {
-            $err .= "Error setting password for user ".$row[0].": ".print_r($out,true)."\n";
+            $err .= "Error setting password for user ".$row[0].": ".$out['message']."\n";
             unset($csv[$k]);
             continue;
         } else {
@@ -75,10 +75,10 @@ try {
                 $create = createMainExtensionForUser($row[0],$row[2]);
                 if ($create !== true) {
                     $result += 1;
-                    $err .= "Error adding main extension ".$row[3]." to user ".$row[0].":". print_r($create,true)."\n";
+                    $err .= "Error adding main extension ".$row[2]." to user ".$row[0].": ".$create['message']."\n";
                 }
             } else {
-                $err .= "Error adding main extension ".$row[3]." to user ".$row[0].": directory is locked";
+                $err .= "Error adding main extension ".$row[2]." to user ".$row[0].": directory is locked";
                 continue;
             }
         }
@@ -89,11 +89,9 @@ try {
     if ($result > 0) {
         throw new Exception("Something went wrong: \n".$err);
     }
-    #return $response->withJson($csv);
     exit(0);
 } catch (Exception $e) {
     error_log($e->getMessage());
     exit (1);
-    #return $response->withJson(['result' => $e->getMessage()], 500);
 }
 
