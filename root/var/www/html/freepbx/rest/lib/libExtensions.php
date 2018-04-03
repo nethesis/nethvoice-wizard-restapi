@@ -373,9 +373,10 @@ function createMainExtensionForUser($username,$mainextension,$outboundcid='') {
 
     //Update user to add this extension as default extension
     //get uid
-    $user = $fpbx->Userman->getUserByUsername($username);
-    $uid = $user['id'];
-
+    if (checkUsermanIsUnlocked()) {
+        $user = $fpbx->Userman->getUserByUsername($username);
+        $uid = $user['id'];
+    }
     if (!isset($uid)) {
         return [array('message'=>'User not found' ), 404];
     }
@@ -416,7 +417,9 @@ function createMainExtensionForUser($username,$mainextension,$outboundcid='') {
             $stmt = $dbh->prepare($sql);
             $stmt->execute(array($uid));
         }
-        $fpbx->Userman->updateUser($uid, $username, $username);
+        if (checkUsermanIsUnlocked()) {
+            $fpbx->Userman->updateUser($uid, $username, $username);
+        }
     }
 
 
@@ -469,3 +472,21 @@ function createMainExtensionForUser($username,$mainextension,$outboundcid='') {
     return true;
 }
 
+function checkUsermanIsUnlocked(){
+    // Check if user directory is locked, wait if it is and exit fail
+    $locked=1;
+    $dbh = FreePBX::Database();
+    for ($i=0; $i<20; $i++) {
+        $sql = 'SELECT `locked` FROM userman_directories WHERE `name` LIKE "NethServer %"';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array());
+        $locked = $sth->fetchAll()[0][0];
+        if ($locked == 0) {
+            return true;
+        }
+        sleep(0.1*$i);
+    }
+    if ($locked == 1) {
+        return false;
+    }
+}

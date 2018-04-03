@@ -62,11 +62,11 @@ $app->post('/mainextensions', function (Request $request, Response $response, $a
         }
         sleep(1);
     }
-    if ($locked == 1) {
+    if (checkUsermanIsUnlocked()) {
+        $ret = createMainExtensionForUser($username,$mainextension,$outboundcid);
+    } else {
         return $response->withJson(array("status"=>'ERROR: directory is locked'), 500);
     }
-
-    $ret = createMainExtensionForUser($username,$mainextension,$outboundcid);
 
     if ($ret !== true) {
         return $response->withJson($ret[0],$ret[1]);

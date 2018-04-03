@@ -245,7 +245,6 @@ $app->post('/users/csvimport', function (Request $request, Response $response, $
         }
         # sync users
         system("/usr/bin/scl enable rh-php56 '/usr/sbin/fwconsole userman --syncall --force' &> /dev/null");
-
         # create extensions
         foreach ($csv as $k => $row) {
 
@@ -269,10 +268,15 @@ $app->post('/users/csvimport', function (Request $request, Response $response, $
             
             #create extension
             if (isset($row[2]) && preg_match('/^[0-9]*$/',$row[2])) {
-                $create = createMainExtensionForUser($row[0],$row[2]);
-                if ($create !== true) {
-                    $result += 1;
-                    $err .= "Error adding main extension ".$row['extension']." to user ".$row['username']."\n";
+                if (checkUsermanIsUnlocked()) {
+                    $create = createMainExtensionForUser($row[0],$row[2]);
+                    if ($create !== true) {
+                        $result += 1;
+                        $err .= "Error adding main extension ".$row[3]." to user ".$row[0].":". print_r($create,true)."\n";
+                    }
+                } else {
+                    $err .= "Error adding main extension ".$row[3]." to user ".$row[0].": directory is locked";
+                    continue;
                 }
             }
         }
