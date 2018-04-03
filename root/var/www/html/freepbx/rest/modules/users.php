@@ -209,7 +209,7 @@ $app->post('/users/csvimport', function (Request $request, Response $response, $
         $params = $request->getParsedBody();
         $base64csv = preg_replace('/^data:text\/csv;base64,/','',$params['file']);
         $st = new SystemTasks();
-        $task = $st->startTask("/usr/bin/scl enable rh-php56 '/var/www/html/freepbx/rest/lib/csvimport.php ".escapeshellarg($base64csv)."'");
+        $task = $st->startTask("/usr/bin/scl enable rh-php56 'php /var/www/html/freepbx/rest/lib/csvimport.php ".escapeshellarg($base64csv)."'");
         return $response->withJson(['result' => $task], 200);
     } catch (Exception $e) {
         error_log($e->getMessage());
