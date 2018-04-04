@@ -41,6 +41,23 @@ try {
                 unset($csv[$k]);
                 continue;
             }
+
+            # Set password
+            $tmp = tempnam("/tmp","ASTPWD");
+            if (isset($row[3]) && ! empty($row[3]) ){
+                $password = $row[3];
+            } else {
+                $password = generateRandomPassword();
+            }
+            file_put_contents($tmp, $password);
+            exec("/usr/bin/sudo /sbin/e-smith/signal-event password-modify '".getUser($row[0])."' $tmp", $out, $ret);
+            $result += $ret;
+            if ($ret > 0 ) {
+                $err .= "Error setting password for user ".$row[0].": ".$out['message']."\n";
+                continue;
+            } else {
+                setPassword($row[0], $password);
+            }
         }
         $csv[$k] = $row;
     }
@@ -50,24 +67,6 @@ try {
 
      # create extensions
      foreach ($csv as $k => $row) {
-
-        # Set password
-        $tmp = tempnam("/tmp","ASTPWD");
-        if (isset($row[3]) && ! empty($row[3]) ){
-            $password = $row[3];
-        } else {
-             $password = generateRandomPassword();
-        }
-        file_put_contents($tmp, $password);
-        exec("/usr/bin/sudo /sbin/e-smith/signal-event password-modify '".getUser($row[0])."' $tmp", $out, $ret);
-        $result += $ret;
-        if ($ret > 0 ) {
-            $err .= "Error setting password for user ".$row[0].": ".$out['message']."\n";
-            unset($csv[$k]);
-            continue;
-        } else {
-            setPassword($row[0], $password);
-        }
 
         #create extension
         if (isset($row[2]) && preg_match('/^[0-9]*$/',$row[2])) {
