@@ -204,13 +204,25 @@ $app->post('/users/sync', function (Request $request, Response $response, $args)
 #
 # Import users from csv long running task
 #
-$app->post('/users/csvimport', function (Request $request, Response $response, $args) {
+$app->post('/csv/csvimport', function (Request $request, Response $response, $args) {
     try {
         $params = $request->getParsedBody();
         $base64csv = preg_replace('/^data:text\/csv;base64,/','',$params['file']);
-        $st = new SystemTasks();
-        $task = $st->startTask("/usr/bin/scl enable rh-php56 'php /var/www/html/freepbx/rest/lib/csvimport.php ".escapeshellarg($base64csv)."'");
-        return $response->withJson(['result' => $task], 200);
+        system("/usr/bin/scl enable rh-php56 -- php /var/www/html/freepbx/rest/lib/csvimport.php ".escapeshellarg($base64csv)." > /dev/null &");
+        return $response->withStatus(200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
+$app->get('/csv/csvimport', function (Request $request, Response $response, $args) {
+    try {
+        $num = exec("ps aux | grep 'php /var/www/html/freepbx/rest/lib/csvimport.php' | wc -l");
+        if ($num <= 1) {
+            $response->withStatus(404);
+        }
+        return $response->withJson(['result' => "active"],200);
     } catch (Exception $e) {
         error_log($e->getMessage());
         return $response->withStatus(500);
