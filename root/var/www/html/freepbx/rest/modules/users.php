@@ -218,9 +218,9 @@ $app->post('/csv/csvimport', function (Request $request, Response $response, $ar
 
 $app->get('/csv/csvimport', function (Request $request, Response $response, $args) {
     try {
-        $num = exec("ps aux | grep 'php /var/www/html/freepbx/rest/lib/csvimport.php' | wc -l");
+        $num = exec("ps aux | grep '[p]hp /var/www/html/freepbx/rest/lib/csvimport.php' | wc -l");
         if ($num <= 1) {
-            $response->withStatus(404);
+            return $response->withJson(['result' => "done"],200);
         }
         return $response->withJson(['result' => "active"],200);
     } catch (Exception $e) {
