@@ -240,6 +240,39 @@ $app->get('/cti/groups/users/{id}', function (Request $request, Response $respon
     }
 });
 
+/* GET /cti/users/groups/:id
+Return [{"user_id":"14","name":"fooo"},{"user_id":"13","name":"fooo"}]
+*/
+$app->get('/cti/users/groups/{id}', function (Request $request, Response $response, $args) {
+    try {
+        $route = $request->getAttribute('route');
+        $id = $route->getArgument('id');
+
+        $dbh = FreePBX::Database();
+        $sql = 'SELECT rest_cti_users_groups.user_id, rest_cti_groups.name'.
+            ' FROM rest_cti_groups'.
+            ' JOIN rest_cti_users_groups ON rest_cti_users_groups.group_id = rest_cti_groups.id'.
+            ' WHERE rest_cti_users_groups.user_id = ?';
+
+        $sql = 'SELECT rest_cti_users_groups.user_id, rest_cti_groups.name'.
+            ' FROM rest_cti_groups'.
+            ' JOIN rest_cti_users_groups ON rest_cti_users_groups.group_id = rest_cti_groups.id'.
+            ' WHERE rest_cti_users_groups.group_id = ?';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array($id));
+        $data = array();
+        while ($res = $sth->fetchObject()) {
+            $data[] = $res;
+        }
+
+        return $response->withJson($data, 200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
+
 /* POST /cti/groups {"name": "sviluppo"}
 */
 $app->post('/cti/groups', function (Request $request, Response $response, $args) {
