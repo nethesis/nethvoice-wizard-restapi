@@ -64,7 +64,7 @@ try {
 
         # create user 
         if (!userExists($row[0])) {
-            exec("/usr/bin/sudo /sbin/e-smith/signal-event user-create ".escapeshellcmd($row[0])." '".escapeshellcmd($row[1])."' '/bin/false'", $out, $ret);
+            exec("/usr/bin/sudo /sbin/e-smith/signal-event user-create ".escapeshellarg($row[0])." ".escapeshellarg($row[1])." '/bin/false'", $out, $ret);
             $result += $ret;
 
             if ($ret > 0 ) {
