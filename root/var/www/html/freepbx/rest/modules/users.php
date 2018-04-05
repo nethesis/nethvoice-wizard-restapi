@@ -20,54 +20,13 @@
 #
 
 require_once(__DIR__. '/../lib/freepbxFwConsole.php');
+include_once('lib/libUsers.php');
+include_once('lib/libExtensions.php');
 
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
-function getUser($username) {
-    # add domain part if needed
-    if (strpos($username, '@') === false) {
-        exec('/usr/bin/hostname -d', $out, $ret);
-        $domain = $out[0];
-        return "$username@$domain";
-    }
-    return $username;
-}
-
-function userExists($username) {
-    $needle = getUser($username);
-    $users = shell_exec("/usr/bin/sudo /usr/libexec/nethserver/list-users");
-    foreach (json_decode($users) as $user => $props) {
-        if ($user == $needle) {
-            return true;
-        }
-    }
-    return false;
-}
-
-function getPassword($username) {
-    return sql(
-      'SELECT rest_users.password'.
-      ' FROM rest_users'.
-      ' JOIN userman_users ON rest_users.user_id = userman_users.id'.
-      ' WHERE userman_users.username = \''. getUser($username). '\'', 'getOne'
-    );
-}
-
-function setPassword($username, $password) {
-    fwconsole('userman --syncall --force');
-    $dbh = FreePBX::Database();
-    $sql =  'INSERT INTO rest_users (user_id,password)'.
-            ' SELECT id, ?'.
-            ' FROM userman_users'.
-            ' WHERE username = ?'.
-            ' ON DUPLICATE KEY UPDATE password = ?';
-    $stmt = $dbh->prepare($sql);
-    $stmt->execute(array($password, $username, $password));
-}
-
 # Get final wizard report for created users
-
 $app->get('/final', function (Request $request, Response $response, $args) {
     try {
         $dbh = FreePBX::Database();
@@ -151,23 +110,6 @@ $app->get('/users/{all}', function (Request $request, Response $response, $args)
 });
 
 
-# Return the selected user
-
-/*$app->get('/users/{username}', function (Request $request, Response $response, $args) {
-    $username = $request->getAttribute('username');
-    if (userExists($username)) {
-        $users = FreePBX::create()->Userman->getAllUsers();
-        foreach ($users as $u) {
-            if ($u['username'] == $username) {
-                $u['password'] = getPassword(getUser($u['username']));
-                return $response->withJson($u);
-            }
-        }
-    }
-    return $response->withStatus(404);
-});*/
-
-
 # Create or edit a system user inside OpenLDAP
 # Should be used only in legacy mode.
 #
@@ -180,14 +122,14 @@ $app->post('/users', function (Request $request, Response $response, $args) {
     $params = $request->getParsedBody();
     $username = $params['username'];
     $fullname = $params['fullname'];
-    if ( ! $username || ! $fullname || preg_match('/^[0-9]/',$username) ) {
+    if ( ! $username || ! $fullname || preg_match('/^[0-9]/',$username)) {
         return $response->withJson(['result' => 'User name or full name invalid'], 422);
     }
     $username = strtolower($username);
     if ( userExists($username) ) {
-        exec("/usr/bin/sudo /sbin/e-smith/signal-event user-modify ".escapeshellcmd($username)." '".escapeshellcmd($fullname)."' '/bin/false'", $out, $ret);
+        exec("/usr/bin/sudo /sbin/e-smith/signal-event user-modify ".escapeshellarg($username)." ".escapeshellarg($fullname)." '/bin/false'", $out, $ret);
     } else {
-        exec("/usr/bin/sudo /sbin/e-smith/signal-event user-create ".escapeshellcmd($username)." '".escapeshellcmd($fullname)."' '/bin/false'", $out, $ret);
+        exec("/usr/bin/sudo /sbin/e-smith/signal-event user-create ".escapeshellarg($username)." ".escapeshellarg($fullname)." '/bin/false'", $out, $ret);
     }
     if ( $ret === 0 ) {
         system("/usr/bin/scl enable rh-php56 '/usr/sbin/fwconsole userman --syncall --force'");
@@ -256,5 +198,47 @@ $app->get('/users/{username}/password', function (Request $request, Response $re
 $app->post('/users/sync', function (Request $request, Response $response, $args) {
     fwconsole('userman --syncall --force');
     return $response->withStatus(200);
+});
+
+
+#
+# Import users from csv long running task
+#
+$app->post('/csv/csvimport', function (Request $request, Response $response, $args) {
+    try {
+        $params = $request->getParsedBody();
+        $base64csv = preg_replace('/^data:text\/csv;base64,/','',$params['file']);
+        $statusfile = '/var/run/nethvoice/csvimport.code';
+        if (file_exists($statusfile)) {
+            unlink($statusfile);
+        }
+        system("/usr/bin/scl enable rh-php56 -- php /var/www/html/freepbx/rest/lib/csvimport.php ".escapeshellarg($base64csv)." &> /dev/null &");
+        return $response->withStatus(200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
+$app->get('/csv/csvimport', function (Request $request, Response $response, $args) {
+    try {
+        $statusfile = '/var/run/nethvoice/csvimport.code';
+        if (file_exists($statusfile)) {
+            $status = json_decode(file_get_contents($statusfile));
+            if (isset($status->exitcode) && $status->exitcode != 0) {
+                unlink($statusfile);
+                return $response->withJson(['status' => $status->errors],500);
+            } elseif (isset($status->exitcode) && $status->exitcode == 0) {
+                unlink($statusfile);
+                return $response->withJson(['result' => $status->progress],200);
+            }
+            return $response->withJson(['result' => $status->progress],200);
+        } else {
+            return $response->withJson(['status' => 'No csv import active'],422);
+        }
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
 });
 

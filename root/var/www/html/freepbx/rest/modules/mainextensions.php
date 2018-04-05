@@ -20,6 +20,7 @@
 #
 
 require_once(__DIR__. '/../lib/freepbxFwConsole.php');
+include_once('lib/libExtensions.php');
 
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
@@ -61,11 +62,11 @@ $app->post('/mainextensions', function (Request $request, Response $response, $a
         }
         sleep(1);
     }
-    if ($locked == 1) {
+    if (checkUsermanIsUnlocked()) {
+        $ret = createMainExtensionForUser($username,$mainextension,$outboundcid);
+    } else {
         return $response->withJson(array("status"=>'ERROR: directory is locked'), 500);
     }
-
-    $ret = createMainExtensionForUser($username,$mainextension,$outboundcid);
 
     if ($ret !== true) {
         return $response->withJson($ret[0],$ret[1]);
@@ -75,94 +76,3 @@ $app->post('/mainextensions', function (Request $request, Response $response, $a
     return $response->withStatus(201);
 });
 
-function checkTableExists($table) {
-    try {
-        $dbh = FreePBX::Database();
-        $sql = 'SHOW TABLES LIKE ?';
-        $sth = $dbh->prepare($sql);
-        $sth->execute(array($table));
-        if($sth->fetch(\PDO::FETCH_ASSOC)) {
-            return true;
-        }
-        return false;
-    } catch (Exception $e) {
-        error_log($e->getMessage());
-        return false;
-    }
-}
-
-function checkFreeExtension($extension){
-    try {
-        $dbh = FreePBX::Database();
-        $extensions = array();
-        $extensions[] = $extension;
-        for ($i=90; $i<=99; $i++) {
-            $extensions[]=$i.$extension;
-        }
-        foreach ($extensions as $extension) {
-            //Check extensions
-            $sql = 'SELECT * FROM `sip` WHERE `id`= ?';
-            $sth = $dbh->prepare($sql);
-            $sth->execute(array($extension));
-            if($sth->fetch(\PDO::FETCH_ASSOC)) {
-                throw new Exception("Extension $extension already in use");
-            }
-
-            //Check ringgroups
-            $sql = 'SELECT * FROM `ringgroups` WHERE `grpnum`= ?';
-            $sth = $dbh->prepare($sql);
-            $sth->execute(array($extension));
-            if($sth->fetch(\PDO::FETCH_ASSOC)) {
-               throw new Exception("Extension $extension already in use in groups");
-            }
-
-            //check custom featurecodes
-            $sql = 'SELECT * FROM `featurecodes` WHERE `customcode` = ?';
-            $sth = $dbh->prepare($sql);
-            $sth->execute(array($extension));
-            if($sth->fetch(\PDO::FETCH_ASSOC)) {
-                throw new Exception("Extension $extension already in use as custom code");
-            }
-
-            //check defaul feturecodes
-            if (checkTableExists("featurecodes")){
-                $sql = 'SELECT * FROM `featurecodes` WHERE `defaultcode` = ? AND `customcode` IS NULL';
-                $sth = $dbh->prepare($sql);
-                $sth->execute(array($extension));
-                if($sth->fetch(\PDO::FETCH_ASSOC)) {
-                    throw new Exception("Extension $extension already in use as default code");
-                }
-            }
-
-            //check queues
-            $sql = 'SELECT * FROM `queues_details` WHERE `id` = ?';
-            $sth = $dbh->prepare($sql);
-            $sth->execute(array($extension));
-            if($sth->fetch(\PDO::FETCH_ASSOC)) {
-                throw new Exception("Extension $extension already in use as queue");
-            }
-
-            //check trunks
-            $sql = 'SELECT * FROM `trunks` WHERE `channelid` = ?';
-            $sth = $dbh->prepare($sql);
-            $sth->execute(array($extension));
-            if($sth->fetch(\PDO::FETCH_ASSOC)) {
-                throw new Exception("Extension $extension already in use as trunk");
-            }
-
-            //check parkings
-            if (checkTableExists("parkplus")){
-                $sql = 'SELECT * FROM `parkplus` WHERE `parkext` = ?';
-                $sth = $dbh->prepare($sql);
-                $sth->execute(array($extension));
-                if($sth->fetch(\PDO::FETCH_ASSOC)) {
-                    throw new Exception("Extension $extension already in use as parking");
-                }
-            }
-        }
-        return true;
-    } catch (Exception $e) {
-        error_log($e->getMessage());
-        return $e->getMessage();
-    }
-}
