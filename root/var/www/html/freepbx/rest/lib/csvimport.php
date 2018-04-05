@@ -24,10 +24,13 @@ include_once('/var/www/html/freepbx/rest/lib/libUsers.php');
 include_once('/var/www/html/freepbx/rest/lib/libExtensions.php');
 
 try {
+    // prepare a file for saving results
+    $statusfile = '/var/run/nethvoice/csvimport.code';
     $base64csv = $argv[1];
     $str = base64_decode($base64csv);
     $rowarr = explode(PHP_EOL, trim($str));
     $csv = array();
+
     foreach ($rowarr as $r) {
          $csv[] = str_getcsv($r);
     }
@@ -35,7 +38,14 @@ try {
     # create users
     $result = 0;
     $err = '';
+    // calculate step/progress/total
+    $numusers = count($csv);
+    $step = 100/$numusers/2; //use /2 because we use 2 for cicle
+    $progress = -$step; //start with negative progress because 
+
     foreach ($csv as $k => $row) {
+        $progress += $step;
+        file_put_contents($statusfile,json_encode(array('progress'=>round($progress))));
         # trim fields
         foreach ($row as $index => $field) {
             $row[$index] = trim($field);
@@ -88,7 +98,9 @@ try {
 
      # create extensions
      foreach ($csv as $k => $row) {
-
+        $progress += $step;
+        if (round($progress)>99) $progress = 99;
+        file_put_contents($statusfile,json_encode(array('progress'=>round($progress))));
         #create extension
         if (isset($row[2]) && preg_match('/^[0-9]*$/',$row[2])) {
             if (checkUsermanIsUnlocked()) {
@@ -109,9 +121,11 @@ try {
     if ($result > 0) {
         throw new Exception("Something went wrong: \n".$err);
     }
+    file_put_contents($statusfile,json_encode(array('exitcode'=>0,'errors'=>$err,'progress'=>100)));
     exit(0);
 } catch (Exception $e) {
     error_log($e->getMessage());
+    file_put_contents($statusfile,json_encode(array('exitcode'=>1,'errors'=>$err,'progress'=>-1)));
     exit (1);
 }
 

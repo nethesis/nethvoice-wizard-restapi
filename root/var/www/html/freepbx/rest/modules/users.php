@@ -208,7 +208,11 @@ $app->post('/csv/csvimport', function (Request $request, Response $response, $ar
     try {
         $params = $request->getParsedBody();
         $base64csv = preg_replace('/^data:text\/csv;base64,/','',$params['file']);
-        system("/usr/bin/scl enable rh-php56 -- php /var/www/html/freepbx/rest/lib/csvimport.php ".escapeshellarg($base64csv)." > /dev/null &");
+        $statusfile = '/var/run/nethvoice/csvimport.code';
+        if (file_exists($statusfile)) {
+            unlink($statusfile);
+        }
+        system("/usr/bin/scl enable rh-php56 -- php /var/www/html/freepbx/rest/lib/csvimport.php ".escapeshellarg($base64csv)." &> /dev/null &");
         return $response->withStatus(200);
     } catch (Exception $e) {
         error_log($e->getMessage());
@@ -218,11 +222,20 @@ $app->post('/csv/csvimport', function (Request $request, Response $response, $ar
 
 $app->get('/csv/csvimport', function (Request $request, Response $response, $args) {
     try {
-        $num = exec("ps aux | grep '[p]hp /var/www/html/freepbx/rest/lib/csvimport.php' | wc -l");
-        if ($num <= 1) {
-            return $response->withJson(['result' => "done"],200);
+        $statusfile = '/var/run/nethvoice/csvimport.code';
+        if (file_exists($statusfile)) {
+            $status = json_decode(file_get_contents($statusfile));
+            if (isset($status->exitcode) && $status->exitcode != 0) {
+                unlink($statusfile);
+                return $response->withJson(['status' => $status->errors],500);
+            } elseif (isset($status->exitcode) && $status->exitcode == 0) {
+                unlink($statusfile);
+                return $response->withJson(['result' => $status->progress],200);
+            }
+            return $response->withJson(['result' => $status->progress],200);
+        } else {
+            return $response->withJson(['status' => 'No csv import active'],422);
         }
-        return $response->withJson(['result' => "active"],200);
     } catch (Exception $e) {
         error_log($e->getMessage());
         return $response->withStatus(500);
