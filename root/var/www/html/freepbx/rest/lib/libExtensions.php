@@ -479,7 +479,7 @@ function checkUsermanIsUnlocked(){
     // Check if user directory is locked, wait if it is and exit fail
     $locked=1;
     $dbh = FreePBX::Database();
-    for ($i=0; $i<20; $i++) {
+    for ($i=0; $i<30; $i++) {
         $sql = 'SELECT `locked` FROM userman_directories WHERE `name` LIKE "NethServer %"';
         $sth = $dbh->prepare($sql);
         $sth->execute(array());
@@ -487,7 +487,7 @@ function checkUsermanIsUnlocked(){
         if ($locked == 0) {
             return true;
         }
-        sleep(1*$i);
+        sleep(1+0.2*$i);
     }
     if ($locked == 1) {
         return false;
