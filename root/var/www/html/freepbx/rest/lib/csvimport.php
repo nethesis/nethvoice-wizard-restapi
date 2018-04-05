@@ -75,20 +75,20 @@ try {
 
             # Set password
             $tmp = tempnam("/tmp","ASTPWD");
-            if (isset($row[3]) && ! empty($row[3]) ){
-                $password = $row[3];
-            } else {
-                $password = generateRandomPassword();
+            if ( ! isset($row[3]) || empty($row[3]) ){
+                $row[3] = generateRandomPassword();
             }
-            file_put_contents($tmp, $password);
+            file_put_contents($tmp, $row[3]);
             exec("/usr/bin/sudo /sbin/e-smith/signal-event password-modify '".getUser($row[0])."' $tmp", $out, $ret);
             $result += $ret;
             if ($ret > 0 ) {
                 $err .= "Error setting password for user ".$row[0].": ".$out['message']."\n";
                 continue;
             } else {
-                setPassword($row[0], $password);
+                setPassword($row[0], $row[3]);
             }
+        } else {
+            $row[3] = '';
         }
         $csv[$k] = $row;
     }
@@ -96,11 +96,15 @@ try {
     # sync users
     system("/usr/bin/scl enable rh-php56 '/usr/sbin/fwconsole userman --syncall --force' &> /dev/null");
 
-     # create extensions
-     foreach ($csv as $k => $row) {
+    foreach ($csv as $k => $row) {
         $progress += $step;
         if (round($progress)>99) $progress = 99;
         file_put_contents($statusfile,json_encode(array('progress'=>round($progress))));
+
+        if ( isset($row[3]) && ! empty($row[3]) ){
+            setPassword($row[0], $row[3]);
+        }
+
         #create extension
         if (isset($row[2]) && preg_match('/^[0-9]*$/',$row[2])) {
             if (checkUsermanIsUnlocked()) {
