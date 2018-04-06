@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.0.1
+Version: 14.1.0
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -38,6 +38,16 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Fri Apr 06 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.0-1
+- Add import from CSV file rest APIs nethesis/dev#5371
+- Add /bulk GET and POST rest API nethesis/dev#5365
+- Launch sql scripts on update event nethesis/dev#5370
+- Error if username starts with a number
+- Check if userman directory is locked before associating extension to user nethesis/dev#5368
+- move extension creating into libExtension library
+- CustomerCard: retrieve conf after a new db connection is created nethesis/dev#5362
+- Change VoipVoice VoIP trunk options nethesis/dev#5359
+
 * Fri Mar 16 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.0.1-1
 - Hide ldapservice user from wizard interface nethesis/dev#5357
 - Recognize Sangoma Vega 60 Gateways nethesis/dev#5357
