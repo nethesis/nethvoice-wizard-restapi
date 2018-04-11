@@ -117,9 +117,10 @@ function useExtensionAsWebRTC($extension,$isMobile = false) {
         } else {
             $type = 'webrtc';
         }
+        $dbh = FreePBX::Database();
+
         //disable call waiting
         global $astman;
-        $dbh = FreePBX::Database();
         $astman->database_del("CW",$extension);
 
         //enable default codecs and vp8 video codec
@@ -160,9 +161,10 @@ function useExtensionAsWebRTC($extension,$isMobile = false) {
 
 function useExtensionAsCustomPhysical($extension,$web_user = null ,$web_password = null) {
     try {
-        //enable call waiting
+        //disable call waiting
         global $astman;
-        $astman->database_put("CW",$extension,"ENABLED");
+        $astman->database_del("CW",$extension);
+
         // insert created physical extension in password table
         $extension_secret = sql('SELECT data FROM `sip` WHERE id = "' . $extension . '" AND keyword="secret"', "getOne");
         $dbh = FreePBX::Database();
@@ -185,9 +187,11 @@ function useExtensionAsCustomPhysical($extension,$web_user = null ,$web_password
 function useExtensionAsPhysical($extension,$mac,$model,$line=false) {
     try {
         require_once(__DIR__. '/../lib/modelRetrieve.php');
-        //enable call waiting
+
+        //disable call waiting
         global $astman;
-        $astman->database_put("CW",$extension,"ENABLED");
+        $astman->database_del("CW",$extension);
+
         // insert created physical extension in password table
         $extension_secret = sql('SELECT data FROM `sip` WHERE id = "' . $extension . '" AND keyword="secret"', "getOne");
         $dbh = FreePBX::Database();
