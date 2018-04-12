@@ -89,6 +89,11 @@ function createExtension($mainextensionnumber){
                 }
             }
         }
+
+        //disable call waiting
+        global $astman;
+        $astman->database_del("CW",$extension);
+
         //set accountcode = mainextension
         $sql = 'UPDATE IGNORE `sip` SET `data` = ? WHERE `id` = ? AND `keyword` = "accountcode"';
         $stmt = $dbh->prepare($sql);
