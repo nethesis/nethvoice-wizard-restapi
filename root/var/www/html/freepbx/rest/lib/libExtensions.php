@@ -89,6 +89,7 @@ function createExtension($mainextensionnumber){
                 }
             }
         }
+
         //set accountcode = mainextension
         $sql = 'UPDATE IGNORE `sip` SET `data` = ? WHERE `id` = ? AND `keyword` = "accountcode"';
         $stmt = $dbh->prepare($sql);
@@ -426,7 +427,6 @@ function createMainExtensionForUser($username,$mainextension,$outboundcid='') {
         }
     }
 
-
     //exit if extension is empty
     error_log(print_r($mainextension,true));
     if (!isset($mainextension) || empty($mainextension) || $mainextension=='none') {
@@ -451,6 +451,10 @@ function createMainExtensionForUser($username,$mainextension,$outboundcid='') {
     if (!$res['status']) {
         return [array('message'=>$res['message']), 500];
     }
+
+    //disable call waiting
+    global $astman;
+    $astman->database_del("CW",$mainextension);
 
     //update user with $extension as default extension
     $res['status'] = false;
