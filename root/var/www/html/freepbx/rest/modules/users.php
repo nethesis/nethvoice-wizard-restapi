@@ -207,7 +207,7 @@ $app->post('/users/sync', function (Request $request, Response $response, $args)
 $app->post('/csv/csvimport', function (Request $request, Response $response, $args) {
     try {
         $params = $request->getParsedBody();
-        $base64csv = preg_replace('/^data:[a-z\.\-]*\/[a-z\.\-]*;base64,/','',$params['file']);
+        $base64csv = preg_replace('/^data:[a-z\.\-\/]*;base64,/','',$params['file']);
         $statusfile = '/var/run/nethvoice/csvimport.code';
         if (file_exists($statusfile)) {
             unlink($statusfile);
