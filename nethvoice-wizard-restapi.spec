@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.1.1
+Version: 14.1.2
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -38,6 +38,9 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Thu Apr 19 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.2-1
+- CSV import: more permissive regexp for base64
+
 * Thu Apr 12 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.1-1
 - Disable callwaiting on new extensions created nethesis/dev#5377
 - Add support for Sangoma 60 Gateways nethesis/dev#5372
