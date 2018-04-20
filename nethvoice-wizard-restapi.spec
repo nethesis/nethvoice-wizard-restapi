@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.1.2
+Version: 14.1.3
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -38,6 +38,9 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Fri Apr 20 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.3-1
+- Add Gigaset MAC address nethesis/dev#5327
+
 * Thu Apr 19 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.2-1
 - CSV import: more permissive regexp for base64
 
