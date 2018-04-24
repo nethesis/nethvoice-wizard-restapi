@@ -27,6 +27,11 @@ try {
     define('FREEPBX_IS_AUTH',1);
 
     $name = $argv[1];
+    if (isset($argv[2])) {
+        $mac=$argv[2]
+    } else {
+        $mac = false;
+    }
     $tftpdir = "/var/lib/tftpboot";
     $sql = "SELECT `id`,`model_id`,`ipv4`,`ipv4_new`,`gateway`,`mac` FROM `gateway_config` WHERE `name` = ?";
     $sth = FreePBX::Database()->prepare($sql);

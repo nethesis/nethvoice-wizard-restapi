@@ -20,13 +20,18 @@
 # along with NethServer.  If not, see COPYING.
 #
 
-function gateway_get_configuration($name){
+function gateway_get_configuration($name, $mac=false){
     try{
         $dbh = FreePBX::Database();
         /*Check if config exists*/
         $sql = "SELECT `id`,`model_id`,`ipv4`,`ipv4_new`,`gateway`,`ipv4_green`,`netmask_green`,`mac` FROM `gateway_config` WHERE `name` = ?";
+        $prep = array($name);
+        if ($mac) {
+            $sql .= " AND `mac` = ?";
+            $prep[] = $mac;
+        }
         $sth = FreePBX::Database()->prepare($sql);
-        $sth->execute(array($name));
+        $sth->execute($prep);
         $config = $sth->fetch(\PDO::FETCH_ASSOC);
         if ($config === false){
             /*Configuration doesn't exist*/
@@ -73,9 +78,9 @@ function gateway_get_configuration($name){
     }
 }
 
-function gateway_generate_configuration_file($name){
+function gateway_generate_configuration_file($name,$mac = false){
     try{
-        $config = gateway_get_configuration($name);
+        $config = gateway_get_configuration($name,$mac);
         # read template
         $template = "/var/www/html/freepbx/rest/lib/gateway/templates/{$config['manufacturer']}/{$config['model']}.txt";
         $handle = fopen($template, "r");

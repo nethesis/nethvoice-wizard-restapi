@@ -366,7 +366,7 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($params['model'],$params['name'],$params['ipv4'],$params['ipv4_new'],$params['gateway'],$params['ipv4_green'],$params['netmask_green'],$params['mac']));
         /*get id*/
-        $sql = "SELECT `id` FROM `gateway_config` WHERE `name` = ?";
+        $sql = "SELECT `id` FROM `gateway_config` WHERE `name` = ? ORDER BY `id` DESC LIMIT 1";
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($params['name']));
         $res = $sth->fetch(\PDO::FETCH_ASSOC);
@@ -491,7 +491,7 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
                 }
             }
         }
-        system("/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/tftpGenerateConfig.php ".escapeshellarg($params['name']), $ret);
+        system("/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/tftpGenerateConfig.php ".escapeshellarg($params['name'])." ".escapeshellarg($params['mac']), $ret);
         if ($ret === 0) {
             system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
             return $response->withJson(array('id'=>$configId), 200);
@@ -531,12 +531,12 @@ $app->delete('/devices/gateways/{id}', function (Request $request, Response $res
     try {
         $route = $request->getAttribute('route');
         $id = $route->getArgument('id');
-        $sql = "SELECT `name` FROM `gateway_config` WHERE `id` = ?";
+        $sql = "SELECT `name`,`mac` FROM `gateway_config` WHERE `id` = ?";
         $fpbx = FreePBX::create();
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($id));
         $res = $sth->fetch(\PDO::FETCH_ASSOC);
-        system("/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/tftpDeleteConfig.php ".escapeshellarg($res['name']), $ret);
+        system("/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/tftpDeleteConfig.php ".escapeshellarg($res['name'])." ".escapeshellarg($res['mac']), $ret);
         //get all trunks for this gateway
         $sql = "SELECT `trunk` FROM `gateway_config_fxo` WHERE `config_id` = ? UNION SELECT `physical_extension` FROM `gateway_config_fxs` WHERE `config_id` = ? UNION SELECT `trunk` FROM `gateway_config_isdn` WHERE `config_id` = ? UNION SELECT `trunk` FROM `gateway_config_pri` WHERE `config_id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
@@ -568,8 +568,12 @@ $app->delete('/devices/gateways/{id}', function (Request $request, Response $res
  $app->get('/devices/gateways/download/{name}', function (Request $request, Response $response, $args) {
      $route = $request->getAttribute('route');
      $name = $route->getArgument('name');
+     $mac = $route->getArgument('mac');
      try {
-         $config = gateway_generate_configuration_file($name);
+         if (!isset($mac)) {
+             $mac = false;
+         }
+         $config = gateway_generate_configuration_file($name,$mac);
          $response->withHeader('Content-Type', 'application/octet-stream');
          $response->withHeader('Content-Disposition', 'attachment; filename='. $name. '.txt');
 
