@@ -31,7 +31,7 @@ try {
     #create configuration files
     $name = $argv[1];
     if (isset($argv[2])) {
-        $mac=$argv[2]
+        $mac=$argv[2];
     } else {
         $mac = false;
     }

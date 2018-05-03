@@ -348,8 +348,13 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
         $dbh = FreePBX::Database();
         /*Check if config exists*/
         $sql = "SELECT `id` FROM `gateway_config` WHERE `name` = ?";
+        $prep = array($params['name']);
+        if (isset($params['mac'])) {
+            $sql .= " AND `mac` = ?";
+            $prep[] = $params['mac'];
+        }
         $sth = FreePBX::Database()->prepare($sql);
-        $sth->execute(array($params['name']));
+        $sth->execute($prep);
         $res = $sth->fetch(\PDO::FETCH_ASSOC);
         if ($res !== false) {
             /*Configuration exists, delete it*/
