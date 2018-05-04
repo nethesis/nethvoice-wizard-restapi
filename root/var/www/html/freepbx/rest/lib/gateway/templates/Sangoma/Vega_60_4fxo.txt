@@ -21,6 +21,8 @@
   set ._advanced.autoexec.scriptfile1="%mscript.txt"
   set ._advanced.autoexec.scriptfile2="defaultscript.txt"
   set ._advanced.billing.options="default"
+  set ._advanced.cac.callrate="15"
+  set ._advanced.cac.response_code="503"
   set ._advanced.debug.content="0"
   set ._advanced.debug.entity="0"
   set ._advanced.debug.entity_watchdog="on"
@@ -95,6 +97,7 @@
    set ._advanced.incoming_cause_mapping.1.name="default"
   set ._advanced.lan.dns_rev_enable="0"
   set ._advanced.lan.help_path="Help/default/usrguide/framedefn.htm"
+  set ._advanced.lan.link_down_block_calls="1"
   set ._advanced.lan.link_down_cause="38"
   set ._advanced.lan.max_fail_count="6"
   set ._advanced.lan.max_major_fail_count="2"
@@ -154,6 +157,7 @@
   set ._advanced.media.control_V25="ignore"
   set ._advanced.media.digit_threshold="-80"
   set ._advanced.media.direct_RTP_enable="0"
+  set ._advanced.media.direct_TDM_enable="0"
   set ._advanced.media.dtmf_cadence_off_time="60"
   set ._advanced.media.dtmf_cadence_on_time="90"
   set ._advanced.media.dtmf_level="-9"
@@ -234,6 +238,7 @@
    purge ._advanced.pots.fxo
    cp ._advanced.pots.fxo.1
     set ._advanced.pots.fxo.1.call_connection_time="30"
+    set ._advanced.pots.fxo.1.current_limit="default"
     set ._advanced.pots.fxo.1.digital_rx_gain="-1"
     set ._advanced.pots.fxo.1.digital_tx_gain="3"
     set ._advanced.pots.fxo.1.dtmf_holdoff_time="1500"
@@ -245,6 +250,7 @@
     set ._advanced.pots.fxo.1.impedance="CTR21"
     set ._advanced.pots.fxo.1.line_reversal_debounce_time="50"
     set ._advanced.pots.fxo.1.line_reversal_detect="0"
+    set ._advanced.pots.fxo.1.line_simulator="0"
     set ._advanced.pots.fxo.1.loop_current_detect="0"
     set ._advanced.pots.fxo.1.port_notreleased_cause="34"
     set ._advanced.pots.fxo.1.port_release_delay="0"
@@ -558,7 +564,7 @@
  set .http.port="80"
  set .http.timeout="30"
  set .http_server.enable="1"
- set .http_server.lan_profile="3"
+ set .http_server.lan_profile="1"
  set .http_server.port="80"
  set .https.port="443"
  set .lan.file_transfer_method="TFTP"
@@ -1017,7 +1023,13 @@
    set .pots.profile.1.line_busy_cause="34"
    set .pots.profile.1.name="FXO_ports_profile"
   cp .pots.profile.2
+   set .pots.profile.2.callerid_time="DST"
    set .pots.profile.2.callerid_type="etsi-fsk-post"
+   set .pots.profile.2.callerid_wait="6000"
+   set .pots.profile.2.dtmf_dial_digit="#"
+   set .pots.profile.2.dtmf_dial_timeout="5"
+   set .pots.profile.2.line_busy_cause="34"
+   set .pots.profile.2.name="pots_profile_name"
   set .qos_profile.stats.cdr_detail="low"
   set .qos_profile.stats.enable="0"
   set .qos_profile.stats.max_no_cdrs="100"
@@ -1091,6 +1103,7 @@
   purge .quick.fxo
   cp .quick.fxo.1
    set .quick.fxo.1.clid_enable="1"
+   set .quick.fxo.1.enable="1"
    set .quick.fxo.1.handle_emergency_calls="0"
    set .quick.fxo.1.incoming_forward="LINENUMBER1"
    set .quick.fxo.1.name="FXO1"
@@ -1098,6 +1111,7 @@
    set .quick.fxo.1.this_tel="0201"
   cp .quick.fxo.2
    set .quick.fxo.2.clid_enable="1"
+   set .quick.fxo.2.enable="1"
    set .quick.fxo.2.handle_emergency_calls="0"
    set .quick.fxo.2.incoming_forward="LINENUMBER2"
    set .quick.fxo.2.name="FXO2"
@@ -1105,6 +1119,7 @@
    set .quick.fxo.2.this_tel="0202"
   cp .quick.fxo.3
    set .quick.fxo.3.clid_enable="1"
+   set .quick.fxo.3.enable="1"
    set .quick.fxo.3.handle_emergency_calls="0"
    set .quick.fxo.3.incoming_forward="LINENUMBER3"
    set .quick.fxo.3.name="FXO3"
@@ -1112,6 +1127,7 @@
    set .quick.fxo.3.this_tel="0203"
   cp .quick.fxo.4
    set .quick.fxo.4.clid_enable="1"
+   set .quick.fxo.4.enable="1"
    set .quick.fxo.4.handle_emergency_calls="0"
    set .quick.fxo.4.incoming_forward="LINENUMBER4"
    set .quick.fxo.4.name="FXO4"
@@ -1159,13 +1175,14 @@
    cp .quick.voip.endpoint.8
     set .quick.voip.endpoint.8.ip="0.0.0.0"
     set .quick.voip.endpoint.8.numlist="list of numbers"
+   set .quick.voip.proxy.accessibility_check="options"
    set .quick.voip.proxy.auth_name="TRUNKNUMBER1"
    set .quick.voip.proxy.auth_pwd="TRUNKNUMBER1"
    set .quick.voip.proxy.outbound_profile_sig_transport="udp"
-   set .quick.voip.proxy.outbound_proxy_addr="0.0.0.0"
    set .quick.voip.proxy.outbound_proxy_port="5060"
    set .quick.voip.proxy.proxy_addr="ASTERISKIP"
-   set .quick.voip.proxy.proxy_domain_name="ASTERISKIP"
+   set .quick.voip.proxy.tls_port="5061"
+   set .quick.voip.register.enable_transport_uri_param="0"
  purge .rs232
  cp .rs232.1
   set .rs232.1.baud_rate="115200"
@@ -1234,6 +1251,7 @@
   cp .sip.profile.1
    set .sip.profile.1.PRACK="off"
    set .sip.profile.1.alt_domain="alt-reg-domain.com"
+   set .sip.profile.1.cac_cause_code="503"
    set .sip.profile.1.capset="2"
    set .sip.profile.1.contact_header_userinfo="calling_party"
    set .sip.profile.1.dtmf_info="mode2"
@@ -1452,7 +1470,7 @@
   set .systime.dst_end.mon="Oct"
   set .systime.dst_end.time="0300"
  set .telnet.enable="1"
- set .telnet.lan_profile="3"
+ set .telnet.lan_profile="1"
  set .telnet.port="23"
  set .tftp.dhcp_if="1"
  set .tftp.ip="ASTERISKIP"
