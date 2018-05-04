@@ -25,12 +25,21 @@ try {
     # Initialize FreePBX environment
     $bootstrap_settings['freepbx_error_handler'] = false;
     define('FREEPBX_IS_AUTH',1);
-
-    $name = $argv[1];
     $tftpdir = "/var/lib/tftpboot";
+    $name = $argv[1];
+
     $sql = "SELECT `id`,`model_id`,`ipv4`,`ipv4_new`,`gateway`,`mac` FROM `gateway_config` WHERE `name` = ?";
+    $prep = array($name);
+    if (isset($argv[2])) {
+        $mac=$argv[2];
+        $sql .= " AND `mac` = ?";
+        $prep[] = $mac;
+    } else {
+        $mac = false;
+    }
+
     $sth = FreePBX::Database()->prepare($sql);
-    $sth->execute(array($name));
+    $sth->execute($prep);
     $config = $sth->fetch(\PDO::FETCH_ASSOC);
     if ($config === false){
         /*Configuration doesn't exist*/

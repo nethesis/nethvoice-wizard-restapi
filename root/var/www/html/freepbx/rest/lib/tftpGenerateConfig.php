@@ -30,8 +30,13 @@ try {
 
     #create configuration files
     $name = $argv[1];
+    if (isset($argv[2])) {
+        $mac=$argv[2];
+    } else {
+        $mac = false;
+    }
     $tftpdir = "/var/lib/tftpboot";
-    $config = gateway_get_configuration($name);
+    $config = gateway_get_configuration($name,$mac);
     if (!isset($config['mac'])|| $config['mac']==''){
         $config['mac'] = 'AAAAAAAAAAAA';
     }
@@ -42,7 +47,7 @@ try {
     } else {
         $filename = preg_replace('/:/','',$config['mac']).".cfg";
     }
-    file_put_contents($tftpdir."/".$filename,gateway_generate_configuration_file($name), LOCK_EX);
+    file_put_contents($tftpdir."/".$filename,gateway_generate_configuration_file($name,$mac), LOCK_EX);
 } catch (Exception $e){
         error_log($e->getMessage());
         exit(1);

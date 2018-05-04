@@ -23,6 +23,12 @@ require_once('/etc/freepbx.conf');
 
 try{
     $name = $argv[1];
+    if (isset($argv[2])) {
+        $mac=$argv[2]
+    } else {
+        $mac = false;
+    }
+
     $tftpdir = "/var/lib/tftpboot";
 
     $bootstrap_settings['freepbx_error_handler'] = false;
@@ -31,8 +37,13 @@ try{
     $dbh = FreePBX::Database();
     /*Check if config exists*/
     $sql = "SELECT `id`,`model_id`,`ipv4`,`ipv4_new`,`gateway`,`ipv4_green`,`netmask_green`,`mac` FROM `gateway_config` WHERE `name` = ?";
+    $prep = array($name);
+    if (isset($mac)) {
+        $sql .= " AND `mac` = ?";
+        $prep[] = $mac;
+    }
     $sth = FreePBX::Database()->prepare($sql);
-    $sth->execute(array($name));
+    $sth->execute($prep);
     $config = $sth->fetch(\PDO::FETCH_ASSOC);
     if ($config === false){
         /*Configuration doesn't exist*/
