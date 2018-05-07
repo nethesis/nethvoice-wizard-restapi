@@ -351,7 +351,7 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
         $prep = array($params['name']);
         if (isset($params['mac'])) {
             $sql .= " AND `mac` = ?";
-            $prep[] = $params['mac'];
+            $prep[] = strtoupper($params['mac']);
         }
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute($prep);
@@ -369,7 +369,7 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
         /*Create configuration*/
         $sql = "INSERT INTO `gateway_config` (`model_id`,`name`,`ipv4`,`ipv4_new`,`gateway`,`ipv4_green`,`netmask_green`,`mac`) VALUES (?,?,?,?,?,?,?,?)";
         $sth = FreePBX::Database()->prepare($sql);
-        $sth->execute(array($params['model'],$params['name'],$params['ipv4'],$params['ipv4_new'],$params['gateway'],$params['ipv4_green'],$params['netmask_green'],$params['mac']));
+        $sth->execute(array($params['model'],$params['name'],$params['ipv4'],$params['ipv4_new'],$params['gateway'],$params['ipv4_green'],$params['netmask_green'],strtoupper($params['mac'])));
         /*get id*/
         $sql = "SELECT `id` FROM `gateway_config` WHERE `name` = ? ORDER BY `id` DESC LIMIT 1";
         $sth = FreePBX::Database()->prepare($sql);
@@ -496,7 +496,7 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
                 }
             }
         }
-        system("/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/tftpGenerateConfig.php ".escapeshellarg($params['name'])." ".escapeshellarg($params['mac']), $ret);
+        system("/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/tftpGenerateConfig.php ".escapeshellarg($params['name'])." ".escapeshellarg(strtoupper($params['mac'])), $ret);
         if ($ret === 0) {
             system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
             return $response->withJson(array('id'=>$configId), 200);

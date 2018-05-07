@@ -37,7 +37,6 @@ try {
     } else {
         $mac = false;
     }
-
     $sth = FreePBX::Database()->prepare($sql);
     $sth->execute($prep);
     $config = $sth->fetch(\PDO::FETCH_ASSOC);
@@ -57,7 +56,7 @@ try {
         $config['mac'] = 'AAAAAAAAAAAA';
     }
     if ($config['manufacturer'] == 'Sangoma'){
-        unlink($tftpdir."/".preg_replace('/:/','',$config['mac']).".config.txt");
+        unlink($tftpdir."/".preg_replace('/:/','',$config['mac'])."config.txt");
         unlink($tftpdir."/".preg_replace('/:/','',$config['mac'])."script.txt");
     } else {
         unlink($tftpdir."/".preg_replace('/:/','',$config['mac']).".cfg");
