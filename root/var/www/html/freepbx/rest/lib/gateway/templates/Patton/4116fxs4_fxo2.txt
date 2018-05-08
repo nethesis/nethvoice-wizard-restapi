@@ -124,6 +124,7 @@ context cs switch
     disconnect-signal battery-reversal
     ring-number on-caller-id
     dial-after timeout 1
+    mute-dialing
 
   interface fxo fxo-01
     route call dest-table from_if_fxo-01
@@ -132,6 +133,7 @@ context cs switch
     disconnect-signal battery-reversal
     ring-number on-caller-id
     dial-after timeout 1
+    mute-dialing
 
   interface fxs fxs-00
     route call dest-table TAB-OUT
