@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.1.3
+Version: 14.1.4
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -38,6 +38,10 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Tue May 08 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.4-1
+- Allow to configure two gateways with same brand and model nethesis/dev#5390
+- Sangoma 60 FXO model: fix disconnect signal for fxo ports
+
 * Fri Apr 20 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.3-1
 - Add Gigaset MAC address nethesis/dev#5327
 
