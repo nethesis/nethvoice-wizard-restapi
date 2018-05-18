@@ -249,3 +249,93 @@ function postCTIProfile($profile, $id=false){
     }
 }
 
+function getProfileID($profilename) {
+    $dbh = FreePBX::Database();
+    $sql = 'SELECT `id` FROM `rest_cti_profiles` WHERE `name` = ?';
+    $sth = $dbh->prepare($sql);
+    $sth->execute(array($profilename));
+    $data = $sth->fetchAll()[0][0];
+    return $data;
+}
+
+function setCTIUserProfile($user_id,$profile_id){
+    try {
+        $dbh = FreePBX::Database();
+        $sql =  'INSERT INTO rest_users (user_id,profile_id)'.
+                ' VALUES (?,?)'.
+                ' ON DUPLICATE KEY UPDATE profile_id = ?';
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute(array($user_id, $profile_id, $profile_id));
+
+        /*Configure user defaults*/
+        //get username
+        $sql =  'SELECT username ' .
+                ' FROM rest_users JOIN userman_users ON rest_users.user_id = userman_users.id ' .
+                ' WHERE userman_users.id = ?';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array($user_id));
+        $username = $sth->fetchAll()[0][0];
+        $dbhcti = NethCTI::Database();
+        $sql =  'INSERT IGNORE INTO user_settings (username,key_name,value) ' .
+                ' VALUES (?,"desktop_notifications","true")';
+        $stmt = $dbhcti->prepare($sql);
+        $stmt->execute(array($username));
+        $sql =  'INSERT IGNORE INTO user_settings (username,key_name,value) ' .
+                ' VALUES (?,"open_ccard","connected")';
+        $stmt = $dbhcti->prepare($sql);
+        $stmt->execute(array($username));
+        $sql =  'INSERT IGNORE INTO user_settings (username,key_name,value) ' .
+                ' VALUES (?,"chat_notifications","true")';
+        $stmt = $dbhcti->prepare($sql);
+        $stmt->execute(array($username));
+        return TRUE;
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return array('error' => $e->getMessage());
+    }
+}
+
+function ctiCreateGroup($name){
+try {
+        $dbh = FreePBX::Database();
+
+        $query = 'SELECT id FROM rest_cti_groups WHERE name = ?';
+        $sth = $dbh->prepare($query);
+        $sth->execute(array($name));
+        $res = $sth->fetchAll()[0][0];
+        if (!empty($res)) {
+            return $res;
+        }
+
+        $sql = 'INSERT INTO rest_cti_groups VALUES (NULL, ?)';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array($name));
+
+        $sql = 'INSERT INTO rest_cti_permissions VALUES (NULL, ?, ?, ?)';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array("grp_".trim(strtolower(preg_replace('/[^a-zA-Z0-9]/','',$name))), "Group: ".trim($name), "Group: ".trim($name).": of presence panel"));
+
+        $query = 'SELECT id FROM rest_cti_macro_permissions WHERE name = "presence_panel"';
+        $sth = $dbh->prepare($query);
+        $sth->execute();
+        $macro_group_id = $sth->fetchObject();
+
+        $query = 'SELECT id FROM rest_cti_permissions WHERE name = ?';
+        $sth = $dbh->prepare($query);
+        $sth->execute(array("grp_".trim(strtolower(preg_replace('/[^a-zA-Z0-9]/','',$name)))));
+        $perm_id = $sth->fetchObject();
+
+        $sql = 'INSERT INTO rest_cti_macro_permissions_permissions VALUES (?, ?)';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array($macro_group_id->id, $perm_id->id));
+
+        $query = 'SELECT id FROM rest_cti_groups WHERE name = ?';
+        $sth = $dbh->prepare($query);
+        $sth->execute(array($name));
+        $group_id = $sth->fetchObject();
+        return $group_id;
+     } catch (Exception $e) {
+        error_log($e->getMessage());
+        return false;
+     }
+}

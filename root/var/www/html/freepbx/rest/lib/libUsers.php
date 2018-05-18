@@ -75,3 +75,12 @@ function generateRandomPassword($length = 8) {
     }
     return $randomString;
 }
+
+function getUserID($username) {
+    $dbh = FreePBX::Database();
+    $sql = 'SELECT `id` FROM `userman_users` WHERE `lname` = ?';
+    $sth = $dbh->prepare($sql);
+    $sth->execute(array($username));
+    $data = $sth->fetchAll()[0][0];
+    return $data;
+}
