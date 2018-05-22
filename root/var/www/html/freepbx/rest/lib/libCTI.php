@@ -19,6 +19,28 @@
 # along with NethServer.  If not, see COPYING.
 #
 
+include_once('/var/www/html/freepbx/rest/config.inc.php');
+
+class NethCTI {
+    private static $db;
+
+    public static function Init($config) {
+        self::$db = new PDO(
+            'mysql:host='. $config['host']. ';dbname='. $config['name'],
+            $config['user'],
+            $config['pass']);
+    }
+
+    public static function Database() {
+        if (!isset(self::$db)) {
+            global $config;
+            self::Init($config['nethctidb']);
+        }
+        return self::$db;
+    }
+}
+
+
 /*Get All Available macro permissions*/
 function getAllAvailableMacroPermissions() {
     try {
@@ -332,7 +354,7 @@ try {
         $query = 'SELECT id FROM rest_cti_groups WHERE name = ?';
         $sth = $dbh->prepare($query);
         $sth->execute(array($name));
-        $group_id = $sth->fetchObject();
+        $group_id = $sth->fetchObject()->id;
         return $group_id;
      } catch (Exception $e) {
         error_log($e->getMessage());
