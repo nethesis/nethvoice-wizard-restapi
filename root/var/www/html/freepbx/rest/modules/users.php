@@ -214,8 +214,8 @@ $app->get('/csv/csvimport', function (Request $request, Response $response, $arg
 $app->get('/csv/csvexport', function (Request $request, Response $response, $args) {
     try {
         $csvarray = array();
-        $csvarray[] = array('# '._('Username'), _('Full Name'), _('Main Extension'), _('Password'), _('Cellphone'), _('Voicemail'), _('WebRTC Extension'), _('CTI Groups'), _('CTI Profile'));
-        $csvarray[] = array ('# '. 'john' , 'John Doe', '201', 'Nethesis,1234', '3331231231', 'TRUE', 'FALSE', 'Developers|Support', 'Advanced');
+        $csvarray[] = array('"# '._('Username').'"','"'._('Full Name').'"','"'._('Main Extension').'"','"'._('Password').'"','"'._('Cellphone').'"','"'._('Voicemail').'"','"'._('WebRTC Extension').'"','"'._('CTI Groups').'"','"'._('CTI Profile').'"');
+        $csvarray[] = array ('"# '. 'john"' , '"John Doe"', '"201"', '"Nethesis,1234"', '"3331231231"', '"TRUE"', '"FALSE"', '"Developers|Support"', '"Advanced"');
 
         $users = getAllUsers();
 
@@ -292,6 +292,10 @@ $app->get('/csv/csvexport', function (Request $request, Response $response, $arg
                 $row[] = $profiles[$u['profile']];
             } else {
                 $row[] = '';
+            }
+            // ad " string delimiters
+            foreach ($row as $key => $value) {
+                $row[$key] = "\"$value\"";
             }
 
             $csvarray[] = $row;
