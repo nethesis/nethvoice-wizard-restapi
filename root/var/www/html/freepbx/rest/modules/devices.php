@@ -496,7 +496,7 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
                 }
             }
         }
-        system("/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/tftpGenerateConfig.php ".escapeshellarg($params['name'])." ".escapeshellarg(strtoupper($params['mac'])), $ret);
+        system("/usr/bin/sudo /usr/bin/scl enable rh-php56 -- php /var/www/html/freepbx/rest/lib/tftpGenerateConfig.php ".escapeshellarg($params['name'])." ".escapeshellarg(strtoupper($params['mac'])), $ret);
         if ($ret === 0) {
             system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
             return $response->withJson(array('id'=>$configId), 200);
@@ -519,7 +519,7 @@ $app->post('/devices/gateways/push', function (Request $request, Response $respo
         $name = $params['name'];
 
         #Launch configuration push
-        system("/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/tftpPushConfig.php ".escapeshellarg($name));
+        system("/usr/bin/sudo /usr/bin/scl enable rh-php56 -- php /var/www/html/freepbx/rest/lib/tftpPushConfig.php ".escapeshellarg($name));
         return $response->withJson(array('status'=>true), 200);
     } catch (Exception $e) {
         error_log($e->getMessage());
@@ -541,7 +541,7 @@ $app->delete('/devices/gateways/{id}', function (Request $request, Response $res
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($id));
         $res = $sth->fetch(\PDO::FETCH_ASSOC);
-        system("/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/tftpDeleteConfig.php ".escapeshellarg($res['name'])." ".escapeshellarg($res['mac']), $ret);
+        system("/usr/bin/sudo /usr/bin/scl enable rh-php56 -- php /var/www/html/freepbx/rest/lib/tftpDeleteConfig.php ".escapeshellarg($res['name'])." ".escapeshellarg($res['mac']), $ret);
         //get all trunks for this gateway
         $sql = "SELECT `trunk` FROM `gateway_config_fxo` WHERE `config_id` = ? UNION SELECT `physical_extension` FROM `gateway_config_fxs` WHERE `config_id` = ? UNION SELECT `trunk` FROM `gateway_config_isdn` WHERE `config_id` = ? UNION SELECT `trunk` FROM `gateway_config_pri` WHERE `config_id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
@@ -606,7 +606,7 @@ $app->post('/devices/phones/provision', function (Request $request, Response $re
             $res = $endpoint->prepare_configs($phone_info, false);
 
           // Copy provisioning file to correct destination
-          system('/usr/bin/sudo /usr/bin/php /var/www/html/freepbx/rest/lib/moveProvisionFiles.php');
+          system('/usr/bin/sudo /usr/bin/scl enable rh-php56 -- php /var/www/html/freepbx/rest/lib/moveProvisionFiles.php');
         } else {
             throw new Exception('device not found');
         }
