@@ -72,41 +72,10 @@ $app->get('/users/count', function (Request $request, Response $response, $args)
 
 $app->get('/users/{all}', function (Request $request, Response $response, $args) {
     $all = $request->getAttribute('all');
-    $blacklist = ['admin', 'administrator', 'guest', 'krbtgt','ldapservice'];
     if($all == "true") {
         fwconsole('userman --syncall --force'); // force FreePBX user sync
     }
-    $users = FreePBX::create()->Userman->getAllUsers();
-    $dbh = FreePBX::Database();
-    $i = 0;
-    foreach ($users as $user) {
-        if (in_array(strtolower($users[$i]['username']), $blacklist)) {
-            unset($users[$i]);
-        } else {
-            if($all == "false" && $users[$i]['default_extension'] == 'none') {
-                unset($users[$i]);
-            } else {
-                $users[$i]['password'] = getPassword(getUser($users[$i]['username']));
-                $sql = 'SELECT rest_devices_phones.*'.
-                  ' FROM rest_devices_phones'.
-                  ' JOIN userman_users ON rest_devices_phones.user_id = userman_users.id'.
-                  ' WHERE userman_users.default_extension = ?';
-                $stmt = $dbh->prepare($sql);
-                $stmt->execute(array($users[$i]['default_extension']));
-                $users[$i]['devices'] = array();
-                while ($d = $stmt->fetch(\PDO::FETCH_ASSOC))
-                    $users[$i]['devices'][] = $d;
-                $sql = 'SELECT rest_users.profile_id'.
-                  ' FROM rest_users'.
-                  ' JOIN userman_users ON rest_users.user_id = userman_users.id'.
-                  ' WHERE userman_users.username = ?';
-                $stmt = $dbh->prepare($sql);$stmt->execute(array($users[$i]['username']));
-                $users[$i]['profile'] = $stmt->fetch(\PDO::FETCH_ASSOC)['profile_id'];
-            }
-        }
-        $i++;
-    }
-    return $response->withJson(array_values($users),200);
+    return $response->withJson(array_values(getAllUsers()),200);
 });
 
 
@@ -242,3 +211,105 @@ $app->get('/csv/csvimport', function (Request $request, Response $response, $arg
     }
 });
 
+$app->get('/csv/csvexport', function (Request $request, Response $response, $args) {
+    try {
+        $csvarray = array();
+        $csvarray[] = array('"# '._('Username').'"','"'._('Full Name').'"','"'._('Main Extension').'"','"'._('Password').'"','"'._('Cellphone').'"','"'._('Voicemail').'"','"'._('WebRTC Extension').'"','"'._('CTI Groups').'"','"'._('CTI Profile').'"');
+        $csvarray[] = array ('"# '. 'john"' , '"John Doe"', '"201"', '"Nethesis,1234"', '"3331231231"', '"TRUE"', '"FALSE"', '"Developers|Support"', '"Advanced"');
+
+        $users = getAllUsers();
+
+        // Get mobiles
+        $dbh = FreePBX::Database();
+        $sql = 'SELECT rest_users.mobile, userman_users.username, userman_users.id'.
+          ' FROM rest_users'.
+          ' JOIN userman_users ON userman_users.id = rest_users.user_id';
+        $mobiles = $dbh->sql($sql, 'getAll', \PDO::FETCH_ASSOC);
+        foreach ($mobiles as $m) {
+            $users[$m['id']]['mobile'] = $m['mobile'];
+        }
+
+        // Voicemails
+        $tmp = FreePBX::Voicemail()->getVoicemail();
+        $voicemails = $tmp['default'];
+
+        // CTI Groups
+        $sql = 'SELECT rest_cti_users_groups.user_id, rest_cti_groups.name'.
+            ' FROM rest_cti_groups'.
+            ' JOIN rest_cti_users_groups ON rest_cti_users_groups.group_id = rest_cti_groups.id';
+        $sth = $dbh->prepare($sql);
+        $sth->execute();
+        $res = $sth->fetchAll(PDO::FETCH_ASSOC);
+        $user_groups = array();
+        foreach ($res as $ug) {
+            if (!isset($user_groups[$ug['user_id']])) $user_groups[$ug['user_id']] = array();
+            $user_groups[$ug['user_id']][] = $ug['name'];
+        }
+
+        // CTI Profiles
+        $sql = 'SELECT id,name FROM rest_cti_profiles';
+        $sth = $dbh->prepare($sql);
+        $sth->execute();
+        $res = $sth->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($res as $r) {
+            $profiles[$r['id']] = $r['name'];
+        }
+
+        foreach ($users as $u) {
+            if (!isset($u['username'])) continue;
+            $row = array();
+            $userid = $u['id'];
+            $row[] = $u['username'];
+            $row[] = $u['displayname'];
+            $row[] = $u['default_extension'];
+            $row[] = getPassword($u['username']);
+            // mobile cellphone
+            $row[] = $u['mobile'];
+            // voicemail
+            if (isset($voicemails[$u['default_extension']])) {
+                $row[] = 'TRUE';
+            } else {
+                $row[] = 'FALSE';
+            }
+            // WebRTC extension
+            $webrtc = 'FALSE';
+            if (isset($u['devices'])) {
+                foreach ($u['devices'] as $device) {
+                    if ($device['type'] === 'webrtc') {
+                        $webrtc = 'TRUE';
+                    }
+                }
+            }
+            $row[] = $webrtc;
+            // pipe separated CTI Groups
+            if (isset($user_groups[$u['id']])) {
+                $row[] = implode('|', $user_groups[$u['id']]);
+            } else {
+                $row[] = '';
+            }
+            // CTI Profile
+            if (isset($u['profile']) && !empty($u['profile'])) {
+                $row[] = $profiles[$u['profile']];
+            } else {
+                $row[] = '';
+            }
+            // ad " string delimiters
+            foreach ($row as $key => $value) {
+                $row[$key] = "\"$value\"";
+            }
+
+            $csvarray[] = $row;
+        }
+
+        $csvstring = '';
+        foreach ($csvarray as $row) {
+            $csvstring .= implode(',',$row);
+            $csvstring .= "\r\n";
+        }
+        error_log($csvstring);
+        return $response->withJson(base64_encode($csvstring),200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});

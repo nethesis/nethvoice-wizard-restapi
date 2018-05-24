@@ -75,3 +75,47 @@ function generateRandomPassword($length = 8) {
     }
     return $randomString;
 }
+
+function getUserID($username) {
+    $dbh = FreePBX::Database();
+    $sql = 'SELECT `id` FROM `userman_users` WHERE `lname` = ?';
+    $sth = $dbh->prepare($sql);
+    $sth->execute(array($username));
+    $data = $sth->fetchAll()[0][0];
+    return $data;
+}
+
+function getAllUsers() {
+    $blacklist = ['admin', 'administrator', 'guest', 'krbtgt','ldapservice'];
+    $users = FreePBX::create()->Userman->getAllUsers();
+    $dbh = FreePBX::Database();
+    $i = 0;
+    foreach ($users as $user) {
+        if (in_array(strtolower($users[$i]['username']), $blacklist)) {
+            unset($users[$i]);
+        } else {
+            if($all == "false" && $users[$i]['default_extension'] == 'none') {
+                unset($users[$i]);
+            } else {
+                $users[$i]['password'] = getPassword(getUser($users[$i]['username']));
+                $sql = 'SELECT rest_devices_phones.*'.
+                  ' FROM rest_devices_phones'.
+                  ' JOIN userman_users ON rest_devices_phones.user_id = userman_users.id'.
+                  ' WHERE userman_users.default_extension = ?';
+                $stmt = $dbh->prepare($sql);
+                $stmt->execute(array($users[$i]['default_extension']));
+                $users[$i]['devices'] = array();
+                while ($d = $stmt->fetch(\PDO::FETCH_ASSOC))
+                    $users[$i]['devices'][] = $d;
+                $sql = 'SELECT rest_users.profile_id'.
+                  ' FROM rest_users'.
+                  ' JOIN userman_users ON rest_users.user_id = userman_users.id'.
+                  ' WHERE userman_users.username = ?';
+                $stmt = $dbh->prepare($sql);$stmt->execute(array($users[$i]['username']));
+                $users[$i]['profile'] = $stmt->fetch(\PDO::FETCH_ASSOC)['profile_id'];
+            }
+        }
+        $i++;
+    }
+    return $users;
+}

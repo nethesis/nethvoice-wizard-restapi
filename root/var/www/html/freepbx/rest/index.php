@@ -49,27 +49,6 @@ $app = new \Slim\App($config);
 # Add authentication
 $app->add(new AuthMiddleware($config['settings']['secretkey']));
 
-class NethCTI {
-    private static $db;
-
-    public static function Init($config) {
-        self::$db = new PDO(
-            'mysql:host='. $config['host']. ';dbname='. $config['name'],
-            $config['user'],
-            $config['pass']);
-    }
-
-    public static function Database() {
-        return self::$db;
-    }
-}
-
-try {
-    NethCTI::Init($config['nethctidb']);
-} catch (PDOException $e) {
-    error_log('nethcti db: '. $e->getMessage());
-}
-
 foreach (glob("modules/*.php") as $filename)
 {
     require($filename);
