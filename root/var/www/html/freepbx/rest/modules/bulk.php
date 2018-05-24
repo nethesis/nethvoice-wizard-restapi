@@ -50,7 +50,8 @@ $blkfunc = array('displayname',
     'pickupgroup',
     'noanswerdest',
     'busydest',
-    'notreachabledest'
+    'notreachabledest',
+    'outboundcid'
 );
 
 /*GET /bulk/200,201,202,...  - return all available infos about selected extensions - empty if extensions has differents 
