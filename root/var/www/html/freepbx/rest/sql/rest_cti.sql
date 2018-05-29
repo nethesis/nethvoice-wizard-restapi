@@ -1,5 +1,12 @@
 USE asterisk;
 
+CREATE TABLE IF NOT EXISTS `rest_cti_profiles_paramurl`(
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `profile_id` INT UNSIGNED NOT NULL,
+  `url` varchar(255) NOT NULL DEFAULT '',
+  UNIQUE `profile_id_key` (`profile_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS `rest_cti_profiles`(
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `name` varchar(255) NOT NULL DEFAULT 'Custom'
