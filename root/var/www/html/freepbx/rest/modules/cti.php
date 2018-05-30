@@ -389,6 +389,7 @@ $app->put('/cti/paramurl/{id}', function (Request $request, Response $response, 
       if ($res === FALSE) {
           throw new Exception($sth->errorInfo()[2]);
       }
+      system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
       return $response->withStatus(200);
   } catch (Exception $e) {
       error_log($e->getMessage());
@@ -448,6 +449,7 @@ $app->post('/cti/paramurl', function (Request $request, Response $response, $arg
             throw new Exception($sth->errorInfo()[2]);
         }
       }
+      system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
       return $response->withStatus(200);
   } catch (Exception $e) {
       error_log($e->getMessage());
@@ -473,6 +475,7 @@ $app->post('/cti/paramurl/delete', function (Request $request, Response $respons
             throw new Exception($sth->errorInfo()[2]);
         }
       }
+      system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
       return $response->withStatus(200);
   } catch (Exception $e) {
       error_log($e->getMessage());
