@@ -123,8 +123,9 @@ $app->post('/users/{username}/password', function (Request $request, Response $r
 
     if ($username === 'admin') { # change freepbx admin password
         $dbh = FreePBX::Database();
-        $dbh->sql('UPDATE ampusers SET password_sha1 = sha1(\''. $password. '\')'.
-            ' WHERE username = \'admin\'');
+        $sql = 'UPDATE ampusers SET password_sha1 = sha1(?) WHERE username = \'admin\'';
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute(array($password));
     } else {
         if ( ! userExists($username) ) {
             return $response->withJson(['result' => "$username user doesn't exist"], 422);
