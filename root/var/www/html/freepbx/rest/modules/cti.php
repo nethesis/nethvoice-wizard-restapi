@@ -365,6 +365,38 @@ $app->post('/cti/dbconn', function (Request $request, Response $response, $args)
 });
 
 /*
+ * PUT /cti/paramurl/:id { id: string, profiles: array, url: string }
+ */
+$app->put('/cti/paramurl/{id}', function (Request $request, Response $response, $args) {
+  try {
+      $route = $request->getAttribute('route');
+      $id = $route->getArgument('id');
+      $data = $request->getParsedBody();
+      $args = array();
+      $fields = array();
+      $dbh = FreePBX::Database();
+      foreach ($data["profiles"] as $p) {
+        $sql = 'INSERT INTO rest_cti_profiles_paramurl (profile_id, url) VALUES (?, ?) ON DUPLICATE KEY UPDATE profile_id=VALUES(profile_id), url=VALUES(url)';
+        $sth = $dbh->prepare($sql);
+        $res = $sth->execute(array($p, $data["url"]));
+        if ($res === FALSE) {
+          throw new Exception($sth->errorInfo()[2]);
+        }
+      }
+      $sql = 'DELETE FROM rest_cti_profiles_paramurl WHERE url=? AND profile_id NOT IN ('.implode(",", $data["profiles"]).')';
+      $sth = $dbh->prepare($sql);
+      $res = $sth->execute(array($data["url"]));
+      if ($res === FALSE) {
+          throw new Exception($sth->errorInfo()[2]);
+      }
+      return $response->withStatus(200);
+  } catch (Exception $e) {
+      error_log($e->getMessage());
+      return $response->withStatus(500);
+  }
+});
+
+/*
  * PUT /cti/dbconn { host: string, port: numeric, type: string, user: string, pass: string, name: string }
 */
 $app->put('/cti/dbconn/{id}', function (Request $request, Response $response, $args) {
@@ -396,6 +428,56 @@ $app->put('/cti/dbconn/{id}', function (Request $request, Response $response, $a
         error_log($e->getMessage());
         return $response->withStatus(500);
     }
+});
+
+/*
+ * POST /cti/paramurl { "url": string, "profiles": array }
+*/
+$app->post('/cti/paramurl', function (Request $request, Response $response, $args) {
+  try {
+      $route = $request->getAttribute('route');
+      $data = $request->getParsedBody();
+      $url = $data['url'];
+      $profiles = $data['profiles'];
+      $dbi = FreePBX::Database();
+      foreach ($profiles as $profileId) {
+        $sql = 'INSERT INTO rest_cti_profiles_paramurl(profile_id, url) VALUES (?, ?)';
+        $sth = $dbi->prepare($sql);
+        $res = $sth->execute(array($profileId, $url));
+        if ($res === FALSE) {
+            throw new Exception($sth->errorInfo()[2]);
+        }
+      }
+      return $response->withStatus(200);
+  } catch (Exception $e) {
+      error_log($e->getMessage());
+      return $response->withStatus(500);
+  }
+});
+
+/*
+ * POST /cti/paramurls/delete
+*/
+$app->post('/cti/paramurl/delete', function (Request $request, Response $response, $args) {
+  try {
+      $route = $request->getAttribute('route');
+      $data = $request->getParsedBody();
+      $url = $data['url'];
+      $profiles = $data['profiles'];
+      $dbi = FreePBX::Database();
+      foreach ($profiles as $profileId) {
+        $sql = 'DELETE FROM rest_cti_profiles_paramurl WHERE profile_id=? AND url=?';
+        $sth = $dbi->prepare($sql);
+        $res = $sth->execute(array($profileId, $url));
+        if ($res === FALSE) {
+            throw new Exception($sth->errorInfo()[2]);
+        }
+      }
+      return $response->withStatus(200);
+  } catch (Exception $e) {
+      error_log($e->getMessage());
+      return $response->withStatus(500);
+  }
 });
 
 /*
@@ -921,6 +1003,30 @@ $app->get('/cti/streaming', function (Request $request, Response $response, $arg
 });
 
 /*
+ * GET /cti/paramurls { url: string, profiles: array }
+ */
+$app->get('/cti/paramurls', function (Request $request, Response $response, $args) {
+  try {
+      $dbh = FreePBX::Database();
+      $sql = 'SELECT * FROM rest_cti_profiles_paramurl';
+      $sth = $dbh->prepare($sql);
+      $sth->execute();
+      $res = $sth->fetchAll(PDO::FETCH_ASSOC);
+      if (sizeof($res) == 0) {
+        return $response->withJson($res);
+      }
+      $sql = 'SELECT id, url, group_concat(profile_id) AS profiles FROM rest_cti_profiles_paramurl GROUP BY url';
+      $sth = $dbh->prepare($sql);
+      $sth->execute();
+      $res = $sth->fetchAll(PDO::FETCH_ASSOC);
+      return $response->withJson($res);
+  } catch (Exception $e) {
+      error_log($e->getMessage());
+      return $response->withStatus(500);
+  }
+});
+
+/*
  * PUT /cti/streaming/:descr { descr: string, exten: string, frame-rate: string, open: string, secret: string, url: string, user: string }
  */
 $app->put('/cti/streaming/{descr}', function (Request $request, Response $response, $args) {
@@ -956,7 +1062,6 @@ $app->put('/cti/streaming/{descr}', function (Request $request, Response $respon
         } else {
             throw new Exception('no permission stored for customer card');
         }
-        file_put_contents('/var/www/html/freepbx/out', "permission_id=$permission_id\n", FILE_APPEND);
 
         // skip the update permission to streaming macro permission: remain inaltered
 
