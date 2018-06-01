@@ -81,6 +81,11 @@ $app->post('/voicemails', function (Request $request, Response $response, $args)
             FreePBX::create()->Voicemail->processQuickCreate($tech, $extension['extension'], $data);
         } else {
             FreePBX::create()->Voicemail->delMailbox($extension['extension']);
+            $sql = 'UPDATE `users` SET `voicemail` = "novm" WHERE `extension` = ?';
+            $sth = $dbh->prepare($sql);
+            $sth->execute(array($extension['extension']));
+            global $astman;
+            $astman->database_put("AMPUSER",$extension['extension']."/voicemail",'novm');
         }
 
         system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
