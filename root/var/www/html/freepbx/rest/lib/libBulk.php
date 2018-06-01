@@ -134,6 +134,14 @@ function get_notreachabledest($mainextension) {
     return $data;
 }
 
+function get_outboundcid($mainextension) {
+    $dbh = FreePBX::Database();
+    $sql = 'SELECT `outboundcid` FROM `users` WHERE `extension` = ?';
+    $sth = $dbh->prepare($sql);
+    $sth->execute(array($mainextension));
+    $data = $sth->fetchAll()[0][0];
+    return preg_replace('/^<|>$/','',$data);
+}
 
 function post_displayname($mainextensions,$data) {
     if (is_null($data)) {
@@ -314,3 +322,18 @@ function post_notreachabledest($mainextensions,$data) {
     return true;
 }
 
+function post_outboundcid($mainextensions,$data) {
+    if (is_null($data)) {
+        return true;
+    }
+    foreach ($mainextensions as $mainextension) {
+        $res = writeUserTableData($mainextension,'outboundcid',$data);
+        if ($res !== true) {
+            $err .= __FUNCTION__." ".$res."\n";
+        }
+    }
+    if (isset($err)) {
+        return $err;
+    }
+    return true;
+}

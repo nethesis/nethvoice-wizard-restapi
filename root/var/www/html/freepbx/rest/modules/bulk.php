@@ -72,7 +72,9 @@ $app->get('/bulk/{mainextensions}', function (Request $request, Response $respon
     $route = $request->getAttribute('route');
     $mainextensions = explode(',',$route->getArgument('mainextensions'));
     $r = array();
-    foreach ($blkfunc as $action){
+    $blkfunc_get = $blkfunc;
+    $blkfunc_get[] = 'outboundcid';
+    foreach ($blkfunc_get as $action){
         $function = 'get_'.$action;
         unset($oldValue);
         foreach ($mainextensions as $mainextension) {
@@ -133,6 +135,16 @@ $app->post('/bulk/{mainextensions}', function (Request $request, Response $respo
                 $res = $function($mainextensions,$data);
                 if ($res !== true) {
                     $err .= $res."\n";
+                }
+            }
+        }
+        //outboundcid
+        if (isset($params['outboundcid_fixed']) && !is_null($params['outboundcid_fixed'])) {
+            if (!isset($params['outboundcid_variable']) || $params['outboundcid_variable'] == 0 || $params['outboundcid_variable'] == '') {
+                post_outboundcid($mainextensions,'<'.$params['outboundcid_fixed'].'>');
+            } else {
+                foreach ($mainextensions as $mainextension) {
+                     post_outboundcid(array($mainextension), '<'.$params['outboundcid_fixed'].substr($mainextension,-$params['outboundcid_variable']).'>');
                 }
             }
         }
