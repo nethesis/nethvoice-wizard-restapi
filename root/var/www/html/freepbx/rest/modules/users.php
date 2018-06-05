@@ -224,11 +224,9 @@ $app->get('/csv/csvexport', function (Request $request, Response $response, $arg
         $dbh = FreePBX::Database();
         $sql = 'SELECT rest_users.mobile, userman_users.username, userman_users.id'.
           ' FROM rest_users'.
-          ' JOIN userman_users ON userman_users.id = rest_users.user_id';
+          ' JOIN userman_users ON userman_users.id = rest_users.user_id'.
+          ' WHERE rest_users.mobile != \'\' AND rest_users.mobile IS NOT NULL';
         $mobiles = $dbh->sql($sql, 'getAll', \PDO::FETCH_ASSOC);
-        foreach ($mobiles as $m) {
-            $users[$m['id']]['mobile'] = $m['mobile'];
-        }
 
         // Voicemails
         $tmp = FreePBX::Voicemail()->getVoicemail();
@@ -265,7 +263,14 @@ $app->get('/csv/csvexport', function (Request $request, Response $response, $arg
             $row[] = $u['default_extension'];
             $row[] = getPassword($u['username']);
             // mobile cellphone
-            $row[] = $u['mobile'];
+            $mobile = NULL;
+            foreach ($mobiles as $m) {
+                if ($m['id'] === $u['id']) {
+                    $mobile = $m['mobile'];
+                    break;
+                }
+            }
+            $row[] = $mobile;
             // voicemail
             if (isset($voicemails[$u['default_extension']])) {
                 $row[] = 'TRUE';
