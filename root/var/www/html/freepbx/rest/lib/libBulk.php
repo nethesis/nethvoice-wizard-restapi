@@ -327,9 +327,11 @@ function post_outboundcid($mainextensions,$data) {
         return true;
     }
     foreach ($mainextensions as $mainextension) {
-        $res = writeUserTableData($mainextension,'outboundcid',$data);
-        if ($res !== true) {
-            $err .= __FUNCTION__." ".$res."\n";
+        foreach (getAllExtensions($mainextension) as $extension) {
+            $res = writeUserTableData($extension,'outboundcid',$data);
+            if ($res !== true) {
+                $err .= __FUNCTION__." ".$res."\n";
+            }
         }
     }
     if (isset($err)) {
