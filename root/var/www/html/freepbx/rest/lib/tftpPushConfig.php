@@ -24,7 +24,7 @@ require_once('/etc/freepbx.conf');
 try{
     $name = $argv[1];
     if (isset($argv[2])) {
-        $mac=$argv[2]
+        $mac=$argv[2];
     } else {
         $mac = false;
     }
@@ -38,7 +38,7 @@ try{
     /*Check if config exists*/
     $sql = "SELECT `id`,`model_id`,`ipv4`,`ipv4_new`,`gateway`,`ipv4_green`,`netmask_green`,`mac` FROM `gateway_config` WHERE `name` = ?";
     $prep = array($name);
-    if (isset($mac)) {
+    if (isset($mac) && !empty($mac)) {
         $sql .= " AND `mac` = ?";
         $prep[] = $mac;
     }
