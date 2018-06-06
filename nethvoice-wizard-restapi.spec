@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.1.4
+Version: 14.1.5
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -38,6 +38,17 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Wed Jun 06 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.5-1
+- Fix: only add phones once when scanning overlapping networks
+- Fix admin password escape
+- New API and sql table for parameterized URLs nethesis/dev#5412
+- Fix voicemail delete
+- Add outbound cid to bulk API nethesis/dev#5402
+- Use SCL to execute external php nethesis/dev#5406
+- Add csv export API nethesis/dev#5411
+- Add cellphone,voicemail,webrtc CTI groups and CTI profile to CSV import nethesis/dev#5411
+- Patton analog: add mute-dialing to prevent incorrect ringing from the provider.
+
 * Tue May 08 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.4-1
 - Allow to configure two gateways with same brand and model nethesis/dev#5390
 - Sangoma 60 FXO model: fix disconnect signal for fxo ports
