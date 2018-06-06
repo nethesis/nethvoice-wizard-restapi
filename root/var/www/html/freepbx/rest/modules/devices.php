@@ -521,9 +521,10 @@ $app->post('/devices/gateways/push', function (Request $request, Response $respo
         #create configuration files
         $params = $request->getParsedBody();
         $name = $params['name'];
+        $mac = $params['mac'];
 
         #Launch configuration push
-        system("/usr/bin/sudo /usr/bin/scl enable rh-php56 -- php /var/www/html/freepbx/rest/lib/tftpPushConfig.php ".escapeshellarg($name));
+        system("/usr/bin/sudo /usr/bin/scl enable rh-php56 -- php /var/www/html/freepbx/rest/lib/tftpPushConfig.php ".escapeshellarg($name)." ".escapeshellarg(strtoupper($mac)));
         return $response->withJson(array('status'=>true), 200);
     } catch (Exception $e) {
         error_log($e->getMessage());
