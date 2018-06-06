@@ -161,7 +161,7 @@ try {
             if (isset($row[5]) && !empty($row[5])) {
                 if (strtolower($row[5]) == 'true' || $row[5] == 1) {
                     $data = array();
-                    $data['name'] = $extension['name'];
+                    $data['name'] = $row[1];
                     $data['vmpwd'] = rand(0, 9).rand(0, 9).rand(0, 9).rand(0, 9);
                     $data['email'] = $user['email'];
                     $data['vm'] = 'yes';
