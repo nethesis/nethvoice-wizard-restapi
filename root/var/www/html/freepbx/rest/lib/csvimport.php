@@ -106,10 +106,6 @@ try {
         $progress += $step;
         if (round($progress)>99) $progress = 99;
         file_put_contents($statusfile,json_encode(array('progress'=>round($progress))));
-        # Skip comments
-        if (substr($row[0],0,1) === '#') {
-            continue;
-        }
 
         $user_id = getUserID($row[0]);
         $username = $row[0];
