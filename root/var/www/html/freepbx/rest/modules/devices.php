@@ -228,7 +228,7 @@ $app->get('/devices/phones/list', function (Request $request, Response $response
         }
 
         //get only one phone in $res array https://stackoverflow.com/questions/2561248/how-do-i-use-array-unique-on-an-array-of-arrays
-        $res = array_intersect_key($res, array_unique(array_map('serialize', $res)));
+        $res = array_values(array_intersect_key($res, array_unique(array_map('serialize', $res))));
 
         /*Get phones from db not in scanned phone list*/
         $sql = 'SELECT userman_users.default_extension'.
