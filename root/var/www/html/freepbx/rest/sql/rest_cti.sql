@@ -113,6 +113,7 @@ INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (6,'queue_agent','Use que
 INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (7,'streaming','Streaming','Allow to view Streaming Panel');
 INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (8,'off_hour','Off Hour','Allow to change of his incoming call paths');
 INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (9,'remote_sites','Remote Sites','Allow to view Remote Sites information');
+INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (10,'qmanager','Queue Manager','Allow to view and manage queues in real time');
 
 /*Permissions*/
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (1,'call_waiting','Call Waiting','Configure call waiting');
@@ -125,7 +126,6 @@ INSERT IGNORE INTO `rest_cti_permissions` VALUES (7,'sms','SMS','Send SMS and vi
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (8,'chat','Chat','Use chat service');
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (9,'privacy','Privacy','Obfuscate called and caller numbers for other users');
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (10,'oppanel','Operation Panel','Enable Operation Panel access');
-INSERT IGNORE INTO `rest_cti_permissions` VALUES (11,'queueman','QueueMan','Enable QueueMan access');
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (12,'ad_phonebook','Advanced Phonebook','Modify and delete all contacts');
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (13,'ad_cdr','PBX CDR','View all users call history');
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (14,'ad_sms','Advanced SMS','View every user SMSs');
@@ -154,7 +154,6 @@ INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (1,7);
 INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (1,8);
 INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (1,9);
 INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (1,10);
-INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (1,11);
 INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (2,12);
 INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (3,13);
 INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (3,14);
@@ -198,7 +197,6 @@ INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (3,6);
 INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (3,7);
 INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (3,8);
 INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (3,10);
-INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (3,11);
 INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (3,12);
 INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (3,13);
 INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (3,14);
@@ -235,3 +233,4 @@ INSERT IGNORE INTO `rest_cti_profiles_macro_permissions` VALUES (3,9);
 UPDATE IGNORE `rest_cti_permissions` SET `name`='advanced_off_hour_tmp',`displayname`='Advanced Off Hour',`description`='Allow to change user\'s incoming call path and generic inbound routes' WHERE id = 25;
 UPDATE IGNORE `rest_cti_permissions` SET `name`='ad_off_hour',`displayname`='Admin Off Hour',`description`='Allow to change all incoming call paths' WHERE id = 27;
 UPDATE IGNORE `rest_cti_permissions` SET `name`='advanced_off_hour',`displayname`='Advanced Off Hour',`description`='Allow to change user\'s incoming call path and generic inbound routes' WHERE id = 25;
+DELETE IGNORE FROM `rest_cti_permissions` WHERE `id`=11 AND `name` = 'QueueMan';

@@ -121,6 +121,28 @@ function getCTIPermissionProfiles($profileId=false, $minified=false){
         // Get all available permissions for all available macro permissions
         $macro_permissions_permissions = getAllAvailableMacroPermissionsPermissions();
 
+        // Delete queue permissions for queue that has been deleted
+        $queues = FreePBX::Queues()->listQueues();
+        foreach ($permissions as $permission) {
+            if (!strstr($permission['name'],'qmanager_')) {
+                continue;
+            }
+            $exists = false;
+            foreach ($queues as $queue) {
+                $queue_name = 'qmanager_'.$queue[1].'_'.$queue[0];
+                if ($permission['name'] == $queue_name) {
+                    $exists = true;
+                    break;
+                }
+            }
+            if (!$exists) {
+                // Delete queue permission
+                $sql = 'DELETE FROM `rest_cti_permissions` WHERE `id` = ?';
+                $sth = $dbh->prepare($sql);
+                $sth->execute(array($permission['id']));
+            }
+        }
+
         foreach ($profiles as $profile) {
             $id = $profile['id'];
             // Get profile macro permissions
@@ -159,6 +181,27 @@ function getCTIPermissionProfiles($profileId=false, $minified=false){
                     $results[$id]['macro_permissions'][$macro_permission['name']]['permissions'] = array_values($results[$id]['macro_permissions'][$macro_permission['name']]['permissions']);
                 } else {
                     $results[$id]['macro_permissions'][$macro_permission['name']]['permissions'] = array();
+                }
+            }
+
+            // add Queue manager disabled queue
+            foreach ($queues as $queue) {
+                $queue_name = 'qmanager_'.$queue[1].'_'.$queue[0];
+                $queue_displayname = $queue[1].' ('.$queue[0].')';
+                $queue_description = 'Manage Queue "'.$queue[1].'" ('.$queue[0].')';
+                //check if this queue is already in permissions array of qmanager macro permission
+                $exists = false;
+                if (!empty($results[$id]['macro_permissions']['qmanager']['permissions'])){
+                    foreach ($results[$id]['macro_permissions']['qmanager']['permissions'] as $qpermission) {
+                        if ($qpermission['name'] === $queue_name) {
+                            $exists = true;
+                            break;
+                        }
+                    }
+                }
+                // Add queue to permissions
+                if (!$exists) {
+                    $results[$id]['macro_permissions']['qmanager']['permissions'][] = array('id'=>null,'name'=>$queue_name,'displayname'=>$queue_displayname,'description'=>$queue_description,'value'=>false);
                 }
             }
         }
@@ -253,6 +296,32 @@ function postCTIProfile($profile, $id=false){
             if (!empty($profile['macro_permissions'][$macro_permission['name']]['permissions'])) {
                 foreach ($profile['macro_permissions'][$macro_permission['name']]['permissions'] as $permission ) {
                     if ($permission['value']) {
+                        // Create new permission here if don't exists
+                        if (is_null($permission['id'])) {
+                            // Check if the permission already exists
+                            $sql = 'SELECT `id` FROM `rest_cti_permissions` WHERE `name` = ? AND `displayname` = ? AND `description` = ?';
+                            $sth = $dbh->prepare($sql);
+                            $sth->execute(array($permission['name'],$permission['displayname'],$permission['description']));
+                            $res = $sth->fetchAll()[0][0];
+                            if (!empty($res)) {
+                                // it exists
+                                $permission['id'] = $res;
+                            } else {
+                                // Create a new permission
+                                $sql = 'INSERT INTO `rest_cti_permissions` VALUES (NULL, ?, ?, ?)';
+                                $sth = $dbh->prepare($sql);
+                                $sth->execute(array($permission['name'],$permission['displayname'],$permission['description']));
+
+                                //Get id
+                                $sql = 'SELECT LAST_INSERT_ID()';
+                                $permission['id'] = $dbh->sql($sql,"getOne");
+
+                                // Save permission into macro permission
+                                $sql = 'INSERT INTO `rest_cti_macro_permissions_permissions` VALUES (?,?)';
+                                $sth = $dbh->prepare($sql);
+                                $sth->execute(array($macro_permission['id'],$permission['id']));
+                            }
+                        }
                         $sql = 'INSERT IGNORE INTO `rest_cti_profiles_permissions` VALUES (?, ?)';
                         $sth = $dbh->prepare($sql);
                         $sth->execute(array($id, $permission['id']));
