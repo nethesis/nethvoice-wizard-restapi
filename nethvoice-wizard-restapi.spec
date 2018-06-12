@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.1.6
+Version: 14.1.7
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -38,6 +38,9 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Tue Jun 12 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.7-1
+- Fix phone scan when more than one network is searched
+
 * Fri Jun 08 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.6-1
 - Remove CSV header and sample line
 
