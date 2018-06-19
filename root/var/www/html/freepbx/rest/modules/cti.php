@@ -28,7 +28,7 @@ include_once('lib/libCTI.php');
 Return: [{id:1, name: admin, macro_permissions [ oppanel: {value: true, permissions [ {name: "foo", description: "descrizione...", value: false},{..} ]}
 */
 $app->get('/cti/profiles', function (Request $request, Response $response, $args) {
-    $results = getCTIPermissionProfiles();
+    $results = getCTIPermissionProfiles(false,false,true);
     if (!$results) {
         return $response->withStatus(500);
     }
@@ -43,7 +43,7 @@ $app->get('/cti/profiles/{id}', function (Request $request, Response $response, 
     try {
         $route = $request->getAttribute('route');
         $id = $route->getArgument('id');
-        $results = getCTIPermissionProfiles($id);
+        $results = getCTIPermissionProfiles($id,false,true);
         if (!$results) {
             return $response->withStatus(500);
         }
