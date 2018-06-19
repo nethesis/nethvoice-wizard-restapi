@@ -104,7 +104,7 @@ function getCTIGroups() {
     }
 }
 
-function getCTIPermissionProfiles($profileId=false, $minified=false){
+function getCTIPermissionProfiles($profileId=false, $minified=false, $printnull=false){
     try {
         $dbh = FreePBX::Database();
 
@@ -129,8 +129,7 @@ function getCTIPermissionProfiles($profileId=false, $minified=false){
             }
             $exists = false;
             foreach ($queues as $queue) {
-                $queue_name = 'qmanager_'.$queue[1].'_'.$queue[0];
-                if ($permission['name'] == $queue_name) {
+                if ($permission['name'] == 'qmanager_'.$queue[0]) {
                     $exists = true;
                     break;
                 }
@@ -185,23 +184,24 @@ function getCTIPermissionProfiles($profileId=false, $minified=false){
             }
 
             // add Queue manager disabled queue
-            foreach ($queues as $queue) {
-                $queue_name = 'qmanager_'.$queue[1].'_'.$queue[0];
-                $queue_displayname = $queue[1].' ('.$queue[0].')';
-                $queue_description = 'Manage Queue "'.$queue[1].'" ('.$queue[0].')';
-                //check if this queue is already in permissions array of qmanager macro permission
-                $exists = false;
-                if (!empty($results[$id]['macro_permissions']['qmanager']['permissions'])){
-                    foreach ($results[$id]['macro_permissions']['qmanager']['permissions'] as $qpermission) {
-                        if ($qpermission['name'] === $queue_name) {
-                            $exists = true;
-                            break;
+            if ($printnull) {
+                foreach ($queues as $queue) {
+                    $queue_displayname = $queue[1].' ('.$queue[0].')';
+                    $queue_description = 'Manage Queue "'.$queue[1].'" ('.$queue[0].')';
+                    //check if this queue is already in permissions array of qmanager macro permission
+                    $exists = false;
+                    if (!empty($results[$id]['macro_permissions']['qmanager']['permissions'])){
+                        foreach ($results[$id]['macro_permissions']['qmanager']['permissions'] as $qpermission) {
+                            if ($qpermission['name'] === 'qmanager_'.$queue[0]) {
+                                $exists = true;
+                                break;
+                            }
                         }
                     }
-                }
-                // Add queue to permissions
-                if (!$exists) {
-                    $results[$id]['macro_permissions']['qmanager']['permissions'][] = array('id'=>null,'name'=>$queue_name,'displayname'=>$queue_displayname,'description'=>$queue_description,'value'=>false);
+                    // Add queue to permissions
+                    if (!$exists) {
+                        $results[$id]['macro_permissions']['qmanager']['permissions'][] = array('id'=>null,'name'=>'qmanager_'.$queue[0],'displayname'=>$queue_displayname,'description'=>$queue_description,'value'=>false);
+                    }
                 }
             }
         }
@@ -326,9 +326,15 @@ function postCTIProfile($profile, $id=false){
                         $sth = $dbh->prepare($sql);
                         $sth->execute(array($id, $permission['id']));
                     } else {
-                        $sql = 'DELETE IGNORE FROM `rest_cti_profiles_permissions` WHERE `profile_id` = ? AND `permission_id` = ?';
-                        $sth = $dbh->prepare($sql);
-                        $sth->execute(array($id, $permission['id']));
+                        if (!is_null($permission['id'])) {
+                            $sql = 'DELETE IGNORE FROM `rest_cti_profiles_permissions` WHERE `profile_id` = ? AND `permission_id` = ?';
+                            $sth = $dbh->prepare($sql);
+                            $sth->execute(array($id, $permission['id']));
+                        } else {
+                            $sql = 'DELETE IGNORE FROM `rest_cti_profiles_permissions` WHERE `profile_id` = ? AND `permission_id` = (SELECT `id` FROM `rest_cti_permissions` WHERE `name` = ?)';
+                            $sth = $dbh->prepare($sql);
+                            $sth->execute(array($id, $permission['name']));
+                        }
                     }
                 }
             }
