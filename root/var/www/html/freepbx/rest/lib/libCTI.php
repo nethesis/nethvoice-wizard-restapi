@@ -20,6 +20,9 @@
 #
 
 include_once('/var/www/html/freepbx/rest/config.inc.php');
+if (file_exists('/var/www/html/freepbx/rest/lib/libQueueManager.php')) {
+    include_once('/var/www/html/freepbx/rest/lib/libQueueManager.php');
+}
 
 class NethCTI {
     private static $db;
@@ -122,24 +125,8 @@ function getCTIPermissionProfiles($profileId=false, $minified=false, $printnull=
         $macro_permissions_permissions = getAllAvailableMacroPermissionsPermissions();
 
         // Delete queue permissions for queue that has been deleted
-        $queues = FreePBX::Queues()->listQueues();
-        foreach ($permissions as $permission) {
-            if (!strstr($permission['name'],'qmanager_')) {
-                continue;
-            }
-            $exists = false;
-            foreach ($queues as $queue) {
-                if ($permission['name'] == 'qmanager_'.$queue[0]) {
-                    $exists = true;
-                    break;
-                }
-            }
-            if (!$exists) {
-                // Delete queue permission
-                $sql = 'DELETE FROM `rest_cti_permissions` WHERE `id` = ?';
-                $sth = $dbh->prepare($sql);
-                $sth->execute(array($permission['id']));
-            }
+        if(function_exists('deleteQueuePermissionsForDeletedQueue')) {
+            deleteQueuePermissionsForDeletedQueue($permissions);
         }
 
         foreach ($profiles as $profile) {
@@ -184,25 +171,12 @@ function getCTIPermissionProfiles($profileId=false, $minified=false, $printnull=
             }
 
             // add Queue manager disabled queue
-            if ($printnull) {
-                foreach ($queues as $queue) {
-                    $queue_displayname = $queue[1].' ('.$queue[0].')';
-                    $queue_description = 'Manage Queue "'.$queue[1].'" ('.$queue[0].')';
-                    //check if this queue is already in permissions array of qmanager macro permission
-                    $exists = false;
-                    if (!empty($results[$id]['macro_permissions']['qmanager']['permissions'])){
-                        foreach ($results[$id]['macro_permissions']['qmanager']['permissions'] as $qpermission) {
-                            if ($qpermission['name'] === 'qmanager_'.$queue[0]) {
-                                $exists = true;
-                                break;
-                            }
-                        }
-                    }
-                    // Add queue to permissions
-                    if (!$exists) {
-                        $results[$id]['macro_permissions']['qmanager']['permissions'][] = array('id'=>null,'name'=>'qmanager_'.$queue[0],'displayname'=>$queue_displayname,'description'=>$queue_description,'value'=>false);
-                    }
+            if (function_exists('addQueueManagerDisabledQueues')) {
+                if ($printnull) {
+                    $results[$id] = addQueueManagerDisabledQueues($results[$id]);
                 }
+            } else {
+                unset($results[$id]['macro_permissions']['qmanager']);
             }
         }
         if (!$profileId) {
