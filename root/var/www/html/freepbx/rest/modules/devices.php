@@ -425,9 +425,10 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
                     $defaults['transport'] = $srvip.'-udp';
                     $defaults['trunk_name'] = $trunkName;
 
-                    // set $_REQUEST params for pjsip
+                    // set $_REQUEST and $_POST params for pjsip
                     foreach ($defaults as $k => $v) {
                         $_REQUEST[$k] = $v;
+                        $_POST[$k] = $v;
                     }
 
                     $trunkId = core_trunks_add(
