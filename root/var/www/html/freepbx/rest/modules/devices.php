@@ -80,21 +80,57 @@ $app->get('/devices/phones/list/{id}', function (Request $request, Response $res
 
         $phones = json_decode(file_get_contents($filename), true);
 
+        // Read known MAC addresses from /var/log/messages
+        $knownMacAddresses = json_decode(file_get_contents(__DIR__. '/../lib/macAddressMap.json'), true);
+        $macs = array();
+        foreach ($knownMacAddresses as $mac => $manufacturer) {
+            if ($manufacturer === 'Patton' || $manufacturer === 'Mediatrix') {
+                continue;
+            }
+            $macs[] = '^'.str_replace(':','',$mac);
+        }
+        $matchString = implode('\|',$macs);
+        // do match in shell because is faster
+        $cmd = '/usr/bin/sudo /usr/bin/grep dnsmasq-tftp /var/log/messages ';
+        // exclude family files, reset files ...
+        $cmd .= ' | grep -v \'/y[0-9]\{12\}\.cfg\|/y[0-9]\{12\}\.boot\|/[0-9]\{12\}-license\.cfg\' ';
+        // get only MAC addresses of string
+        $cmd .= ' | sed \'s/^.*\([0-9a-fA-F]\{12\}\).*$/\1/\' ';
+        // MAC to uppercase
+        $cmd .= ' | tr \'[a-z]\' \'[A-Z]\' ';
+        // take only known MACs
+        $cmd .= " | grep '$matchString' ";
+        // sort unique
+        $cmd .= " | sort -u ";
+
+        $fp=popen($cmd,'r');
+        while (!feof($fp)) {
+            $mac = trim(fgets($fp));
+            if ($mac == '') {
+                continue;
+            }
+            $mac = preg_replace('/(..)(..)(..)(..)(..)(..)/', '$1:$2:$3:$4:$5:$6',$mac);
+            $manufacturer = $knownMacAddresses[substr($mac,0,8)];
+            // Add phone to output
+            $phones[] = array('mac' => $mac, 'type' => 'phone', 'ipv4' => '', 'manufacturer' => $manufacturer);
+        }
+        fclose($fp);
+
         foreach ($phones as $key => $value) {
             // get model from db
             $model = sql('SELECT model FROM `rest_devices_phones` WHERE mac = "' . $phones[$key]['mac'] . '"', "getOne");
             if ($model) {
                 $phones[$key]['model'] = $model;
-            } else { // read from other sources
+            } else {
+                // read from other sources
                 $modelNew = retrieveModel($phones[$key]['manufacturer'], $dhcp_map[strtolower($phones[$key]['mac'])], $phones[$key]['ipv4']);
                 $phones[$key]['model'] = $modelNew;
                 if ($modelNew) {
-                    if (!addPhone($phones[$key]['mac'], $phones[$key]['manufacturer'], $modelNew)) {
-                        return $response->withStatus(500);
-                    }
+                    addPhone($phones[$key]['mac'], $phones[$key]['manufacturer'], $modelNew);
                 }
             }
         }
+
         return $response->withJson($phones, 200);
     } catch (Exception $e) {
         error_log($e->getMessage());
@@ -451,7 +487,7 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
                     );
 
                     $dialpattern_inser = array('prepend_digits'=>'','match_pattern_prefix'=>'','match_pattern_pass'=>'','match_cid'=>'');
-                    core_trunks_update_dialrules($trunkId, $dialpattern_insert); 
+                    core_trunks_update_dialrules($trunkId, $dialpattern_insert);
                     $port++;
                 }
 
