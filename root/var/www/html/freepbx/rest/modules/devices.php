@@ -119,9 +119,12 @@ $app->get('/devices/phones/list/{id}', function (Request $request, Response $res
                     break;
                 }
             }
-            if (!$present) {
+            if ($present) {
+                // phone already present and already requested configuration to tftp
+                $phones[$mac]['tftp-requested'] = true;
+            } else {
                 // Add phone to output
-                $phones[] = array('mac' => $mac, 'type' => 'phone', 'ipv4' => '', 'manufacturer' => $manufacturer);
+                $phones[] = array('mac' => $mac, 'type' => 'phone', 'ipv4' => '', 'manufacturer' => $manufacturer, 'tftp-requested' => true);
             }
         }
         fclose($fp);
@@ -190,9 +193,9 @@ $app->get('/devices/gateways/list/{id}', function (Request $request, Response $r
 
                 foreach ($trunksMeta as $trunkPrefix=>$trunkAttr) {
                     $sql = 'SELECT '. implode(',', $trunksMeta[$trunkPrefix]).
-                ' FROM `gateway_config`'.
-                ' JOIN `gateway_config_'. $trunkPrefix. '` ON `gateway_config_'. $trunkPrefix. '`.config_id = `gateway_config`.id'.
-                ' WHERE `gateway_config`.mac = "' . $gateway['mac'] . '"';
+                           ' FROM `gateway_config`'.
+                           ' JOIN `gateway_config_'. $trunkPrefix. '` ON `gateway_config_'. $trunkPrefix. '`.config_id = `gateway_config`.id'.
+                           ' WHERE `gateway_config`.mac = "' . $gateway['mac'] . '"';
                     $obj = sql($sql, "getAll", \PDO::FETCH_ASSOC);
 
                     if ($obj) {
