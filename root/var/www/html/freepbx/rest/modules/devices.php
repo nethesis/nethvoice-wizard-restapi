@@ -111,8 +111,18 @@ $app->get('/devices/phones/list/{id}', function (Request $request, Response $res
             }
             $mac = preg_replace('/(..)(..)(..)(..)(..)(..)/', '$1:$2:$3:$4:$5:$6',$mac);
             $manufacturer = $knownMacAddresses[substr($mac,0,8)];
-            // Add phone to output
-            $phones[] = array('mac' => $mac, 'type' => 'phone', 'ipv4' => '', 'manufacturer' => $manufacturer);
+            // check if phone is already in array
+            $present = false;
+            foreach ($phones as $phone) {
+                if ($phone['mac'] === $mac) {
+                    $present = true;
+                    break;
+                }
+            }
+            if (!$present) {
+                // Add phone to output
+                $phones[] = array('mac' => $mac, 'type' => 'phone', 'ipv4' => '', 'manufacturer' => $manufacturer);
+            }
         }
         fclose($fp);
 
