@@ -80,70 +80,21 @@ $app->get('/devices/phones/list/{id}', function (Request $request, Response $res
 
         $phones = json_decode(file_get_contents($filename), true);
 
-        // Read known MAC addresses from /var/log/messages
-        $knownMacAddresses = json_decode(file_get_contents(__DIR__. '/../lib/macAddressMap.json'), true);
-        $macs = array();
-        foreach ($knownMacAddresses as $mac => $manufacturer) {
-            if ($manufacturer === 'Patton' || $manufacturer === 'Mediatrix') {
-                continue;
-            }
-            $macs[] = '^'.str_replace(':','',$mac);
-        }
-        $matchString = implode('\|',$macs);
-        // do match in shell because is faster
-        $cmd = '/usr/bin/sudo /usr/bin/grep dnsmasq-tftp /var/log/messages ';
-        // exclude family files, reset files ...
-        $cmd .= ' | grep -v \'/y[0-9]\{12\}\.cfg\|/y[0-9]\{12\}\.boot\|/[0-9]\{12\}-license\.cfg\' ';
-        // get only MAC addresses of string
-        $cmd .= ' | sed \'s/^.*\([0-9a-fA-F]\{12\}\).*$/\1/\' ';
-        // MAC to uppercase
-        $cmd .= ' | tr \'[a-z]\' \'[A-Z]\' ';
-        // take only known MACs
-        $cmd .= " | grep '$matchString' ";
-        // sort unique
-        $cmd .= " | sort -u ";
-
-        $fp=popen($cmd,'r');
-        while (!feof($fp)) {
-            $mac = trim(fgets($fp));
-            if ($mac == '') {
-                continue;
-            }
-            $mac = preg_replace('/(..)(..)(..)(..)(..)(..)/', '$1:$2:$3:$4:$5:$6',$mac);
-            $manufacturer = $knownMacAddresses[substr($mac,0,8)];
-            // check if phone is already in array
-            $present = false;
-            foreach ($phones as $phone) {
-                if ($phone['mac'] === $mac) {
-                    $present = true;
-                    break;
-                }
-            }
-            if ($present) {
-                // phone already present and already requested configuration to tftp
-                $phones[$mac]['tftp-requested'] = true;
-            } else {
-                // Add phone to output
-                $phones[] = array('mac' => $mac, 'type' => 'phone', 'ipv4' => '', 'manufacturer' => $manufacturer, 'tftp-requested' => true);
-            }
-        }
-        fclose($fp);
-
         foreach ($phones as $key => $value) {
             // get model from db
             $model = sql('SELECT model FROM `rest_devices_phones` WHERE mac = "' . $phones[$key]['mac'] . '"', "getOne");
             if ($model) {
                 $phones[$key]['model'] = $model;
-            } else {
-                // read from other sources
+            } else { // read from other sources
                 $modelNew = retrieveModel($phones[$key]['manufacturer'], $dhcp_map[strtolower($phones[$key]['mac'])], $phones[$key]['ipv4']);
                 $phones[$key]['model'] = $modelNew;
                 if ($modelNew) {
-                    addPhone($phones[$key]['mac'], $phones[$key]['manufacturer'], $modelNew);
+                    if (!addPhone($phones[$key]['mac'], $phones[$key]['manufacturer'], $modelNew)) {
+                        return $response->withStatus(500);
+                    }
                 }
             }
         }
-
         return $response->withJson($phones, 200);
     } catch (Exception $e) {
         error_log($e->getMessage());
@@ -193,9 +144,9 @@ $app->get('/devices/gateways/list/{id}', function (Request $request, Response $r
 
                 foreach ($trunksMeta as $trunkPrefix=>$trunkAttr) {
                     $sql = 'SELECT '. implode(',', $trunksMeta[$trunkPrefix]).
-                           ' FROM `gateway_config`'.
-                           ' JOIN `gateway_config_'. $trunkPrefix. '` ON `gateway_config_'. $trunkPrefix. '`.config_id = `gateway_config`.id'.
-                           ' WHERE `gateway_config`.mac = "' . $gateway['mac'] . '"';
+                ' FROM `gateway_config`'.
+                ' JOIN `gateway_config_'. $trunkPrefix. '` ON `gateway_config_'. $trunkPrefix. '`.config_id = `gateway_config`.id'.
+                ' WHERE `gateway_config`.mac = "' . $gateway['mac'] . '"';
                     $obj = sql($sql, "getAll", \PDO::FETCH_ASSOC);
 
                     if ($obj) {
@@ -500,7 +451,7 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
                     );
 
                     $dialpattern_inser = array('prepend_digits'=>'','match_pattern_prefix'=>'','match_pattern_pass'=>'','match_cid'=>'');
-                    core_trunks_update_dialrules($trunkId, $dialpattern_insert);
+                    core_trunks_update_dialrules($trunkId, $dialpattern_insert); 
                     $port++;
                 }
 
