@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.1.7
+Version: 14.1.8
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -38,6 +38,11 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Mon Jul 02 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.8-1
+- Fix trunk creation for updated version of FreePBX core module nethesis/dev#5426
+- Remove user from CTI groups if is main extension is deleted
+- Qmanager permission, fix permission removal nethesis/dev#5416
+
 * Tue Jun 12 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.7-1
 - Fix phone scan when more than one network is searched
 
