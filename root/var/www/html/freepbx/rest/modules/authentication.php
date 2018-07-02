@@ -60,6 +60,6 @@ $app->post('/testauth', function (Request $request, Response $response, $args) {
     }
     unset($_SESSION['AMP_user']);
     $no_auth = true;
-    return $response->withCode(401);
+    return $response->withStatus(401);
 });
 
