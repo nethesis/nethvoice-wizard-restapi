@@ -97,6 +97,9 @@ function retrieveModel($manufacturer, $name, $ip)
 
 function doNastyCurl($ip_address, $manufacturer)
 {
+    if ($ip_address == "") {
+        return "";
+    }
     switch ($manufacturer) {
         case "SnomMXXX":
             $url='http://'.$ip_address.'/main.html';
