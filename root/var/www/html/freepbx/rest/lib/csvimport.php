@@ -118,14 +118,14 @@ try {
         }
 
         #create extension
-        if (isset($row[2]) && preg_match('/^[0-9]*$/',$row[2])) {
+        if (isset($row[2]) && preg_match('/^[0-9]+$/',$row[2])) {
             if (checkUsermanIsUnlocked()) {
                 $create = createMainExtensionForUser($username,$row[2]);
                 if ($create !== true) {
                     $result += 1;
                     $err .= "Error adding main extension ".$row[2]." to user ".$username.": ".$create['message']."\n";
                 } else {
-                    // assign physical device to user it it is a migration
+                    // assign physical device to user if it is a migration
                     if (function_exists('assignPhysicalDevice')) {
                         assignPhysicalDevice($row[2]);
                     }
