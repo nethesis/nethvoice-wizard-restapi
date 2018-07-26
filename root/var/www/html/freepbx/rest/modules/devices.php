@@ -653,7 +653,7 @@ $app->post('/devices/phones/provision', function (Request $request, Response $re
 
         $mac = $body['mac'];
 
-        $endpoint = new endpointmanager();
+        $endpoint = FreePBX::endpointmanager();
 
         $mac_id = $endpoint->eda->sql('SELECT id FROM endpointman_mac_list WHERE mac = \''. str_replace(':', '', $mac) .'\'', 'getOne');
         if ($mac_id) {
@@ -683,7 +683,7 @@ $app->post('/devices/phones/reboot', function (Request $request, Response $respo
         $mac = $body['mac'];
         $phoneIp = $body['ip'];
 
-        $endpoint = new endpointmanager();
+        $endpoint = FreePBX::endpointmanager();
 
         $mac_id = $endpoint->eda->sql('SELECT id FROM endpointman_mac_list WHERE mac = \''. str_replace(':', '', $mac) .'\'', 'getOne');
         if ($mac_id) {

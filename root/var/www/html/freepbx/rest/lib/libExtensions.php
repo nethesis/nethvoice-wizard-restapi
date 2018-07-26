@@ -220,7 +220,7 @@ function useExtensionAsPhysical($extension,$mac,$model,$line=false) {
 
         if ($res) {
             // Add extension to endpointman
-            $endpoint = new endpointmanager();
+            $endpoint = FreePBX::endpointmanager();
             // Get model id by mac
             $brand = $endpoint->get_brand_from_mac($mac);
             $models = $endpoint->models_available(null, $brand['id']);
@@ -331,7 +331,7 @@ function deletePhysicalExtension($extension) {
         $usedlinecount = $dbh->sql('SELECT COUNT(*) FROM `rest_devices_phones` WHERE `mac` = "'.$mac.'" AND `extension` != "" AND `extension`', "getOne");
 
         // Remove endpoint from endpointman
-        $endpoint = new endpointmanager();
+        $endpoint = FreePBX::endpointmanager();
         $mac_id = $dbh->sql('SELECT id FROM endpointman_mac_list WHERE mac = "'.preg_replace('/:/', '', $mac).'"', "getOne");
         if (!empty($mac_id)) {
             $luid = $dbh->sql('SELECT luid FROM endpointman_line_list WHERE mac_id = "'.$mac_id.'" AND ext = "'.$extension.'"', "getOne");
