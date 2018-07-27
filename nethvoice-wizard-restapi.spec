@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.1.8
+Version: 14.1.9
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -38,6 +38,13 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Fri Jul 27 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.9-1
+- Minor changes to Xstream VoIP provider for new installations
+- Add Xera voip provider
+- Add gigaset mac address to type map
+- Fix failed testauth return code
+- Add phones from tftp requests nethesis/dev#5427
+
 * Mon Jul 02 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.8-1
 - Fix trunk creation for updated version of FreePBX core module nethesis/dev#5426
 - Remove user from CTI groups if is main extension is deleted
