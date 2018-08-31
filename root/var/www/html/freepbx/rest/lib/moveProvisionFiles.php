@@ -20,4 +20,6 @@
 #
 
 // Move provisioning files to tftpserver dir
-exec('/bin/cp -a /var/lib/tftpnethvoice/* /var/lib/tftpboot/');
+if (count(scandir('/var/lib/tftpnethvoice/')) > 2) {
+    exec('/bin/cp -a /var/lib/tftpnethvoice/* /var/lib/tftpboot/');
+}
