@@ -268,12 +268,6 @@ POST /mainextensions
 Parameter: { "username": "myuser", "extension": "extnumber"[,"outboundcid" : "outboundcid" ] }
 ```
 
-Delete main extension and all associated extensions
-
-```
-DELETE /mainextensions/{extension}
-```
-
 ### Physical Extensions
 
 Retrieve all Physical Extensions
