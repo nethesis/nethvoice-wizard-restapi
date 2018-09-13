@@ -471,7 +471,7 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
                         $defaults['sip_server'] = $params['ipv4_new'];
                         $defaults['sv_channelid'] = $trunkName;
                         $defaults['sv_trunk_name'] = $trunkName;
-                        $defaults['transport'] = $srvip.'-udp';
+                        $defaults['transport'] = '0.0.0.0-udp';
                         $defaults['trunk_name'] = $trunkName;
 
                         // set $_REQUEST and $_POST params for pjsip
