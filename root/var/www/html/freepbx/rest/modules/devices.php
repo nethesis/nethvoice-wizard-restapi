@@ -461,7 +461,6 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
                         $nextTrunkId = count(core_trunks_list());
 
                         $trunk['trunknumber'] = intval('20'. str_pad(++$nextTrunkId, 3, '0', STR_PAD_LEFT));
-                        $dialoutprefix = $trunk['trunknumber'];
                         $srvip = sql('SELECT `value` FROM `endpointman_global_vars` WHERE `var_name` = "srvip"', "getOne");
                         $secret = substr(md5(uniqid(rand(), true)),0,8);
                         $defaults = getPjSipDefaults();
@@ -473,6 +472,7 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
                         $defaults['sv_trunk_name'] = $trunkName;
                         $defaults['transport'] = '0.0.0.0-udp';
                         $defaults['trunk_name'] = $trunkName;
+                        $defaults['dialoutprefix'] = $trunk['trunknumber'];
 
                         // set $_REQUEST and $_POST params for pjsip
                         foreach ($defaults as $k => $v) {
@@ -483,7 +483,7 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
                         $trunkId = core_trunks_add(
                             'pjsip', // tech
                             $trunkName, // channelid as trunk name
-                            $dialoutprefix, // dialoutprefix
+                            $defaults['dialoutprefix'], // dialoutprefix
                             null, // maxchans
                             null, // outcid
                             null, // peerdetails
@@ -499,7 +499,7 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
                             false   // dialopts
                         );
 
-                        $dialpattern_inser = array('prepend_digits'=>'','match_pattern_prefix'=>'','match_pattern_pass'=>'','match_cid'=>'');
+                        $dialpattern_insert = array('prepend_digits'=>'','match_pattern_prefix'=>'','match_pattern_pass'=>'','match_cid'=>'');
                         core_trunks_update_dialrules($trunkId, $dialpattern_insert);
                         $port++;
                     }
