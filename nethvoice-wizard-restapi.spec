@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.1.9
+Version: 14.1.10
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -38,6 +38,12 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Fri Sep 21 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.10-1
+- Fix missing dialoutprefix in trunks creation. nethesis/dev#5425
+- Create new pjsip trunks with 0.0.0.0-udp as transport. nethesis/dev#5425
+- README: removed obsolete API DELETE /mainextensions/{extension}
+- Check if there if provisioning files to copy to avoid error logs
+
 * Fri Jul 27 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.9-1
 - Minor changes to Xstream VoIP provider for new installations
 - Add Xera voip provider
