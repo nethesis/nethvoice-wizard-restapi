@@ -113,15 +113,17 @@ $app->get('/devices/phones/list/{id}', function (Request $request, Response $res
             $manufacturer = $knownMacAddresses[substr($mac,0,8)];
             // check if phone is already in array
             $present = false;
-            foreach ($phones as $phone) {
+            $phone_index = false;
+            foreach ($phones as $index => $phone) {
                 if ($phone['mac'] === $mac) {
                     $present = true;
+                    $phone_index = $index;
                     break;
                 }
             }
             if ($present) {
                 // phone already present and already requested configuration to tftp
-                $phones[$mac]['tftp-requested'] = true;
+                $phones[$phone_index]['tftp-requested'] = true;
             } else {
                 // Add phone to output
                 $phones[] = array('mac' => $mac, 'type' => 'phone', 'ipv4' => '', 'manufacturer' => $manufacturer, 'tftp-requested' => true);
