@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.1.10
+Version: 14.1.11
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -38,6 +38,9 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Mon Sep 24 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.11-1
+ - Fix indexes of scan device response
+
 * Fri Sep 21 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.10-1
 - Fix missing dialoutprefix in trunks creation. nethesis/dev#5425
 - Create new pjsip trunks with 0.0.0.0-udp as transport. nethesis/dev#5425
