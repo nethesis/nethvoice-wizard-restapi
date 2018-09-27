@@ -122,8 +122,9 @@ $app->get('/outboundroutes/count', function (Request $request, Response $respons
        foreach($allRoutes as $route) {
            $route_trunks = core_routing_getroutetrunksbyid($route['route_id']);
            $route['trunks'] = [];
-           foreach($route_trunks as $trunk) {
-               $route['trunks'][] = array("trunkid" => $trunk, "name" => core_trunks_getTrunkTrunkName($trunk));
+           foreach($route_trunks as $trunkID) {
+               $trunk = core_trunks_getDetails($trunkID);
+               $route['trunks'][] = array("trunkid" => $trunkID, "name" => $trunk['name']);
            }
            $routes[] = $route;
        }
