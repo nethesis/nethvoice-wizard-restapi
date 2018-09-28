@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.1.11
+Version: 14.1.12
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -38,6 +38,10 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Fri Sep 28 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.12-1
+- Don't use broken core function for trunk name nethesis/dev#5475
+- Bulk: write outboundcid to astdb nethesis/dev#5474
+
 * Mon Sep 24 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.11-1
  - Fix indexes of scan device response
 
