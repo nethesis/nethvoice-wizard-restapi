@@ -628,7 +628,7 @@ $app->delete('/devices/gateways/{id}', function (Request $request, Response $res
  *
  * @api devices/gateways/download/:name
  */
- $app->get('/devices/gateways/download/{name}', function (Request $request, Response $response, $args) {
+ $app->get('/devices/gateways/download/{name}[/{mac}]', function (Request $request, Response $response, $args) {
      $route = $request->getAttribute('route');
      $name = $route->getArgument('name');
      $mac = $route->getArgument('mac');
