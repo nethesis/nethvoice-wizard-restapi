@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.1.12
+Version: 14.1.13
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -38,6 +38,9 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Thu Oct 04 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.13-1
+- Allow to specify mac address in gateway configuration download request nethesis/dev#5472
+
 * Fri Sep 28 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.12-1
 - Don't use broken core function for trunk name nethesis/dev#5475
 - Bulk: write outboundcid to astdb nethesis/dev#5474
