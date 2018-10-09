@@ -141,10 +141,10 @@ $app->post('/bulk/{mainextensions}', function (Request $request, Response $respo
         //outboundcid
         if (isset($params['outboundcid_fixed']) && !is_null($params['outboundcid_fixed'])) {
             if (!isset($params['outboundcid_variable']) || $params['outboundcid_variable'] == 0 || $params['outboundcid_variable'] == '') {
-                post_outboundcid($mainextensions,'<'.$params['outboundcid_fixed'].'>');
+                post_outboundcid($mainextensions,$params['outboundcid_fixed']);
             } else {
                 foreach ($mainextensions as $mainextension) {
-                     post_outboundcid(array($mainextension), '<'.$params['outboundcid_fixed'].substr($mainextension,-$params['outboundcid_variable']).'>');
+                     post_outboundcid(array($mainextension), $params['outboundcid_fixed'].substr($mainextension,-$params['outboundcid_variable']));
                 }
             }
         }

@@ -323,15 +323,17 @@ function post_notreachabledest($mainextensions,$data) {
 }
 
 function post_outboundcid($mainextensions,$data) {
+    global $astman;
     if (is_null($data)) {
         return true;
     }
     foreach ($mainextensions as $mainextension) {
         foreach (getAllExtensions($mainextension) as $extension) {
-            $res = writeUserTableData($extension,'outboundcid',$data);
+            $res = writeUserTableData($extension,'outboundcid','<'.$data.'>');
             if ($res !== true) {
                 $err .= __FUNCTION__." ".$res."\n";
             }
+            $astman->database_put("AMPUSER",$extension."/outboundcid",$data);
         }
     }
     if (isset($err)) {

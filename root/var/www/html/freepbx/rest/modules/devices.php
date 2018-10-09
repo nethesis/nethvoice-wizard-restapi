@@ -80,21 +80,72 @@ $app->get('/devices/phones/list/{id}', function (Request $request, Response $res
 
         $phones = json_decode(file_get_contents($filename), true);
 
+        // Read known MAC addresses from /var/log/messages
+        $knownMacAddresses = json_decode(file_get_contents(__DIR__. '/../lib/macAddressMap.json'), true);
+        $macs = array();
+        foreach ($knownMacAddresses as $mac => $manufacturer) {
+            if ($manufacturer === 'Patton' || $manufacturer === 'Mediatrix') {
+                continue;
+            }
+            $macs[] = '^'.str_replace(':','',$mac);
+        }
+        $matchString = implode('\|',$macs);
+        // do match in shell because is faster
+        $cmd = '/usr/bin/sudo /usr/bin/grep dnsmasq-tftp /var/log/messages ';
+        // exclude family files, reset files ...
+        $cmd .= ' | grep -v \'/y[0-9]\{12\}\.cfg\|/y[0-9]\{12\}\.boot\|/[0-9]\{12\}-license\.cfg\' ';
+        // get only MAC addresses of string
+        $cmd .= ' | sed \'s/^.*\([0-9a-fA-F]\{12\}\).*$/\1/\' ';
+        // MAC to uppercase
+        $cmd .= ' | tr \'[a-z]\' \'[A-Z]\' ';
+        // take only known MACs
+        $cmd .= " | grep '$matchString' ";
+        // sort unique
+        $cmd .= " | sort -u ";
+
+        $fp=popen($cmd,'r');
+        while (!feof($fp)) {
+            $mac = trim(fgets($fp));
+            if ($mac == '') {
+                continue;
+            }
+            $mac = preg_replace('/(..)(..)(..)(..)(..)(..)/', '$1:$2:$3:$4:$5:$6',$mac);
+            $manufacturer = $knownMacAddresses[substr($mac,0,8)];
+            // check if phone is already in array
+            $present = false;
+            $phone_index = false;
+            foreach ($phones as $index => $phone) {
+                if ($phone['mac'] === $mac) {
+                    $present = true;
+                    $phone_index = $index;
+                    break;
+                }
+            }
+            if ($present) {
+                // phone already present and already requested configuration to tftp
+                $phones[$phone_index]['tftp-requested'] = true;
+            } else {
+                // Add phone to output
+                $phones[] = array('mac' => $mac, 'type' => 'phone', 'ipv4' => '', 'manufacturer' => $manufacturer, 'tftp-requested' => true);
+            }
+        }
+        fclose($fp);
+
         foreach ($phones as $key => $value) {
             // get model from db
             $model = sql('SELECT model FROM `rest_devices_phones` WHERE mac = "' . $phones[$key]['mac'] . '"', "getOne");
             if ($model) {
                 $phones[$key]['model'] = $model;
-            } else { // read from other sources
+            } else {
+                // read from other sources
                 $modelNew = retrieveModel($phones[$key]['manufacturer'], $dhcp_map[strtolower($phones[$key]['mac'])], $phones[$key]['ipv4']);
                 $phones[$key]['model'] = $modelNew;
                 if ($modelNew) {
-                    if (!addPhone($phones[$key]['mac'], $phones[$key]['manufacturer'], $modelNew)) {
-                        return $response->withStatus(500);
-                    }
+                    addPhone($phones[$key]['mac'], $phones[$key]['manufacturer'], $modelNew);
                 }
             }
         }
+
         return $response->withJson($phones, 200);
     } catch (Exception $e) {
         error_log($e->getMessage());
@@ -144,9 +195,9 @@ $app->get('/devices/gateways/list/{id}', function (Request $request, Response $r
 
                 foreach ($trunksMeta as $trunkPrefix=>$trunkAttr) {
                     $sql = 'SELECT '. implode(',', $trunksMeta[$trunkPrefix]).
-                ' FROM `gateway_config`'.
-                ' JOIN `gateway_config_'. $trunkPrefix. '` ON `gateway_config_'. $trunkPrefix. '`.config_id = `gateway_config`.id'.
-                ' WHERE `gateway_config`.mac = "' . $gateway['mac'] . '"';
+                           ' FROM `gateway_config`'.
+                           ' JOIN `gateway_config_'. $trunkPrefix. '` ON `gateway_config_'. $trunkPrefix. '`.config_id = `gateway_config`.id'.
+                           ' WHERE `gateway_config`.mac = "' . $gateway['mac'] . '"';
                     $obj = sql($sql, "getAll", \PDO::FETCH_ASSOC);
 
                     if ($obj) {
@@ -404,100 +455,101 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
         foreach ($trunksByTypes as $type=>$trunks) {
 
             $port = (strtolower($res['manufacturer']) === 'patton' ? 0 : 1);
+            if (!empty($trunks)) {
+                foreach ($trunks as $trunk) {
+                    if($type != 'fxs') {
+                        $trunkName = $vendor. '_'. $uid. '_'. $type. '_'. $port;
 
-            foreach ($trunks as $trunk) {
-                if($type != 'fxs') {
-                    $trunkName = $vendor. '_'. $uid. '_'. $type. '_'. $port;
+                        $nextTrunkId = count(core_trunks_list());
 
-                    $nextTrunkId = count(core_trunks_list());
+                        $trunk['trunknumber'] = intval('20'. str_pad(++$nextTrunkId, 3, '0', STR_PAD_LEFT));
+                        $srvip = sql('SELECT `value` FROM `endpointman_global_vars` WHERE `var_name` = "srvip"', "getOne");
+                        $secret = substr(md5(uniqid(rand(), true)),0,8);
+                        $defaults = getPjSipDefaults();
+                        $defaults['secret'] = $secret;
+                        $defaults['username'] = $trunk['trunknumber'];
+                        $defaults['extdisplay'] = 'OUT_'.$nextTrunkId;
+                        $defaults['sip_server'] = $params['ipv4_new'];
+                        $defaults['sv_channelid'] = $trunkName;
+                        $defaults['sv_trunk_name'] = $trunkName;
+                        $defaults['transport'] = '0.0.0.0-udp';
+                        $defaults['trunk_name'] = $trunkName;
+                        $defaults['dialoutprefix'] = $trunk['trunknumber'];
 
-                    $trunk['trunknumber'] = intval('20'. str_pad(++$nextTrunkId, 3, '0', STR_PAD_LEFT));
-                    $dialoutprefix = $trunk['trunknumber'];
-                    $srvip = sql('SELECT `value` FROM `endpointman_global_vars` WHERE `var_name` = "srvip"', "getOne");
-                    $secret = substr(md5(uniqid(rand(), true)),0,8);
-                    $defaults = getPjSipDefaults();
-                    $defaults['secret'] = $secret;
-                    $defaults['username'] = $trunk['trunknumber'];
-                    $defaults['extdisplay'] = 'OUT_'.$nextTrunkId;
-                    $defaults['sip_server'] = $params['ipv4_new'];
-                    $defaults['sv_channelid'] = $trunkName;
-                    $defaults['sv_trunk_name'] = $trunkName;
-                    $defaults['transport'] = $srvip.'-udp';
-                    $defaults['trunk_name'] = $trunkName;
+                        // set $_REQUEST and $_POST params for pjsip
+                        foreach ($defaults as $k => $v) {
+                            $_REQUEST[$k] = $v;
+                            $_POST[$k] = $v;
+                        }
 
-                    // set $_REQUEST and $_POST params for pjsip
-                    foreach ($defaults as $k => $v) {
-                        $_REQUEST[$k] = $v;
-                        $_POST[$k] = $v;
+                        $trunkId = core_trunks_add(
+                            'pjsip', // tech
+                            $trunkName, // channelid as trunk name
+                            $defaults['dialoutprefix'], // dialoutprefix
+                            null, // maxchans
+                            null, // outcid
+                            null, // peerdetails
+                            'from-pstn', // usercontext
+                            null, // userconfig
+                            null, // register
+                            'off', // keepcid
+                            null, // failtrunk
+                            'off', // disabletrunk
+                            $trunkName, // name
+                            null, // provider
+                            'off', // continue
+                            false   // dialopts
+                        );
+
+                        $dialpattern_insert = array('prepend_digits'=>'','match_pattern_prefix'=>'','match_pattern_pass'=>'','match_cid'=>'');
+                        core_trunks_update_dialrules($trunkId, $dialpattern_insert);
+                        $port++;
                     }
 
-                    $trunkId = core_trunks_add(
-                        'pjsip', // tech
-                        $trunkName, // channelid as trunk name
-                        $dialoutprefix, // dialoutprefix
-                        null, // maxchans
-                        null, // outcid
-                        null, // peerdetails
-                        'from-pstn', // usercontext
-                        null, // userconfig
-                        null, // register
-                        'off', // keepcid
-                        null, // failtrunk
-                        'off', // disabletrunk
-                        $trunkName, // name
-                        null, // provider
-                        'off', // continue
-                        false   // dialopts
-                    );
-
-                    $dialpattern_inser = array('prepend_digits'=>'','match_pattern_prefix'=>'','match_pattern_pass'=>'','match_cid'=>'');
-                    core_trunks_update_dialrules($trunkId, $dialpattern_insert); 
-                    $port++;
-                }
-
-                if ($type === 'isdn' && isset($params['trunks_isdn'])) {
-                    /*Save isdn trunks parameters*/
-                    $sql = "REPLACE INTO `gateway_config_isdn` (`config_id`,`trunk`,`trunknumber`,`protocol`,`secret`) VALUES (?,?,?,?,?)";
-                    $sth = FreePBX::Database()->prepare($sql);
-                    $sth->execute(array($configId,$trunkId,$trunk['trunknumber'],$trunk['type'],$secret));
-                } elseif ($type === 'pri' && isset($params['trunks_pri'])) {
-                    /*Save pri trunks parameters*/
-                    $sql = "REPLACE INTO `gateway_config_pri` (`config_id`,`trunk`,`trunknumber`,`secret`) VALUES (?,?,?,?)";
-                    $sth = FreePBX::Database()->prepare($sql);
-                    $sth->execute(array($configId,$trunkId,$trunk['trunknumber'],$secret));
-                } elseif ($type === 'fxo' && isset($params['trunks_fxo'])) {
-                    /*Save fxo trunks parameters*/
-                    $sql = "REPLACE INTO `gateway_config_fxo` (`config_id`,`trunk`,`trunknumber`,`number`,`secret`) VALUES (?,?,?,?,?)";
-                    $sth = FreePBX::Database()->prepare($sql);
-                    $sth->execute(array($configId,$trunkId,$trunk['trunknumber'],$trunk['number'],$secret));
-                    /* Add AOR */
-                    $trunk_pjsip_id = sql('SELECT id FROM `pjsip` WHERE keyword ="trunk_name" AND data = "' . $trunkName . '"' , "getOne");
-                    $sql = "INSERT INTO `pjsip` (`id`,`keyword`,`data`,`flags`) VALUES (?,?,?,?)";
-                    $sth = FreePBX::Database()->prepare($sql);
-                    $sth->execute(array($trunk_pjsip_id,'aors',$trunkName,'0'));
-                } elseif ($type === 'fxs' && isset($params['trunks_fxs'])) {
-                    /* create physical extension */
-                    $mainextensionnumber = $trunk['linked_extension'];
-                    $extension = createExtension($mainextensionnumber);
-                    if (useExtensionAsCustomPhysical($extension,$web_user,$web_password) === false) {
-                        $response->withJson(array("status"=>"Error creating custom extension"), 500);
-                    }
-                    /* Add fxs extension to fxo AOR */
-                    $trunk_number = (strtolower($res['manufacturer']) === 'patton' ? 0 : 2);
-                    $trunk_name = $vendor. '_'. $uid. '_fxo_'. $trunk_number;
-                    $trunk_pjsip_id = sql('SELECT id FROM `pjsip` WHERE keyword ="trunk_name" AND data = "' . $trunk_name . '"' , "getOne");
-                    if (!empty($trunk_pjsip_id)) {
-                        $trunk_pjsip_aor = sql('SELECT data FROM `pjsip` WHERE keyword ="aors" AND id = "' . $trunk_pjsip_id . '"', "getOne");
-                        $trunk_pjsip_aor .= ",".$extension;
-                        $sql = "REPLACE INTO `pjsip` (`id`,`keyword`,`data`,`flags`) VALUES (?,?,?,?)";
+                    if ($type === 'isdn' && isset($params['trunks_isdn'])) {
+                        /*Save isdn trunks parameters*/
+                        $sql = "REPLACE INTO `gateway_config_isdn` (`config_id`,`trunk`,`trunknumber`,`protocol`,`secret`) VALUES (?,?,?,?,?)";
                         $sth = FreePBX::Database()->prepare($sql);
-                        $sth->execute(array($trunk_pjsip_id,'aors',$trunk_pjsip_aor,'0'));
+                        $sth->execute(array($configId,$trunkId,$trunk['trunknumber'],$trunk['type'],$secret));
+                    } elseif ($type === 'pri' && isset($params['trunks_pri'])) {
+                        /*Save pri trunks parameters*/
+                        $sql = "REPLACE INTO `gateway_config_pri` (`config_id`,`trunk`,`trunknumber`,`secret`) VALUES (?,?,?,?)";
+                        $sth = FreePBX::Database()->prepare($sql);
+                        $sth->execute(array($configId,$trunkId,$trunk['trunknumber'],$secret));
+                    } elseif ($type === 'fxo' && isset($params['trunks_fxo'])) {
+                        /*Save fxo trunks parameters*/
+                        $sql = "REPLACE INTO `gateway_config_fxo` (`config_id`,`trunk`,`trunknumber`,`number`,`secret`) VALUES (?,?,?,?,?)";
+                        $sth = FreePBX::Database()->prepare($sql);
+                        $sth->execute(array($configId,$trunkId,$trunk['trunknumber'],$trunk['number'],$secret));
+                        /* Add AOR */
+                        $trunk_pjsip_id = sql('SELECT id FROM `pjsip` WHERE keyword ="trunk_name" AND data = "' . $trunkName . '"' , "getOne");
+                        $sql = "INSERT INTO `pjsip` (`id`,`keyword`,`data`,`flags`) VALUES (?,?,?,?)";
+                        $sth = FreePBX::Database()->prepare($sql);
+                        $sth->execute(array($trunk_pjsip_id,'aors',$trunkName,'0'));
+                    } elseif ($type === 'fxs' && isset($params['trunks_fxs'])) {
+                        /* create physical extension */
+                        $mainextensionnumber = $trunk['linked_extension'];
+                        $extension = createExtension($mainextensionnumber);
+                        if (useExtensionAsCustomPhysical($extension,$web_user,$web_password) === false) {
+                            $response->withJson(array("status"=>"Error creating custom extension"), 500);
+                        }
+                        /* Add fxs extension to fxo AOR */
+                        $trunk_number = (strtolower($res['manufacturer']) === 'patton' ? 0 : 2);
+                        $trunk_name = $vendor. '_'. $uid. '_fxo_'. $trunk_number;
+                        $trunk_pjsip_id = sql('SELECT id FROM `pjsip` WHERE keyword ="trunk_name" AND data = "' . $trunk_name . '"' , "getOne");
+                        if (!empty($trunk_pjsip_id)) {
+                            $trunk_pjsip_aor = sql('SELECT data FROM `pjsip` WHERE keyword ="aors" AND id = "' . $trunk_pjsip_id . '"', "getOne");
+                            $trunk_pjsip_aor .= ",".$extension;
+                            $sql = "REPLACE INTO `pjsip` (`id`,`keyword`,`data`,`flags`) VALUES (?,?,?,?)";
+                            $sth = FreePBX::Database()->prepare($sql);
+                            $sth->execute(array($trunk_pjsip_id,'aors',$trunk_pjsip_aor,'0'));
+                        }
+                        /*Save fxs trunks parameters*/
+                        $extension_secret = sql('SELECT data FROM `sip` WHERE id = "' . $extension . '" AND keyword="secret"', "getOne");
+                        $sql = "REPLACE INTO `gateway_config_fxs` (`config_id`,`extension`,`physical_extension`,`secret`) VALUES (?,?,?,?)";
+                        $sth = FreePBX::Database()->prepare($sql);
+                        $sth->execute(array($configId,$trunk['linked_extension'],$extension,$extension_secret));
                     }
-                    /*Save fxs trunks parameters*/
-                    $extension_secret = sql('SELECT data FROM `sip` WHERE id = "' . $extension . '" AND keyword="secret"', "getOne");
-                    $sql = "REPLACE INTO `gateway_config_fxs` (`config_id`,`extension`,`physical_extension`,`secret`) VALUES (?,?,?,?)";
-                    $sth = FreePBX::Database()->prepare($sql);
-                    $sth->execute(array($configId,$trunk['linked_extension'],$extension,$extension_secret));
                 }
             }
         }
@@ -576,7 +628,7 @@ $app->delete('/devices/gateways/{id}', function (Request $request, Response $res
  *
  * @api devices/gateways/download/:name
  */
- $app->get('/devices/gateways/download/{name}', function (Request $request, Response $response, $args) {
+ $app->get('/devices/gateways/download/{name}[/{mac}]', function (Request $request, Response $response, $args) {
      $route = $request->getAttribute('route');
      $name = $route->getArgument('name');
      $mac = $route->getArgument('mac');

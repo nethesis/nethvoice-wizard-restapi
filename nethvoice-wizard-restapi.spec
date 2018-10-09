@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.1.8
+Version: 14.1.13
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -38,6 +38,29 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Thu Oct 04 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.13-1
+- Allow to specify mac address in gateway configuration download request nethesis/dev#5472
+
+* Fri Sep 28 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.12-1
+- Don't use broken core function for trunk name nethesis/dev#5475
+- Bulk: write outboundcid to astdb nethesis/dev#5474
+
+* Mon Sep 24 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.11-1
+ - Fix indexes of scan device response
+
+* Fri Sep 21 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.10-1
+- Fix missing dialoutprefix in trunks creation. nethesis/dev#5425
+- Create new pjsip trunks with 0.0.0.0-udp as transport. nethesis/dev#5425
+- README: removed obsolete API DELETE /mainextensions/{extension}
+- Check if there if provisioning files to copy to avoid error logs
+
+* Fri Jul 27 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.9-1
+- Minor changes to Xstream VoIP provider for new installations
+- Add Xera voip provider
+- Add gigaset mac address to type map
+- Fix failed testauth return code
+- Add phones from tftp requests nethesis/dev#5427
+
 * Mon Jul 02 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.8-1
 - Fix trunk creation for updated version of FreePBX core module nethesis/dev#5426
 - Remove user from CTI groups if is main extension is deleted
