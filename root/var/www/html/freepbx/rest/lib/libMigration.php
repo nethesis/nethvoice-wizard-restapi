@@ -28,10 +28,12 @@ class OldDB {
     private static $db;
 
     public static function Init() {
+        //get password
+        $pass=system('/usr/bin/sudo /usr/bin/cat /var/lib/nethserver/secrets/asteriskOldDB');
         self::$db = new PDO(
             'mysql:host=localhost;dbname=asterisk11',
             'migration',
-            'Migration,1234');
+            $pass);
     }
 
     public static function Database() {
@@ -45,6 +47,16 @@ class OldDB {
 
 function oldDB(){
     return new PDO("mysql:host=localhost;dbname=asterisk11",'migration','Migration,1234');
+}
+
+function isMigration(){
+    try {
+        $oldDb = OldDB::Database();
+    } catch (Exception $e) {
+        return false;
+    }
+    // TODO check a "migrated" prop into old db
+    return true;
 }
 
 function checkDestination($tocheck) {

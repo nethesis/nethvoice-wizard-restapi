@@ -24,6 +24,8 @@ use \Psr\Http\Message\ResponseInterface as Response;
 
 include_once('lib/libMigration.php');
 
+
+
 $app->get('/migration/users', function (Request $request, Response $response, $args) {
     $res = getOldUsersCSV();
     return $response->withJson($res, 200);
