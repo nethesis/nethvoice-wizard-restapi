@@ -29,7 +29,7 @@ class OldDB {
 
     public static function Init() {
         //get password
-        $pass=system('/usr/bin/sudo /usr/bin/cat /var/lib/nethserver/secrets/asteriskOldDB');
+        $pass=exec('/usr/bin/sudo /usr/bin/cat /var/lib/nethserver/secrets/asteriskOldDB');
         self::$db = new PDO(
             'mysql:host=localhost;dbname=asterisk11',
             'migration',
@@ -45,18 +45,36 @@ class OldDB {
     }
 }
 
-function oldDB(){
-    return new PDO("mysql:host=localhost;dbname=asterisk11",'migration','Migration,1234');
-}
-
 function isMigration(){
     try {
         $oldDb = OldDB::Database();
     } catch (Exception $e) {
         return false;
     }
-    // TODO check a "migrated" prop into old db
+    $dbh = FreePBX::Database();
+    $sql = 'SELECT `value` FROM `admin` WHERE `variable`="migration_status"';
+    $sth = $dbh->prepare($sql);
+    $sth->execute(array());
+    $res = $sth->fetchAll()[0][0];
+    if ($res === 'done') { //TODO Adjust this
+        return false;
+    }
     return true;
+}
+
+function getOldUsers(){
+    try {
+        $oldDb = OldDB::Database();
+        $sql = 'SELECT `extension`, `username`, `secret`, `users`.`name`, `cellphone`, `email`, `voicemail`, `outboundcid`,`profile_id` FROM users LEFT JOIN (SELECT id,data AS secret FROM sip WHERE keyword="secret") AS sip ON users.extension = sip.id LEFT JOIN nethcti_users ON users.extension = nethcti_users.user_id';
+        $sth = $oldDb->prepare($sql);
+        $sth->execute(array());
+        $result = $sth->fetchAll(\PDO::FETCH_ASSOC);
+        return $result;
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return array('error' => true, 'error_message' => $e->getMessage());
+    }
+
 }
 
 function checkDestination($tocheck) {
@@ -422,6 +440,7 @@ function copyOldTrunks() {
                 $sth->execute(array_values($row));
             }
             // migrate trunks table data
+            $migrated = array();
             $sql = 'SELECT * FROM `trunks` WHERE `trunkid` = ?';
             $sth = $oldDb->prepare($sql);
             $sth->execute(array($oldid));
@@ -444,12 +463,13 @@ function copyOldTrunks() {
                     $trunk['disabled'],
                     'off'
                 ));
+                $migrated[] = $trunk;
             } catch (Exception $e) {
                 error_log($sql . ' ERROR: ' . $e->getMessage());
                 $errors[] = $sql . ' ERROR: ' . $e->getMessage();
             }
         }
-        return array('status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
+        return array('status' => true, 'trunks' => $migrated, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     } catch (Exception $e) {
         error_log($e->getMessage());
         $errors[] = $e->getMessage();

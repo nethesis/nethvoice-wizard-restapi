@@ -24,22 +24,63 @@ use \Psr\Http\Message\ResponseInterface as Response;
 
 include_once('lib/libMigration.php');
 
+$app->get('/migration/ismigration', function (Request $request, Response $response, $args) {
+    if (isMigration()) {
+        return $response->withJson(true, 200);
+    }
+    return $response->withJson(false, 200);
+});
 
-
-$app->get('/migration/users', function (Request $request, Response $response, $args) {
-    $res = getOldUsersCSV();
+$app->get('/migration/oldusers', function (Request $request, Response $response, $args) {
+    $res = getOldUsers();
     return $response->withJson($res, 200);
 });
 
-// use csv import to import users from old installation
 $app->post('/migration/importusers', function (Request $request, Response $response, $args) {
     try {
+        //get users json
+        $params = $request->getParsedBody();
         $csv = '';
-        foreach (getOldUsersCSV() as $row) {
-            foreach ($row as $index => $field) {
-                $row[$index] = preg_replace('/,/',' ',$field);
+        $profiles = getOldCTIProfiles();
+        $users_groups = getOldCTIUsersGroups();
+        foreach ($params as $user) {
+            if (isset($user['username']) && isset($user['name'])) {
+                // username
+                $row[0] = (string) $user['username'];
+                // fullname
+                $row[1] = (string) $user['name'];
+                // extension
+                $row[2] = (string) $user['extension']; // get lower extension as mainextension
+                // empty password
+                $row[3] = '';
+                // cellphone
+                if (isset($user['cellphone']) && !empty($user['cellphone'])) {
+                    $row[4] = (string) $user['cellphone'];
+                } else {
+                    $row[4] = '';
+                }
+                // voicemail
+                if (isset($user['voicemails']) && $user['voicemails'] === 'default') {
+                    $row[5] = 'TRUE';
+                } else {
+                     $row[5] = 'FALSE';
+                }
+                $row[6] = 'FALSE';
+                // CTI groups
+                if (isset($users_groups[$user['username']])) {
+                    $row[7] = (string) implode('|',$users_groups[$user['username']]);
+                } else {
+                    $row[7] = '';
+                }
+                //CTI profiles
+                $profiles = getOldCTIProfiles();
+                if (isset($profiles[$user['profile_id']])) {
+                    $row[8] = $profiles[$user['profile_id']];
+                } else {
+                    $row[8] = '';
+                }
+                $csv .= implode(',',$row)."\n";
             }
-            $csv .= implode(',',$row)."\n";
         }
         $base64csv = base64_encode($csv);
         system("/usr/bin/scl enable rh-php56 -- php /var/www/html/freepbx/rest/lib/csvimport.php ".escapeshellarg($base64csv)." &> /dev/null &");
@@ -49,6 +90,8 @@ $app->post('/migration/importusers', function (Request $request, Response $respo
         return $response->withStatus(500);
     }
 });
+
+######################################################################################
 
 $app->post('/migration/importprofiles', function (Request $request, Response $response, $args) {
     try {
