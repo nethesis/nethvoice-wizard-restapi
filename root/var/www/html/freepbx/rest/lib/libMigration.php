@@ -393,15 +393,20 @@ function copyOldTrunks() {
         $oldDb = OldDB::Database();
         $errors = array(); $warnings = array(); $infos = array();
 
-        $sql = 'SELECT * FROM `sip` WHERE `id` LIKE "tr-peer-%" and keyword = "account" ';
+        $sql = 'SELECT * FROM `sip` WHERE `id` LIKE "tr-peer-%"';
         $sth = $oldDb->prepare($sql);
         $sth->execute(array());
         $res = $sth->fetchAll(\PDO::FETCH_ASSOC);
+        $trunks = array();
+        foreach ($res as $row) {
+            $trunks[$row['id']][$row['keyword']]= $row['data'];
+        }
+
         $trunkIdToCopy = array();
-        foreach ($res as $trunk) {
-            if (!preg_match('/^[2-9]0[0-9][0-9]$/',$trunk['data'])) {
-                $trunkIdToCopy[] = preg_replace('/^tr-peer-([0-9]*)$/','$1',$trunk['id']);
-            }
+        foreach ($trunks as $identifier => $trunk) {
+            if ($trunk['host'] == 'dynamic') continue;
+            if (preg_match('/^[2-9]0[0-9][0-9]$/',$trunk['username'])) continue;
+            $trunkIdToCopy[] = preg_replace('/^tr-peer-([0-9]*)$/','$1',$identifier);
         }
 
         foreach ($trunkIdToCopy as $oldid) {
