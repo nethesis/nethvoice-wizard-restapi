@@ -232,7 +232,7 @@ $app->get('/devices/phones/list', function (Request $request, Response $response
             ' , rest_devices_phones.model, rest_devices_phones.extension, rest_devices_phones.line, rest_devices_phones.secret, rest_devices_phones.web_user, rest_devices_phones.web_password'.
             ' FROM `rest_devices_phones`'.
             ' LEFT JOIN userman_users ON userman_users.id = rest_devices_phones.user_id'.
-            ' WHERE mac IS NULL AND type = "physical"';
+            ' WHERE mac IS NULL AND ( `type` = "physical" OR `type` = "temporaryphysical")';
         $objs = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC);
         foreach ($objs as $obj){
             $phone = array();
@@ -529,8 +529,8 @@ $app->post('/devices/gateways', function (Request $request, Response $response, 
                     } elseif ($type === 'fxs' && isset($params['trunks_fxs'])) {
                         /* create physical extension */
                         $mainextensionnumber = $trunk['linked_extension'];
-                        $extension = createExtension($mainextensionnumber);
-                        if (useExtensionAsCustomPhysical($extension,$web_user,$web_password) === false) {
+                        $extension = createExtension($mainextensionnumber,true);
+                        if (useExtensionAsCustomPhysical($extension,false,'physical',$web_user,$web_password) === false) {
                             $response->withJson(array("status"=>"Error creating custom extension"), 500);
                         }
                         /* Add fxs extension to fxo AOR */

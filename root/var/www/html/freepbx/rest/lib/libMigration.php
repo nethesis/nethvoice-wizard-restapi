@@ -62,6 +62,20 @@ function isMigration(){
     return true;
 }
 
+function getOldSecret($extension){
+    try {
+        $oldDb = OldDB::Database();
+        $sql = 'SELECT `data` FROM `sip` WHERE `id` = ? AND `keyword` = "secret"';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array($extension));
+        $res = $sth->fetchAll()[0][0];
+        return $res;
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return false;
+    }
+}
+
 function getOldUsers(){
     try {
         $oldDb = OldDB::Database();
@@ -369,31 +383,6 @@ function getPermissionByName($permission_name) {
         return $sth->fetchAll(\PDO::FETCH_ASSOC)[0];
     } catch (Exception $e) {
         error_log(__FUNCTION__ . ' : ' .$e->getMessage());
-    }
-}
-
-function assignPhysicalDevice($mainextensionnumber) {
-    try {
-        $oldDb = OldDB::Database();
-        $errors = array(); $warnings = array(); $infos = array();
-        $sql = 'SELECT endpointman_mac_list.mac,endpointman_brand_list.name AS brand,endpointman_model_list.model,endpointman_line_list.ext FROM endpointman_mac_list JOIN endpointman_model_list ON endpointman_mac_list.model = endpointman_model_list.id JOIN endpointman_brand_list ON endpointman_model_list.brand = endpointman_brand_list.id JOIN endpointman_line_list ON endpointman_line_list.luid = endpointman_mac_list.id WHERE endpointman_line_list.ext = ? LIMIT 1';
-        $sth = $oldDb->prepare($sql);
-        $sth->execute(array($mainextensionnumber));
-        $res = $sth->fetchAll(\PDO::FETCH_ASSOC)[0];
-        if (!empty($res)) {
-            $extension = createExtension($mainextensionnumber);
-            if (isset($res['mac']) && isset($res['model'])) {
-                $mac = preg_replace('/^([0-9A-F]{2})([0-9A-F]{2})([0-9A-F]{2})([0-9A-F]{2})([0-9A-F]{2})([0-9A-F]{2})$/','$1:$2:$3:$4:$5:$6',$res['mac']);
-                if (useExtensionAsPhysical($extension,$mac,$res['model'],null)) {
-                    return true;
-                }
-            }
-        }
-        return array('status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
-    } catch (Exception $e) {
-        error_log($e->getMessage());
-        $errors[] = $e->getMessage();
-        return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     }
 }
 
