@@ -128,7 +128,8 @@ try {
                     // assign physical device to user if it is a migration
                     if (function_exists('isMigration') && isMigration()) {
                         $secret = getOldSecret($row[2]);
-                        useExtensionAsCustomPhysical($row[2],$secret,'temporaryphysical');
+                        $extension = createExtension($argv[1],false);
+                        useExtensionAsCustomPhysical($extension,$secret,'temporaryphysical');
                     }
                 }
             } else {
