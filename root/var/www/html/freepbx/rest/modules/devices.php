@@ -228,13 +228,14 @@ $app->get('/devices/phones/list', function (Request $request, Response $response
         $res=array();
         $dbh = FreePBX::Database();
         /*Get custom extensions*/
-        $sql = 'SELECT userman_users.default_extension'.
+        $sql = 'SELECT userman_users.default_extension, userman_users.username, userman_users.displayname'.
             ' , rest_devices_phones.model, rest_devices_phones.extension, rest_devices_phones.line, rest_devices_phones.secret, rest_devices_phones.web_user, rest_devices_phones.web_password'.
             ' FROM `rest_devices_phones`'.
             ' LEFT JOIN userman_users ON userman_users.id = rest_devices_phones.user_id'.
             ' WHERE mac IS NULL AND ( `type` = "physical" OR `type` = "temporaryphysical")';
         $objs = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC);
         foreach ($objs as $obj){
+
             $phone = array();
             $phone['model'] = "custom";
             $phone['manufacturer'] = " _";
@@ -244,7 +245,9 @@ $app->get('/devices/phones/list', function (Request $request, Response $response
                 "line"=>$obj['line'],
                 "secret"=>$obj['secret'],
                 "web_user"=>$obj['web_user'],
-                "web_password"=>$obj['web_password']
+                "web_password"=>$obj['web_password'],
+                "username"=>$obj['username'],
+                "displayname"=>$obj['displayname']
             );
             $res[] = $phone;
         }
@@ -254,7 +257,7 @@ $app->get('/devices/phones/list', function (Request $request, Response $response
                 if (file_exists($basedir."/".$file)) {
                     $phones = json_decode(file_get_contents($basedir."/".$file), true);
                     foreach ($phones as $key => $value) {
-                        $sql = 'SELECT userman_users.default_extension'.
+                        $sql = 'SELECT userman_users.default_extension, userman_users.username, userman_users.displayname'.
                             ' , rest_devices_phones.model, rest_devices_phones.extension, rest_devices_phones.line, rest_devices_phones.secret'.
                           ' FROM `rest_devices_phones`'.
                           ' LEFT JOIN userman_users ON userman_users.id = rest_devices_phones.user_id'.
@@ -262,13 +265,16 @@ $app->get('/devices/phones/list', function (Request $request, Response $response
                         $objs = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC);
                         $phones[$key]['lines'] = array();
                         foreach ($objs as $obj){
+
                             $phones[$key]['model'] = $obj['model'];
                             $phones[$key]['lines'][] = (object)array(
-                                                        "extension"=>$obj['extension'],
-                                                        "mainextension"=>$obj['default_extension'],
-                                                        "line"=>$obj['line'],
-							"secret"=>$obj['secret']
-                                                        );
+                                "extension"=>$obj['extension'],
+                                "mainextension"=>$obj['default_extension'],
+                                "line"=>$obj['line'],
+                                "secret"=>$obj['secret'],
+                                "username"=>$obj['username'],
+                                "displayname"=>$obj['displayname']
+                            );
                         }
                         if($phones[$key]['model']) {
                             $res[]=$phones[$key];
@@ -282,7 +288,7 @@ $app->get('/devices/phones/list', function (Request $request, Response $response
         $res = array_values(array_intersect_key($res, array_unique(array_map('serialize', $res))));
 
         /*Get phones from db not in scanned phone list*/
-        $sql = 'SELECT userman_users.default_extension'.
+        $sql = 'SELECT userman_users.default_extension, userman_users.username, userman_users.displayname'.
             ' , rest_devices_phones.model, rest_devices_phones.extension, rest_devices_phones.line, rest_devices_phones.secret, rest_devices_phones.mac, rest_devices_phones.vendor'.
             ' FROM `rest_devices_phones`'.
             ' LEFT JOIN userman_users ON userman_users.id = rest_devices_phones.user_id'.
@@ -306,11 +312,13 @@ $app->get('/devices/phones/list', function (Request $request, Response $response
             $phone['manufacturer'] = $obj['vendor'];
             $phone['lines'] = array();
             $phone['lines'][] = (object)array(
-                                 "extension"=>$obj['extension'],
-                                 "mainextension"=>$obj['default_extension'],
-                                 "line"=>$obj['line'],
-                                 "secret"=>$obj['secret']
-                                 );
+                "extension"=>$obj['extension'],
+                "mainextension"=>$obj['default_extension'],
+                "line"=>$obj['line'],
+                "secret"=>$obj['secret'],
+                "username"=>$obj['username'],
+                "displayname"=>$obj['displayname']
+            );
             $res[] = $phone;
         }
         return $response->withJson($res,200);
