@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.1.13
+Version: 14.1.14
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -38,6 +38,9 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Tue Nov 13 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.14-1
+- Add username and displayname to devices object nethesis/dev#5493
+
 * Thu Oct 04 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.13-1
 - Allow to specify mac address in gateway configuration download request nethesis/dev#5472
 
