@@ -105,28 +105,33 @@ $app->post('/migration/importprofiles', function (Request $request, Response $re
         $profiles = getOldCTIProfiles();
         $errors = array();
         $infos = array();
+        $returncode = 422;
         if (!empty($profiles)) {
             $return = true;
             foreach ( $profiles as $old_profile) {
                 $res = cloneOldCTIProfile($old_profile);
-                if ($return && $res) {
-                    $return = true;
+                if ($res) {
                     $infos[] = $old_profile . " migrated";
                 } else {
-                    $return = false;
                     $errors[] = 'Error migrating '.$old_profile;
+                }
+                if ($return && $res) {
+                    $return = true;
+                } else {
+                    $return = false;
                 }
             }
             if ($return) {
-                return $response->withJson(array('status' => $return, 'errors' => $errors, 'infos' => $infos), 200);
+                $returncode = 200;
             } else {
-                return $response->withJson(array('status' => $return, 'errors' => $errors, 'infos' => $infos), 500);
+                $returncode = 500;
             }
         }
+        return $response->withJson(array('status' => $return, 'errors' => $errors, 'infos' => $infos), $returncode);
     } catch (Exception $e) {
         error_log($e->getMessage());
         $errors[] = $e->getMessage();
-        return $response->withJson(array('status' => false, 'errors' => $errors),500);
+        return $response->withJson(array('status' => false, 'errors' => $errors, 'infos' => $infos), 500);
     }
 });
 
