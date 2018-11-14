@@ -45,6 +45,52 @@ class OldDB {
     }
 }
 
+class OldCDRDB {
+    private static $db;
+
+    public static function Init() {
+        //get password
+        $pass=exec('/usr/bin/sudo /usr/bin/cat /var/lib/nethserver/secrets/asteriskOldDB');
+        self::$db = new PDO(
+            'mysql:host=localhost;dbname=asteriskcdrdb11',
+            'migration',
+            $pass);
+    }
+
+    public static function Database() {
+        if (!isset(self::$db)) {
+            global $config;
+            self::Init();
+        }
+        return self::$db;
+    }
+}
+
+class NewCDRDB {
+    private static $db;
+
+    public static function Init() {
+        global $amp_conf;
+        $db_host = !empty($amp_conf['CDRDBHOST']) ? $amp_conf["CDRDBHOST"] : 'localhost';
+        $db_port = empty($amp_conf["CDRDBPORT"]) ? '' :  ':' . $amp_conf["CDRDBPORT"];
+        $db_user = empty($amp_conf["CDRDBUSER"]) ? $amp_conf["AMPDBUSER"] : $amp_conf["CDRDBUSER"];
+        $db_pass = empty($amp_conf["CDRDBPASS"]) ? $amp_conf["AMPDBPASS"] : $amp_conf["CDRDBPASS"];
+
+        self::$db = new PDO(
+            "mysql:host=$db_host$db_port;dbname=asteriskcdrdb",
+            $db_user,
+            $db_pass);
+    }
+
+    public static function Database() {
+        if (!isset(self::$db)) {
+            global $config;
+            self::Init();
+        }
+        return self::$db;
+    }
+}
+
 function isMigration(){
     try {
         $oldDb = OldDB::Database();
@@ -56,17 +102,30 @@ function isMigration(){
     $sth = $dbh->prepare($sql);
     $sth->execute(array());
     $res = $sth->fetchAll()[0][0];
-    if ($res === 'done') { //TODO Adjust this
+    if ($res === 'done') {
         return false;
     }
     return true;
+}
+
+function setMigration($status = 'done') {
+    try {
+        $dbh = FreePBX::Database();
+        $sql = 'DELETE FROM `admin` WHERE `variable`="migration_status"; INSERT IGNORE INTO `admin` (`variable`,`value`) VALUES ("migration_status","done")';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array());
+        return array('status' => true, 'errors' => array(), 'infos' => array('migration_status changed'), 'warnings' => array());
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return array('status' => false, 'errors' => array($e->getMessage()), 'infos' => array(), 'warnings' => array());
+    }
 }
 
 function getOldSecret($extension){
     try {
         $oldDb = OldDB::Database();
         $sql = 'SELECT `data` FROM `sip` WHERE `id` = ? AND `keyword` = "secret"';
-        $sth = $dbh->prepare($sql);
+        $sth = $oldDb->prepare($sql);
         $sth->execute(array($extension));
         $res = $sth->fetchAll()[0][0];
         return $res;
@@ -1141,6 +1200,21 @@ function migrateInboundRoutes() {
             }
         }
         return array('status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        $errors[] = $e->getMessage();
+        return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
+    }
+}
+
+function getCdrRowCount(){
+    try {
+        $oldCDRDB = OldCDRDB::Database();
+        $sql = 'SELECT COUNT(*) FROM cdr';
+        $sth = $oldCDRDB->prepare($sql);
+        $sth->execute(array());
+        $count = $sth->fetchAll()[0][0];
+        return array('count' => $count, 'status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     } catch (Exception $e) {
         error_log($e->getMessage());
         $errors[] = $e->getMessage();

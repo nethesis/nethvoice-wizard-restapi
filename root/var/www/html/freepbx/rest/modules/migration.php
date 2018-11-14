@@ -31,6 +31,15 @@ $app->get('/migration/ismigration', function (Request $request, Response $respon
     return $response->withJson(false, 200);
 });
 
+$app->post('/migration/endmigration', function (Request $request, Response $response, $args) {
+    $res = setMigration();
+    if ($res['status']) {
+        return $response->withJson($res,200);
+    } else {
+        return $response->withJson($res,500);
+    }
+});
+
 $app->get('/migration/oldusers', function (Request $request, Response $response, $args) {
     $res = getOldUsers();
     return $response->withJson($res, 200);
@@ -91,30 +100,33 @@ $app->post('/migration/importusers', function (Request $request, Response $respo
     }
 });
 
-######################################################################################
-
 $app->post('/migration/importprofiles', function (Request $request, Response $response, $args) {
     try {
         $profiles = getOldCTIProfiles();
+        $errors = array();
+        $infos = array();
         if (!empty($profiles)) {
             $return = true;
             foreach ( $profiles as $old_profile) {
                 $res = cloneOldCTIProfile($old_profile);
                 if ($return && $res) {
                     $return = true;
+                    $infos[] = $old_profile . " migrated";
                 } else {
                     $return = false;
+                    $errors[] = 'Error migrating '.$old_profile;
                 }
             }
             if ($return) {
-                return $response->withJson(array('status' => $return, 200));
+                return $response->withJson(array('status' => $return, 'errors' => $errors, 'infos' => $infos), 200);
             } else {
-                return $response->withJson(array('status' => $return, 500));
+                return $response->withJson(array('status' => $return, 'errors' => $errors, 'infos' => $infos), 500);
             }
         }
     } catch (Exception $e) {
         error_log($e->getMessage());
-        return $response->withJson(array('status' => false, 'errors' => array($e->getMessage())),500);
+        $errors[] = $e->getMessage();
+        return $response->withJson(array('status' => false, 'errors' => $errors),500);
     }
 });
 
@@ -297,5 +309,53 @@ $app->post('/migration/inboundroutes', function (Request $request, Response $res
     } catch (Exception $e) {
         error_log($e->getMessage());
         return $response->withJson(array('status' => false, 'errors' => array($e->getMessage())),500);
+    }
+});
+
+$app->get('/migration/cdrrowcount', function (Request $request, Response $response, $args) {
+    try {
+        $res = getCdrRowCount();
+        if ($res['status']) {
+            return $response->withJson($res, 200);
+        } else {
+            return $response->withJson($res, 500);
+        }
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withJson(array('status' => false, 'errors' => array($e->getMessage())),500);
+    }
+});
+
+$app->post('/migration/cdr', function (Request $request, Response $response, $args) {
+    try {
+        # launch migration task
+        $statusfile = '/var/run/nethvoice/cdrmigration';
+        system("/usr/bin/scl enable rh-php56 -- php /var/www/html/freepbx/rest/lib/cdrmigration.php &> /dev/null &");
+        return $response->withStatus(200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
+$app->get('/migration/cdr', function (Request $request, Response $response, $args) {
+    try {
+        $statusfile = '/var/run/nethvoice/cdrmigration';
+        if (file_exists($statusfile)) {
+            $status = json_decode(file_get_contents($statusfile));
+            if (isset($status->status) && $status->status == false) {
+                unlink($statusfile);
+                return $response->withJson($status,500);
+            } elseif (isset($status->status) && $status->status == true) {
+                unlink($statusfile);
+                return $response->withJson($status,200);
+            }
+            return $response->withJson($status,200);
+        } else {
+            return $response->withJson(['status' => 'false', 'warnings' => 'No cdr migration active'],422);
+        }
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withJson($status,500);
     }
 });
