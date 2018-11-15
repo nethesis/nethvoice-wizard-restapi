@@ -138,7 +138,7 @@ function getOldSecret($extension){
 function getOldUsers(){
     try {
         $oldDb = OldDB::Database();
-        $sql = 'SELECT `extension`, `username`, `secret`, `users`.`name`, `cellphone`, `email`, `voicemail`, `outboundcid`,`profile_id` FROM users LEFT JOIN (SELECT id,data AS secret FROM sip WHERE keyword="secret") AS sip ON users.extension = sip.id LEFT JOIN nethcti_users ON users.extension = nethcti_users.user_id';
+        $sql = 'SELECT `extension`, `username`, `secret`, `users`.`name`, `cellphone`, `email`, `voicemail`, `outboundcid`,`profile_id` FROM users LEFT JOIN (SELECT id,data AS secret FROM sip WHERE keyword="secret") AS sip ON users.extension = sip.id LEFT JOIN (SELECT `username`, `cellphone`, `email`, `profile_id`, SUBSTRING_INDEX(`extensions`,",",1) AS ext FROM nethcti_users ) AS nethcti_users ON users.extension = nethcti_users.ext';
         $sth = $oldDb->prepare($sql);
         $sth->execute(array());
         $result = $sth->fetchAll(\PDO::FETCH_ASSOC);
