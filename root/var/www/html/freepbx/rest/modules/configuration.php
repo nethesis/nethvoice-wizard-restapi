@@ -33,6 +33,13 @@ function setLegacyMode($value) {
     exec("/usr/bin/sudo /sbin/e-smith/config setprop nethvoice LegacyMode $value", $out, $ret);
 }
 
+
+$app->get('/configuration/userprovider', function (Request $request, Response $response, $args) {
+    exec("/usr/bin/sudo /var/www/html/freepbx/rest/lib/getSSSD.pl", $out);
+    $out = json_decode($out[0]);
+    return $response->withJson($out,200);
+});
+
 # get enabled mode
 $app->get('/configuration/mode', function (Request $request, Response $response, $args) {
     $mode = getLegacyMode();
