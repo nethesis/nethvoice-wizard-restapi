@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.1.14
+Version: 14.1.15
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -38,6 +38,10 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Tue Nov 20 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.15-1
+- Add Fanvil device and mac address nethesis/dev#5515
+- Insert CTI permissions into mysql only if it is needed nethesis/dev#5499
+
 * Tue Nov 13 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.14-1
 - Add username and displayname to devices object nethesis/dev#5493
 
