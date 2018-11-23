@@ -156,7 +156,7 @@ function getMigrationReport(){
         $sql = 'SELECT `object`,`type`,`message` FROM rest_migration_report';
         $sth = $dbh->prepare($sql);
         $results = $sth->execute(array());
-        $res = array()
+        $res = array();
         foreach ($results as $row) {
             if (!isset($res[$row['object']])) {
                 $res[$row['object']] = array();
@@ -1227,7 +1227,7 @@ function migrateTimeconditions() {
             }
             if (!checkDestination($old_timecondition['falsegoto'])) {
                 $warnings[] = $old_timecondition['falsegoto'] . ' destination not migrated';
-                storeMigrationReport(__FUNCTION__,,$old_timecondition['falsegoto'] . ' destination not migrated''warnings');
+                storeMigrationReport(__FUNCTION__,$old_timecondition['falsegoto'] . ' destination not migrated','warnings');
                 $old_timecondition['falsegoto'] = 'app-blackhole,hangup,1';
             }
 
