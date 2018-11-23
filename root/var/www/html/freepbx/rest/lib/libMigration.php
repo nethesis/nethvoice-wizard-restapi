@@ -114,9 +114,11 @@ function setMigration($status = 'done') {
         $sql = 'DELETE FROM `admin` WHERE `variable`="migration_status"; INSERT IGNORE INTO `admin` (`variable`,`value`) VALUES ("migration_status","done")';
         $sth = $dbh->prepare($sql);
         $sth->execute(array());
+        storeMigrationReport(__FUNCTION__,'migration_status changed','debug');
         return array('status' => true, 'errors' => array(), 'infos' => array('migration_status changed'), 'warnings' => array());
     } catch (Exception $e) {
         error_log($e->getMessage());
+        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
         return array('status' => false, 'errors' => array($e->getMessage()), 'infos' => array(), 'warnings' => array());
     }
 }
@@ -135,6 +137,43 @@ function getOldSecret($extension){
     }
 }
 
+function storeMigrationReport($object,$message,$type = 'info') {
+    try {
+        $dbh = FreePBX::Database();
+        $sql = 'INSERT INTO rest_migration_report (`object`,`type`,`message`) VALUES (?,?,?)';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array($type,$message));
+        return true;
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return false;
+    }
+}
+
+function getMigrationReport(){
+    try {
+        $dbh = FreePBX::Database();
+        $sql = 'SELECT `object`,`type`,`message` FROM rest_migration_report';
+        $sth = $dbh->prepare($sql);
+        $results = $sth->execute(array());
+        $res = array()
+        foreach ($results as $row) {
+            if (!isset($res[$row['object']])) {
+                $res[$row['object']] = array();
+            }
+            if (!isset($res[$row['object']][$row['type']])) {
+                $res[$row['object']][$row['type']] = array();
+            }
+            $res[$row['object']][$row['type']][] = $row['message'];
+        }
+        return true;
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return false;
+    }
+
+}
+
 function getOldUsers(){
     try {
         $oldDb = OldDB::Database();
@@ -145,6 +184,7 @@ function getOldUsers(){
         return $result;
     } catch (Exception $e) {
         error_log($e->getMessage());
+        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
         return array('error' => true, 'error_message' => $e->getMessage());
     }
 
@@ -285,10 +325,12 @@ function cloneOldCTIProfile($name) {
         $num = $sth->fetchAll()[0][0];
     } catch (Exception $e) {
         error_log($sql . ' ERROR: ' . $e->getMessage());
+        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
         $errors[] = $sql . ' ERROR: ' . $e->getMessage();
     }
     if ($num >= 1) {
         $errors[] = 'ERROR: too many profile with same name';
+        storeMigrationReport(__FUNCTION__,'too many profile with same name','errors');
         return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     }
     //read old cti permissions
@@ -299,6 +341,7 @@ function cloneOldCTIProfile($name) {
         $sth->execute(array($name));
         $res = $sth->fetchAll(\PDO::FETCH_ASSOC);
     } catch (Exception $e) {
+        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
         error_log($sql . ' ERROR: ' . $e->getMessage());
         $errors[] = $sql . ' ERROR: ' . $e->getMessage();
     }
@@ -429,6 +472,7 @@ function getMacroPermissionFromPermissionName($permission_name) {
         $sth->execute(array($permission_name));
         return $sth->fetchAll(\PDO::FETCH_ASSOC)[0];
     } catch (Exception $e) {
+        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
         error_log(__FUNCTION__ . ' : ' .$e->getMessage());
     }
 }
@@ -441,6 +485,7 @@ function getPermissionByName($permission_name) {
         $sth->execute(array($permission_name));
         return $sth->fetchAll(\PDO::FETCH_ASSOC)[0];
     } catch (Exception $e) {
+        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
         error_log(__FUNCTION__ . ' : ' .$e->getMessage());
     }
 }
@@ -519,12 +564,14 @@ function copyOldTrunks() {
                 $migrated[] = $trunk;
             } catch (Exception $e) {
                 error_log($sql . ' ERROR: ' . $e->getMessage());
+                storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
                 $errors[] = $sql . ' ERROR: ' . $e->getMessage();
             }
         }
         return array('status' => true, 'trunks' => $migrated, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     } catch (Exception $e) {
         error_log($e->getMessage());
+        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
         $errors[] = $e->getMessage();
         return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     }
@@ -610,6 +657,7 @@ function getOldGateways() {
         return $gateways;
     } catch (Exception $e) {
         error_log($e->getMessage());
+        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
         $errors[] = $e->getMessage();
         return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     }
@@ -670,6 +718,7 @@ function copyOldOutboundRoutes(){
         return array('status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     } catch (Exception $e) {
         error_log($e->getMessage());
+        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
         $errors[] = $e->getMessage();
         return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     }
@@ -736,6 +785,7 @@ function migrateRoutesTrunksAssignements() {
         return array('status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     } catch (Exception $e) {
         error_log($e->getMessage());
+        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
         $errors[] = $e->getMessage();
         return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     }
@@ -772,6 +822,7 @@ function migrateQueues() {
             // use hangup as destination if it is an extrange object
             if (!checkDestination($oldconfig['dest'])) {
                 $warnings[] = $oldconfig['dest'] . ' destination not migrated';
+                storeMigrationReport(__FUNCTION__,$oldconfig['dest'] . ' destination not migrated','warnings');
                 $oldconfig['dest'] = 'app-blackhole,hangup,1';
             }
 
@@ -783,6 +834,7 @@ function migrateQueues() {
                 $infos[] = 'Queue ' . $oldconfig['extension'] . ' - ' . $oldconfig['descr'] . ' migrated';
             } catch (Exception $e) {
                 error_log($sql . ' ERROR: ' . $e->getMessage());
+                storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
                 $errors[] = $sql . ' ERROR: ' . $e->getMessage();
             }
         }
@@ -801,12 +853,14 @@ function migrateQueues() {
                 $sth->execute(array($olddetails['id'],$olddetails['keyword'],$olddetails['data'],$olddetails['flags']));
             } catch (Exception $e) {
                 error_log($sql . ' ERROR: ' . $e->getMessage());
+                storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
                 $errors[] = $sql . ' ERROR: ' . $e->getMessage();
             }
         }
         return array('status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     } catch (Exception $e) {
         error_log($e->getMessage());
+        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
         $errors[] = $e->getMessage();
         return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     }
@@ -861,12 +915,14 @@ function migrateGroups() {
                 $infos[] = 'Ring group ' . $oldgroup['grpnum'] . ' - ' . $oldgroup['description'] . ' migrated';
             } catch (Exception $e) {
                 error_log($sql . ' ERROR: ' . $e->getMessage());
+                storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
                 $errors[] = $sql . ' ERROR: ' . $e->getMessage();
             }
         }
         return array('status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     } catch (Exception $e) {
         error_log($e->getMessage());
+        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
         $errors[] = $e->getMessage();
         return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     }
@@ -892,10 +948,12 @@ function migrateIVRs() {
         foreach ($oldIVRs_details as $oldIVR) {
             if (!checkDestination($oldIVR['invalid_destination'])) {
                 $warnings[] =  $oldIVR['invalid_destination'] . ' destination not migrated';
+                storeMigrationReport(__FUNCTION__,$oldIVR['invalid_destination'] . ' destination not migrated','warnings');
                 $oldIVR['invalid_destination'] = 'app-blackhole,hangup,1';
             }
             if (!checkDestination($oldIVR['timeout_destination'])) {
                 $warnings[] =  $oldIVR['timeout_destination'] . ' destination not migrated';
+                storeMigrationReport(__FUNCTION__,$oldIVR['timeout_destination'] . ' destination not migrated','warnings');
                 $oldIVR['timeout_destination'] = 'app-blackhole,hangup,1';
             }
             $sql = 'INSERT INTO ivr_details (`id`,`name`,`description`,`announcement`,`directdial`,`invalid_loops`,`invalid_retry_recording`,`invalid_destination`,`timeout_enabled`,`invalid_recording`,`retvm`,`timeout_time`,`timeout_recording`,`timeout_retry_recording`,`timeout_destination`,`timeout_loops`,`timeout_append_announce`,`invalid_append_announce`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
@@ -905,12 +963,14 @@ function migrateIVRs() {
                 $infos[] = 'IVR '. $oldIVR['name']  .' migrated';
             } catch (Exception $e) {
                 error_log($sql . ' ERROR: ' . $e->getMessage());
+                storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
                 $errors[] = $sql . ' ERROR: ' . $e->getMessage();
             }
         }
         foreach ($oldIVRs_entries as $oldEntry) {
             if (!checkDestination($oldEntry['dest'])) {
                 $warnings[] =  $oldEntry['dest'] . ' destination not migrated';
+                storeMigrationReport(__FUNCTION__,$oldEntry['dest'] . ' destination not migrated','warnings');
                 $oldEntry['dest'] = 'app-blackhole,hangup,1';
             }
             $sql = 'INSERT INTO ivr_entries (ivr_id,selection,dest,ivr_ret) VALUES (?,?,?,?)';
@@ -920,12 +980,14 @@ function migrateIVRs() {
                 $infos[] = 'IVR entry migrated';
             } catch (Exception $e) {
                 error_log($sql . ' ERROR: ' . $e->getMessage());
+                storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
                 $errors[] = $sql . ' ERROR: ' . $e->getMessage();
             }
         }
         return array('status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     } catch (Exception $e) {
         error_log($e->getMessage());
+        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
         $errors[] = $e->getMessage();
         return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     }
@@ -951,6 +1013,7 @@ function migrateCQRs() {
         foreach ($oldCQRs_details as $oldCQR) {
             if (!checkDestination($oldCQR['default_destination'])) {
                 $warnings[] =  $oldCQR['default_destination'] . ' destination not migrated';
+                storeMigrationReport(__FUNCTION__,$oldCQR['default_destination'] . ' destination not migrated','warnings');
                 $oldCQR['default_destination'] = 'app-blackhole,hangup,1';
             }
             $keys = array();
@@ -969,6 +1032,7 @@ function migrateCQRs() {
         foreach ($oldCQRs_entries as $oldCQR) {
             if (!checkDestination($oldCQR['destination'])) {
                 $warnings[] =  $oldCQR['destination'] . ' destination not migrated';
+                storeMigrationReport(__FUNCTION__,$oldCQR['destination'] . ' destination not migrated','warnings');
                 $oldCQR['destination'] = 'app-blackhole,hangup,1';
             }
             $keys = array();
@@ -986,6 +1050,7 @@ function migrateCQRs() {
                 $infos[] = 'NethCQR entry migrated';
             } catch (Exception $e) {
                 error_log($sql . ' ERROR: ' . $e->getMessage());
+                storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
                 $errors[] = $sql . ' ERROR: ' . $e->getMessage();
             }
 
@@ -993,6 +1058,7 @@ function migrateCQRs() {
         return array('status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     } catch (Exception $e) {
         error_log($e->getMessage());
+        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
         $errors[] = $e->getMessage();
         return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     }
@@ -1026,6 +1092,7 @@ function migrateRecordings($newlang = 'it') {
                     $rescp = copy( '/var/lib/asterisk/sounds/custom/'.$oldfile, '/var/lib/asterisk/sounds/'.$newlang.'/custom/'.$oldfile);
                     if (!$rescp) {
                         $warnings[] = 'Failed to copy '.$oldfile.' recording';
+                        storeMigrationReport(__FUNCTION__,'Failed to copy '.$oldfile.' recording','warnings');
                         break;
                     }
                     // copy db line
@@ -1036,6 +1103,7 @@ function migrateRecordings($newlang = 'it') {
                         $infos[] = $oldfile.' recording migrated';
                     } catch (Exception $e) {
                         error_log($sql . ' ERROR: ' . $e->getMessage());
+                        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
                         $errors[] = $sql . ' ERROR: ' . $e->getMessage();
                     }
                     break;
@@ -1045,6 +1113,7 @@ function migrateRecordings($newlang = 'it') {
         return array('status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     } catch (Exception $e) {
         error_log($e->getMessage());
+        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
         $errors[] = $e->getMessage();
         return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     }
@@ -1065,6 +1134,7 @@ function migrateAnnouncements() {
         foreach ($oldannouncements as $oldannouncement) {
             if (!checkDestination($oldannouncement['post_dest'])) {
                 $warnings[] = $oldannouncement['post_dest'] . ' destination not migrated';
+                storeMigrationReport(__FUNCTION__,$oldannouncement['post_dest'] . ' destination not migrated','warnings');
                 $oldannouncement['post_dest'] = 'app-blackhole,hangup,1';
             }
             $sql = 'INSERT INTO `announcement` (`announcement_id`,`description`,`recording_id`,`allow_skip`,`post_dest`,`return_ivr`,`noanswer`,`repeat_msg`) VALUES (?,?,?,?,?,?,?,?)';
@@ -1074,12 +1144,14 @@ function migrateAnnouncements() {
                 $infos[] = $oldannouncement['description'] . ' announcement migrated';
             } catch (Exception $e) {
                 error_log($sql . ' ERROR: ' . $e->getMessage());
+                storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
                 $errors[] = $sql . ' ERROR: ' . $e->getMessage();
             }
         }
         return array('status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     } catch (Exception $e) {
         error_log($e->getMessage());
+        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
         $errors[] = $e->getMessage();
         return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     }
@@ -1110,6 +1182,7 @@ function migrateTimegroups() {
                 $infos[] = $old_timegroups_group['id'] . ' timegroup migrated';
             } catch (Exception $e) {
                 error_log($sql . ' ERROR: ' . $e->getMessage());
+                storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
                 $errors[] = $sql . ' ERROR: ' . $e->getMessage();
             }
         }
@@ -1122,12 +1195,14 @@ function migrateTimegroups() {
                 $infos[] = $old_timegroups_detail['id'] . ' timegroup detail migrated';
             } catch (Exception $e) {
                 error_log($sql . ' ERROR: ' . $e->getMessage());
+                storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
                 $errors[] = $sql . ' ERROR: ' . $e->getMessage();
             }
         }
         return array('status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     } catch (Exception $e) {
         error_log($e->getMessage());
+        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
         $errors[] = $e->getMessage();
         return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     }
@@ -1147,10 +1222,12 @@ function migrateTimeconditions() {
         foreach ($old_timeconditions as $old_timecondition) {
             if (!checkDestination($old_timecondition['truegoto'])) {
                 $warnings[] = $old_timecondition['truegoto'] . ' destination not migrated';
+                storeMigrationReport(__FUNCTION__,$old_timecondition['truegoto'] . ' destination not migrated','warnings');
                 $old_timecondition['truegoto'] = 'app-blackhole,hangup,1';
             }
             if (!checkDestination($old_timecondition['falsegoto'])) {
                 $warnings[] = $old_timecondition['falsegoto'] . ' destination not migrated';
+                storeMigrationReport(__FUNCTION__,,$old_timecondition['falsegoto'] . ' destination not migrated''warnings');
                 $old_timecondition['falsegoto'] = 'app-blackhole,hangup,1';
             }
 
@@ -1167,6 +1244,7 @@ function migrateTimeconditions() {
         return array('status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     } catch (Exception $e) {
         error_log($e->getMessage());
+        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
         $errors[] = $e->getMessage();
         return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     }
@@ -1187,6 +1265,7 @@ function migrateInboundRoutes() {
             // check destination
             if (!checkDestination($old_inbound['destination'])) {
                 $warnings[] = $old_inbound['destination'] . ' destination not migrated';
+                storeMigrationReport(__FUNCTION__,$old_inbound['destination'] . ' destination not migrated','warnings');
                 $old_inbound['destination'] = 'app-blackhole,hangup,1';
             }
             $sql = 'INSERT INTO incoming (`cidnum`,`extension`,`destination`,`privacyman`,`alertinfo`,`ringing`,`mohclass`,`description`,`grppre`,`delay_answer`,`pricid`,`pmmaxretries`,`pmminlength`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)';
@@ -1202,6 +1281,7 @@ function migrateInboundRoutes() {
         return array('status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     } catch (Exception $e) {
         error_log($e->getMessage());
+        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
         $errors[] = $e->getMessage();
         return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     }
@@ -1217,6 +1297,7 @@ function getCdrRowCount(){
         return array('count' => $count, 'status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     } catch (Exception $e) {
         error_log($e->getMessage());
+        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
         $errors[] = $e->getMessage();
         return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     }

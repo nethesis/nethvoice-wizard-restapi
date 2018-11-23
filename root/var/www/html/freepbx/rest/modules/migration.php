@@ -45,6 +45,12 @@ $app->get('/migration/oldusers', function (Request $request, Response $response,
     return $response->withJson($res, 200);
 });
 
+$app->get('/migration/report', function (Request $request, Response $response, $args) {
+    $res = getMigrationReport();
+    return $response->withJson($res, 200);
+});
+
+
 $app->post('/migration/importusers', function (Request $request, Response $response, $args) {
     try {
         //get users json
