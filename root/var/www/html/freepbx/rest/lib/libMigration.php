@@ -1091,38 +1091,17 @@ function migrateRecordings($newlang = 'it') {
         $sth->execute(array());
         $oldrecordings = $sth->fetchAll(\PDO::FETCH_ASSOC);
         
-        $oldfilelist = scandir('/var/lib/asterisk/sounds/custom/');
-
-        // Create lang directory if doesn't exist
-        $newdir = '/var/lib/asterisk/sounds/' . $newlang . '/custom';
-        if (!file_exists($newdir)) {
-            mkdir($newdir, 0775, true);
-        }
- 
         foreach ($oldrecordings as $oldrecording) {
-            // check that filename exists
-            foreach ($oldfilelist as $oldfile) {
-                if (strpos('custom/'.$oldfile, $oldrecording['filename']) !== FALSE) {
-                    // Copy file into new directory
-                    $rescp = copy( '/var/lib/asterisk/sounds/custom/'.$oldfile, '/var/lib/asterisk/sounds/'.$newlang.'/custom/'.$oldfile);
-                    if (!$rescp) {
-                        $warnings[] = 'Failed to copy '.$oldfile.' recording';
-                        storeMigrationReport(__FUNCTION__,'Failed to copy '.$oldfile.' recording','warnings');
-                        break;
-                    }
-                    // copy db line
-                    $sql = 'INSERT INTO `recordings` (`id`,`displayname`,`filename`,`description`,`fcode`,`fcode_pass`) VALUES (?,?,?,?,?,?)';
-                    try {
-                        $sth = $db->prepare($sql);
-                        $sth->execute(array($oldrecording['id'],$oldrecording['displayname'],$oldrecording['filename'],$oldrecording['description'],$oldrecording['fcode'],$oldrecording['fcode_pass']));
-                        $infos[] = $oldfile.' recording migrated';
-                    } catch (Exception $e) {
-                        error_log($sql . ' ERROR: ' . $e->getMessage());
-                        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
-                        $errors[] = $sql . ' ERROR: ' . $e->getMessage();
-                    }
-                    break;
-                }
+            // copy db line
+            $sql = 'INSERT INTO `recordings` (`id`,`displayname`,`filename`,`description`,`fcode`,`fcode_pass`) VALUES (?,?,?,?,?,?)';
+            try {
+                $sth = $db->prepare($sql);
+                $sth->execute(array($oldrecording['id'],$oldrecording['displayname'],$oldrecording['filename'],$oldrecording['description'],$oldrecording['fcode'],$oldrecording['fcode_pass']));
+                $infos[] = 'Recording "'.$oldrecording['displayname'].'" migrated';
+            } catch (Exception $e) {
+                error_log($sql . ' ERROR: ' . $e->getMessage());
+                storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
+                $errors[] = $sql . ' ERROR: ' . $e->getMessage();
             }
         }
         return array('status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
