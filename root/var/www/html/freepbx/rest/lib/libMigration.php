@@ -181,7 +181,7 @@ function getMigrationReport(){
             }
             $res[$row['object']][$row['type']][] = $row['message'];
         }
-        return true;
+        return $res;
     } catch (Exception $e) {
         error_log($e->getMessage());
         return false;
