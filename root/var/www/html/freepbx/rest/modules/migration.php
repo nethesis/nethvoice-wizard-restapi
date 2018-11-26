@@ -109,6 +109,7 @@ $app->post('/migration/importusers', function (Request $request, Response $respo
         }
         $base64csv = base64_encode($csv);
         system("/usr/bin/scl enable rh-php56 -- php /var/www/html/freepbx/rest/lib/csvimport.php ".escapeshellarg($base64csv)." &> /dev/null &");
+        setMigration('importusers');
         return $response->withStatus(200);
     } catch (Exception $e) {
         error_log($e->getMessage());
@@ -143,6 +144,7 @@ $app->post('/migration/importprofiles', function (Request $request, Response $re
                 $returncode = 500;
             }
         }
+        setMigration('importprofiles');
         return $response->withJson(array('status' => $return, 'errors' => $errors, 'infos' => $infos), $returncode);
     } catch (Exception $e) {
         error_log($e->getMessage());
@@ -154,6 +156,7 @@ $app->post('/migration/importprofiles', function (Request $request, Response $re
 $app->post('/migration/importoldvoiptrunks', function (Request $request, Response $response, $args) {
     try {
         $res = copyOldTrunks();
+        setMigration('importoldvoiptrunks');
         if ($res['status']) {
             return $response->withJson($res, 200);
         } else {
@@ -182,6 +185,7 @@ $app->get('/migration/oldgateways', function (Request $request, Response $respon
 $app->post('/migration/importoutboundroutes', function (Request $request, Response $response, $args) {
     try {
         $res = copyOldOutboundRoutes();
+        setMigration('importoutboundroutes');
         if ($res['status']) {
             return $response->withJson($res, 200);
         } else {
@@ -196,6 +200,7 @@ $app->post('/migration/importoutboundroutes', function (Request $request, Respon
 $app->post('/migration/trunksroutesassignements', function (Request $request, Response $response, $args) {
     try {
         $res = migrateRoutesTrunksAssignements();
+        setMigration('trunksroutesassignements');
         if ($res['status']) {
             return $response->withJson($res, 200);
         } else {
@@ -210,6 +215,7 @@ $app->post('/migration/trunksroutesassignements', function (Request $request, Re
 $app->post('/migration/groups', function (Request $request, Response $response, $args) {
     try {
         $res = migrateGroups();
+        setMigration('groups');
         if ($res['status']) {
             return $response->withJson($res, 200);
         } else {
@@ -224,6 +230,7 @@ $app->post('/migration/groups', function (Request $request, Response $response, 
 $app->post('/migration/queues', function (Request $request, Response $response, $args) {
     try {
         $res = migrateQueues();
+        setMigration('queues');
         if ($res['status']) {
             return $response->withJson($res, 200);
         } else {
@@ -238,6 +245,7 @@ $app->post('/migration/queues', function (Request $request, Response $response, 
 $app->post('/migration/ivr', function (Request $request, Response $response, $args) {
     try {
         $res = migrateIVRs();
+        setMigration('ivr');
         if ($res['status']) {
             return $response->withJson($res, 200);
         } else {
@@ -252,6 +260,7 @@ $app->post('/migration/ivr', function (Request $request, Response $response, $ar
 $app->post('/migration/cqr', function (Request $request, Response $response, $args) {
     try {
         $res = migrateCQRs();
+        setMigration('cqr');
         if ($res['status']) {
             return $response->withJson($res, 200);
         } else {
@@ -266,6 +275,7 @@ $app->post('/migration/cqr', function (Request $request, Response $response, $ar
 $app->post('/migration/recordings', function (Request $request, Response $response, $args) {
     try {
         $res = migrateRecordings();
+        setMigration('recordings');
         if ($res['status']) {
             return $response->withJson($res, 200);
         } else {
@@ -280,6 +290,7 @@ $app->post('/migration/recordings', function (Request $request, Response $respon
 $app->post('/migration/announcements', function (Request $request, Response $response, $args) {
     try {
         $res = migrateAnnouncements();
+        setMigration('announcements');
         if ($res['status']) {
             return $response->withJson($res, 200);
         } else {
@@ -294,6 +305,7 @@ $app->post('/migration/announcements', function (Request $request, Response $res
 $app->post('/migration/timegroups', function (Request $request, Response $response, $args) {
     try {
         $res = migrateTimegroups();
+        setMigration('timegroups');
         if ($res['status']) {
             return $response->withJson($res, 200);
         } else {
@@ -308,6 +320,7 @@ $app->post('/migration/timegroups', function (Request $request, Response $respon
 $app->post('/migration/timeconditions', function (Request $request, Response $response, $args) {
     try {
         $res = migrateTimeconditions();
+        setMigration('timeconditions');
         if ($res['status']) {
             return $response->withJson($res, 200);
         } else {
@@ -322,6 +335,7 @@ $app->post('/migration/timeconditions', function (Request $request, Response $re
 $app->post('/migration/inboundroutes', function (Request $request, Response $response, $args) {
     try {
         $res = migrateInboundRoutes();
+        setMigration('inboundroutes');
         if ($res['status']) {
             return $response->withJson($res, 200);
         } else {
@@ -352,6 +366,7 @@ $app->post('/migration/cdr', function (Request $request, Response $response, $ar
         # launch migration task
         $statusfile = '/var/run/nethvoice/cdrmigration';
         system("/usr/bin/scl enable rh-php56 -- php /var/www/html/freepbx/rest/lib/cdrmigration.php &> /dev/null &");
+        setMigration('cdr');
         return $response->withStatus(200);
     } catch (Exception $e) {
         error_log($e->getMessage());
