@@ -1283,12 +1283,37 @@ function migrateInboundRoutes() {
 
 function getCdrRowCount(){
     try {
+        $errors = array(); $warnings = array(); $infos = array();
         $oldCDRDB = OldCDRDB::Database();
         $sql = 'SELECT COUNT(*) FROM cdr';
         $sth = $oldCDRDB->prepare($sql);
         $sth->execute(array());
         $count = $sth->fetchAll()[0][0];
         return array('count' => $count, 'status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
+        $errors[] = $e->getMessage();
+        return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
+    }
+}
+
+function postMigration(){
+    try {
+        $errors = array(); $warnings = array(); $infos = array();
+        # Migrate CTI phonebook
+        exec('/usr/bin/sudo /var/www/html/freepbx/rest/lib/ctiMigrationHelper.sh',$output,$return);
+        if ($return === 0) {
+            $infos[] = 'CTI phonebook migrated';
+        } else {
+            $errors[] = 'Unknown error migrating CTI phonebook';
+        }
+        # make sure SIP channel driver is "both" (chan_sip and pjsip)
+        $db = FreePBX::Database();
+        $sql = 'UPDATE `freepbx_settings` SET `value` = "both" WHERE `keyword` = "ASTSIPDRIVER"';
+        $sth = $db->prepare($sql);
+        $sth->execute(array());
+        return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     } catch (Exception $e) {
         error_log($e->getMessage());
         storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
