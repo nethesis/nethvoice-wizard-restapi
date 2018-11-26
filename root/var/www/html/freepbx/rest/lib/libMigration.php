@@ -170,7 +170,8 @@ function getMigrationReport(){
         $dbh = FreePBX::Database();
         $sql = 'SELECT `object`,`type`,`message` FROM rest_migration_report';
         $sth = $dbh->prepare($sql);
-        $results = $sth->execute(array());
+        $sth->execute(array());
+        $results = $sth->fetchAll(\PDO::FETCH_ASSOC);
         $res = array();
         foreach ($results as $row) {
             if (!isset($res[$row['object']])) {
