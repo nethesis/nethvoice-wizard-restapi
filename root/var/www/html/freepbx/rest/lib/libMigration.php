@@ -155,9 +155,9 @@ function getOldSecret($extension){
 function storeMigrationReport($object,$message,$type = 'info') {
     try {
         $dbh = FreePBX::Database();
-        $sql = 'INSERT INTO rest_migration_report (`object`,`type`,`message`) VALUES (?,?,?)';
+        $sql = 'INSERT INTO rest_migration_report (`type`,`object`,`message`) VALUES (?,?,?)';
         $sth = $dbh->prepare($sql);
-        $sth->execute(array($type,$message));
+        $sth->execute(array($type,$object,$message));
         return true;
     } catch (Exception $e) {
         error_log($e->getMessage());
