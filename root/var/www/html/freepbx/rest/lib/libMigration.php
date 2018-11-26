@@ -123,6 +123,21 @@ function setMigration($status = 'done') {
     }
 }
 
+function getMigrationStatus() {
+    try {
+        $dbh = FreePBX::Database();
+        $sql = 'SELECT `value` FROM `admin` WHERE `variable`="migration_status"';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array());
+        $res = $sth->fetchAll()[0][0];
+        return $res;
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
+        return false;
+    }
+}
+
 function getOldSecret($extension){
     try {
         $oldDb = OldDB::Database();

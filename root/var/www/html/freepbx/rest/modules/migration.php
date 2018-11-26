@@ -40,6 +40,16 @@ $app->post('/migration/endmigration', function (Request $request, Response $resp
     }
 });
 
+$app->get('/migration/migrationstatus', function (Request $request, Response $response, $args) {
+    $res = getMigrationStatus();
+    if ($res !== false) {
+        return $response->withJson($res, 200);
+    } else {
+        return $response->withJson($res,500);
+    }
+
+});
+
 $app->get('/migration/oldusers', function (Request $request, Response $response, $args) {
     $res = getOldUsers();
     return $response->withJson($res, 200);
@@ -117,9 +127,9 @@ $app->post('/migration/importprofiles', function (Request $request, Response $re
             foreach ( $profiles as $old_profile) {
                 $res = cloneOldCTIProfile($old_profile);
                 if ($res) {
-                    $infos[] = $old_profile . " migrated";
+                    $infos[] = 'Profile "'.$old_profile . '": migrated';
                 } else {
-                    $errors[] = 'Error migrating '.$old_profile;
+                    $errors[] = 'Error migrating profile "'.$old_profile.'"';
                 }
                 if ($return && $res) {
                     $return = true;
