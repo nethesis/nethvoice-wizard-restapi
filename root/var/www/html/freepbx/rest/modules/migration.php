@@ -127,12 +127,12 @@ $app->post('/migration/importprofiles', function (Request $request, Response $re
             $return = true;
             foreach ( $profiles as $old_profile) {
                 $res = cloneOldCTIProfile($old_profile);
-                if ($res) {
+                if ($res['status']) {
                     $infos[] = 'Profile "'.$old_profile . '": migrated';
                 } else {
-                    $errors[] = 'Error migrating profile "'.$old_profile.'"';
+                    $errors = array_merge($errors,$res['errors']);
                 }
-                if ($return && $res) {
+                if ($return && $res['status']) {
                     $return = true;
                 } else {
                     $return = false;
@@ -388,7 +388,7 @@ $app->get('/migration/cdr', function (Request $request, Response $response, $arg
             }
             return $response->withJson($status,200);
         } else {
-            return $response->withJson(['status' => 'false', 'warnings' => 'No cdr migration active'],422);
+            return $response->withJson(['status' => 'false', 'warnings' => array('No cdr migration active')],422);
         }
     } catch (Exception $e) {
         error_log($e->getMessage());

@@ -114,11 +114,9 @@ function setMigration($status = 'done') {
         $sql = 'DELETE FROM `admin` WHERE `variable`="migration_status"; INSERT IGNORE INTO `admin` (`variable`,`value`) VALUES ("migration_status","?")';
         $sth = $dbh->prepare($sql);
         $sth->execute(array($status));
-        storeMigrationReport(__FUNCTION__,'migration_status changed','debug');
         return array('status' => true, 'errors' => array(), 'infos' => array('migration_status changed'), 'warnings' => array());
     } catch (Exception $e) {
         error_log($e->getMessage());
-        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
         return array('status' => false, 'errors' => array($e->getMessage()), 'infos' => array(), 'warnings' => array());
     }
 }
@@ -133,7 +131,6 @@ function getMigrationStatus() {
         return $res;
     } catch (Exception $e) {
         error_log($e->getMessage());
-        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
         return false;
     }
 }
@@ -200,7 +197,6 @@ function getOldUsers(){
         return $result;
     } catch (Exception $e) {
         error_log($e->getMessage());
-        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
         return array('error' => true, 'error_message' => $e->getMessage());
     }
 
@@ -333,6 +329,7 @@ function getOldUsersCSV() {
 
 function cloneOldCTIProfile($name) {
     // Skip if there is already a profile with this name
+    $errors = array(); $warnings = array(); $infos = array();
     $dbh = FreePBX::Database();
     $sql = 'SELECT COUNT(*) FROM `rest_cti_profiles` WHERE `name` = ?';
     $sth = $dbh->prepare($sql);
@@ -345,8 +342,8 @@ function cloneOldCTIProfile($name) {
         $errors[] = $sql . ' ERROR: ' . $e->getMessage();
     }
     if ($num >= 1) {
-        $errors[] = 'ERROR: too many profile with same name';
-        storeMigrationReport(__FUNCTION__,'too many profile with same name','errors');
+        $warnings[] = "Profile \"$name\" already migrated";
+        storeMigrationReport(__FUNCTION__,"Profile \"$name\" already migrated",'warnings');
         return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     }
     //read old cti permissions
@@ -473,8 +470,11 @@ function cloneOldCTIProfile($name) {
         }
     }  
     $res = postCTIProfile($profile);
-    if ($res === false) return false;
-    return true;
+    if ($res === false) {
+        $errors[] = 'Error saving profile '.$profile['name'];
+        return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
+    }
+    return array('status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
 }
 
 
@@ -488,7 +488,6 @@ function getMacroPermissionFromPermissionName($permission_name) {
         $sth->execute(array($permission_name));
         return $sth->fetchAll(\PDO::FETCH_ASSOC)[0];
     } catch (Exception $e) {
-        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
         error_log(__FUNCTION__ . ' : ' .$e->getMessage());
     }
 }
@@ -501,7 +500,6 @@ function getPermissionByName($permission_name) {
         $sth->execute(array($permission_name));
         return $sth->fetchAll(\PDO::FETCH_ASSOC)[0];
     } catch (Exception $e) {
-        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
         error_log(__FUNCTION__ . ' : ' .$e->getMessage());
     }
 }
@@ -1293,7 +1291,6 @@ function getCdrRowCount(){
         return array('count' => $count, 'status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     } catch (Exception $e) {
         error_log($e->getMessage());
-        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
         $errors[] = $e->getMessage();
         return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     }
@@ -1317,7 +1314,6 @@ function postMigration(){
         return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     } catch (Exception $e) {
         error_log($e->getMessage());
-        storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
         $errors[] = $e->getMessage();
         return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     }
