@@ -23,6 +23,7 @@ use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
 include_once('lib/libMigration.php');
+include_once('lib/gateway/functions.inc.php');
 
 $app->get('/migration/ismigration', function (Request $request, Response $response, $args) {
     if (isMigration()) {
@@ -168,19 +169,37 @@ $app->post('/migration/importoldvoiptrunks', function (Request $request, Respons
     }
 });
 
-$app->get('/migration/oldgateways', function (Request $request, Response $response, $args) {
+$app->post('/migration/gateways', function (Request $request, Response $response, $args) {
     try {
-        $res = getOldGateways();
-        if (isset($res['status']) && $res['status'] === FALSE) {
-            return $response->withJson($res, 500);
-        } else {
-            return $response->withJson($res, 200);
+        $oldGateways = getOldGateways();
+        $errors = array(); $warnings = array(); $infos = array();
+        $status = true;
+        foreach ($oldGateways as $oldgw) {
+            # Add gateway
+            $res = addEditGateway($oldgw);
+            $errors = array_merge($errors,$res['errors']);
+            $warnings = array_merge($warnings,$res['warnings']);
+            $infos = array_merge($infos,$res['infos']);
+            if ($res['status'] && $status) {
+                $status = true;
+            } else {
+                $status = false;
+            }
+            if ($res['status'] && isset($res['id'])) {
+                $infos[] = 'Gateway "'.$res['id'].'" migrated';
+            }
         }
+        if ($status) {
+            return $response->withJson(array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos),200);
+        }
+        return $response->withJson(array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos),500);
     } catch (Exception $e) {
         error_log($e->getMessage());
-        return $response->withJson(array('status' => false, 'errors' => array($e->getMessage())),500);
+        $errors[] = $e->getMessage();
+        return $response->withJson(array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos),500);
     }
 });
+
 
 $app->post('/migration/importoutboundroutes', function (Request $request, Response $response, $args) {
     try {
