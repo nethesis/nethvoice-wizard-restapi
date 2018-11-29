@@ -1292,8 +1292,8 @@ function migrateIAX(){
         $oldDb = OldDB::Database();
         $errors = array(); $warnings = array(); $infos = array();
 
-        // Get old IAX
-        $sql = 'SELECT `id`,`keyword`,`data`,`flags` FROM iax';
+        // Get old IAX extensions
+        $sql = 'SELECT `id`,`keyword`,`data`,`flags` FROM `iax`';
         $sth = $oldDb->prepare($sql);
         $sth->execute(array());
         $rows = $sth->fetchAll(\PDO::FETCH_NUM);
@@ -1313,13 +1313,72 @@ function migrateIAX(){
         $sth = $db->prepare($sql);
         $sth->execute($insert_values);
 
-        // Get number of migrated IAX objects
-        $sql = 'SELECT COUNT(DISTINCT(`id`)) FROM iax';
+        // Get old trunks ids
+        $oldids = array();
+        $sql = 'SELECT DISTINCT(`id`) FROM iax WHERE `id` LIKE "tr-peer-%"';
+        $sth = $oldDb->prepare($sql);
+        $sth->execute(array());
+        $res = $sth->fetchAll(\PDO::FETCH_NUM);
+        foreach ($res as $identifier) {
+              $oldids[] = preg_replace('/^tr-peer-([0-9]*)$/','$1',$identifier[0]);
+        }
+
+        // Get minimum id to use for new trunks
+        $sql = 'SELECT MAX(`trunkid`) FROM `trunks`';
+        $sth = $db->prepare($sql);
+        $sth->execute(array());
+        $maxId = $sth->fetchAll(\PDO::FETCH_NUM)[0][0];
+        if (!isset($maxId)) {
+            $maxId = 0;
+        }
+        foreach ($oldids as $oldid) {
+            $maxId += 1;
+            $newID = $maxId;
+
+            // Update iax details
+            $sql = 'UPDATE iax SET `id` = ? WHERE `id` = ? ; UPDATE iax SET `id` = ? WHERE `id` = ?';
+            $sth = $db->prepare($sql);
+            $sth->execute(array('tr-peer-'.$newID,'tr-peer-'.$oldid,'tr-user-'.$newID,'tr-user-'.$oldid));
+
+            // Copy trunks table content
+            $migrated = array();
+            $sql = 'SELECT * FROM `trunks` WHERE `trunkid` = ?';
+            $sth = $oldDb->prepare($sql);
+            $sth->execute(array($oldid));
+            $trunk = $sth->fetchAll(\PDO::FETCH_ASSOC)[0];
+            $sql = 'INSERT INTO `trunks` (`trunkid`,`tech`,`channelid`,`name`,`outcid`,`keepcid`,`maxchans`,`failscript`,`dialoutprefix`,`usercontext`,`provider`,`disabled`,`continue`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)';
+            try {
+                $sth = $db->prepare($sql);
+                $sth->execute(array(
+                    $newID,
+                    $trunk['tech'],
+                    $trunk['channelid'],
+                    $trunk['name'],
+                    $trunk['outcid'],
+                    $trunk['keepcid'],
+                    $trunk['maxchans'],
+                    $trunk['failscript'],
+                    $trunk['dialoutprefix'],
+                    $trunk['usercontext'],
+                    $trunk['provider'],
+                    $trunk['disabled'],
+                    'off'
+                ));
+                $infos[] = 'Trunk "'. $trunk['name'] . '" migrated';
+            } catch (Exception $e) {
+                error_log($e->getMessage());
+                $errors[] = 'Error migrating trunk "' . $trunk['name'] . '": '.$e->getMessage();
+            }
+        }
+
+        // Get number of migrated IAX extensions
+        $sql = 'SELECT COUNT(DISTINCT(`id`)) FROM iax WHERE `id` NOT LIKE "tr-%-%"';
         $sth = $db->prepare($sql);
         $sth->execute(array());
         $res = $sth->fetchAll(\PDO::FETCH_NUM)[0][0];
+        $infos[] = $res.' IAX extensions migrated';
 
-        return array('status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => array($res.' IAX object migrated'));
+        return array('status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     } catch (Exception $e) {
         error_log($e->getMessage());
         $errors[] = $e->getMessage();
