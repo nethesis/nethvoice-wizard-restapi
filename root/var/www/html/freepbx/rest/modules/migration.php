@@ -120,32 +120,24 @@ $app->post('/migration/importusers', function (Request $request, Response $respo
 $app->post('/migration/importprofiles', function (Request $request, Response $response, $args) {
     try {
         $profiles = getOldCTIProfiles();
-        $errors = array();
-        $infos = array();
+        $errors = array(); $warnings = array(); $infos = array();
         $returncode = 422;
         if (!empty($profiles)) {
             $return = true;
-            foreach ( $profiles as $old_profile) {
+            foreach ($profiles as $old_profile) {
                 $res = cloneOldCTIProfile($old_profile);
                 if ($res['status']) {
-                    $infos[] = 'Profile "'.$old_profile . '": migrated';
+                    $infos = array_merge($infos,$res['infos']);
+                    $warnings = array_merge($warnings,$res['warnings']);
                 } else {
+                    $infos = array_merge($infos,$res['infos']);
+                    $warnings = array_merge($warnings,$res['warnings']);
                     $errors = array_merge($errors,$res['errors']);
                 }
-                if ($return && $res['status']) {
-                    $return = true;
-                } else {
-                    $return = false;
-                }
-            }
-            if ($return) {
-                $returncode = 200;
-            } else {
-                $returncode = 500;
             }
         }
         setMigration('importprofiles');
-        return $response->withJson(array('status' => $return, 'errors' => $errors, 'infos' => $infos), $returncode);
+        return $response->withJson(array('status' => $return, 'errors' => $errors, 'infos' => $infos, 'warnings' => $warnings), 200);
     } catch (Exception $e) {
         error_log($e->getMessage());
         $errors[] = $e->getMessage();
