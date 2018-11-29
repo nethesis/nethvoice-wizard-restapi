@@ -420,6 +420,40 @@ $app->post('/migration/iax', function (Request $request, Response $response, $ar
     }
 });
 
+$app->post('/migration/daynight', function (Request $request, Response $response, $args) {
+    try {
+        $db = FreePBX::Database();
+        $oldDb = OldDB::Database();
+        $errors = array(); $warnings = array(); $infos = array();
+
+        $sql = 'SELECT `ext`,`dmode`,`dest` FROM daynight';
+        $sth = $oldDb->prepare($sql);
+        $sth->execute(array());
+        $rows = $sth->fetchAll(\PDO::FETCH_NUM);
+
+        // fill question marks string
+        $question_marks = array();
+        foreach ($rows as $index => $row) {
+            $question_marks[] = '(?,?,?)';
+            if ($row[1] === 'day' || $row[1] === 'night') {
+                if (!checkDestination($row[2])) {
+                    $rows[$index][2] = 'app-blackhole,hangup,1';
+                    $warnings[] = $row[2] . ' destination not migrated';
+                }
+            }
+        }
+        $sql = 'INSERT INTO daynight (`ext`,`dmode`,`dest`) VALUES ' . implode(',',$question_marks);
+        $sth = $db->prepare($sql);
+        $sth->execute(array_merge(... $rows));
+        $infos[] = 'DayNight migrated';
+        setMigration('daynight');
+        return $response->withJson(array('status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos),200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withJson(array('status' => false, 'errors' => array($e->getMessage())),500);
+    }
+});
+
 $app->post('/migration/postmigration', function (Request $request, Response $response, $args) {
     try {
         $res = postMigration();

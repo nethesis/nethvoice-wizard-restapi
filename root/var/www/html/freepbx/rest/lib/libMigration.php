@@ -212,7 +212,7 @@ function checkDestination($tocheck) {
         'ivr',
         'nethcqr',
         'timeconditions',
-        ''
+        'app-daynight'
     );
     foreach ($destinations as $destination) {
         if (strpos($tocheck,$destination) !== FALSE) {
