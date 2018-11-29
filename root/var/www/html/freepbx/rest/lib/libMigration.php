@@ -692,6 +692,10 @@ function copyOldOutboundRoutes(){
             //Copy route
             $sql = 'INSERT INTO outbound_routes (route_id,name,outcid,outcid_mode,password,emergency_route,intracompany_route,mohclass,time_group_id) VALUES (?,?,?,?,?,?,?,?,?)';
             $sth = $db->prepare($sql);
+            // add 1 to timegroup id if it's configured to avoid conflicts with "Office Hours" default timegroup
+            if (is_int($route['time_group_id'])) {
+                $route['time_group_id'] += 1;
+            }
             $sth->execute(array(
                 $route['route_id'],
                 $route['name'],
@@ -1171,8 +1175,12 @@ function migrateTimegroups() {
             $sql = 'INSERT INTO timegroups_groups (`id`,`description`) VALUES (?,?)';
             try {
                 $sth = $db->prepare($sql);
+
+                // add 1 to timegroup id if it's configured to avoid conflicts with "Office Hours" default timegroup
+                $old_timegroups_group['id'] += 1;
+
                 $sth->execute(array($old_timegroups_group['id'],$old_timegroups_group['description']));
-                $infos[] = $old_timegroups_group['id'] . ' timegroup migrated';
+                $infos[] = '"'.$old_timegroups_group['description'] . '" timegroup migrated';
             } catch (Exception $e) {
                 error_log($sql . ' ERROR: ' . $e->getMessage());
                 storeMigrationReport(__FUNCTION__,$e->getMessage(),'errors');
@@ -1184,6 +1192,10 @@ function migrateTimegroups() {
             $sql = 'INSERT INTO timegroups_details (`id`,`timegroupid`,`time`) VALUES (?,?,?)';
             try {
                 $sth = $db->prepare($sql);
+
+                // add 1 to timegroup id if it's configured to avoid conflicts with "Office Hours" default timegroup
+                $old_timegroups_detail['timegroupid'] += 1;
+
                 $sth->execute(array($old_timegroups_detail['id'],$old_timegroups_detail['timegroupid'],$old_timegroups_detail['time']));
                 $infos[] = $old_timegroups_detail['id'] . ' timegroup detail migrated';
             } catch (Exception $e) {
@@ -1227,8 +1239,12 @@ function migrateTimeconditions() {
             $sql = 'INSERT INTO timeconditions (`timeconditions_id`,`displayname`,`time`,`truegoto`,`falsegoto`,`deptname`,`generate_hint`) VALUES (?,?,?,?,?,?,?)';
             try {
                 $sth = $db->prepare($sql);
+
+                // add 1 to timegroup id if it's configured to avoid conflicts with "Office Hours" default timegroup
+                $old_timecondition['time'] += 1;
+
                 $sth->execute(array($old_timecondition['timeconditions_id'],$old_timecondition['displayname'],$old_timecondition['time'],$old_timecondition['truegoto'],$old_timecondition['falsegoto'],$old_timecondition['deptname'],$old_timecondition['generate_hint']));
-                $infos[] = $old_timecondition['displayname'] . ' timecondition migrated';
+                $infos[] = '"' . $old_timecondition['displayname'] . '" timecondition migrated';
             } catch (Exception $e) {
                 error_log($sql . ' ERROR: ' . $e->getMessage());
                 $errors[] = $sql . ' ERROR: ' . $e->getMessage();
