@@ -1267,8 +1267,10 @@ function postMigration(){
         # Migrate CTI phonebook
         exec('/usr/bin/sudo /var/www/html/freepbx/rest/lib/ctiMigrationHelper.sh',$output,$return);
         if ($return === 0) {
+            $status = true;
             $infos[] = 'CTI phonebook migrated';
         } else {
+            $status = false;
             $errors[] = 'Unknown error migrating CTI phonebook';
         }
         # make sure SIP channel driver is "both" (chan_sip and pjsip)
@@ -1276,10 +1278,52 @@ function postMigration(){
         $sql = 'UPDATE `freepbx_settings` SET `value` = "both" WHERE `keyword` = "ASTSIPDRIVER"';
         $sth = $db->prepare($sql);
         $sth->execute(array());
-        return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
+        return array('status' => $status, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     } catch (Exception $e) {
         error_log($e->getMessage());
         $errors[] = $e->getMessage();
         return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     }
 }
+
+function migrateIAX(){
+    try {
+        $db = FreePBX::Database();
+        $oldDb = OldDB::Database();
+        $errors = array(); $warnings = array(); $infos = array();
+
+        // Get old IAX
+        $sql = 'SELECT `id`,`keyword`,`data`,`flags` FROM iax';
+        $sth = $oldDb->prepare($sql);
+        $sth->execute(array());
+        $rows = $sth->fetchAll(\PDO::FETCH_NUM);
+
+        if (count($rows) === 0) {
+            return array('status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => array('No IAX extensions to migrate'));
+        }
+
+        $insert_values = array_merge(... $rows);
+
+        // fill question marks string
+        $question_marks = array();
+        foreach ($rows as $row) {
+            $question_marks[] = '(?,?,?,?)';
+        }
+        $sql = 'INSERT INTO iax (`id`,`keyword`,`data`,`flags`) VALUES ' . implode(',',$question_marks);
+        $sth = $db->prepare($sql);
+        $sth->execute($insert_values);
+
+        // Get number of migrated IAX objects
+        $sql = 'SELECT COUNT(DISTINCT(`id`)) FROM iax';
+        $sth = $db->prepare($sql);
+        $sth->execute(array());
+        $res = $sth->fetchAll(\PDO::FETCH_NUM)[0][0];
+
+        return array('status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => array($res.' IAX object migrated'));
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        $errors[] = $e->getMessage();
+        return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
+    }
+}
+

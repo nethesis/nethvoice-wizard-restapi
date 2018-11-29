@@ -414,6 +414,20 @@ $app->get('/migration/cdr', function (Request $request, Response $response, $arg
     }
 });
 
+$app->post('/migration/iax', function (Request $request, Response $response, $args) {
+    try {
+        $res = migrateIAX();
+        if ($res['status']) {
+            return $response->withJson($res, 200);
+        } else {
+            return $response->withJson($res, 500);
+        }
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withJson(array('status' => false, 'errors' => array($e->getMessage())),500);
+    }
+});
+
 $app->post('/migration/postmigration', function (Request $request, Response $response, $args) {
     try {
         $res = postMigration();
