@@ -99,9 +99,8 @@ $app->post('/migration/importusers', function (Request $request, Response $respo
                     $row[7] = '';
                 }
                 //CTI profiles
-                $profiles = getOldCTIProfiles();
                 if (isset($profiles[$user['profile_id']])) {
-                    $row[8] = $profiles[$user['profile_id']];
+                    $row[8] = $user['profile_id'];
                 } else {
                     $row[8] = '';
                 }

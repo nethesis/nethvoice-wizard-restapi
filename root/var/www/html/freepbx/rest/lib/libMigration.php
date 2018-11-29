@@ -276,57 +276,6 @@ function getOldCTIProfiles() {
     return $profiles;
 }
 
-function getOldUsersCSV() {
-    $users = getOldCTIUsers();
-    $users_groups = getOldCTIUsersGroups();
-    $res = array();
-    foreach ($users as $user) {
-        $row = array();
-        // username
-        $row[0] = (string) $user['username'];
-        // fullname
-        $row[1] = (string) $user['name'];
-        // extension
-        $extensions = explode(',',$user['extensions']);
-        $row[2] = (string) min($extensions); // get lower extension as mainextension
-        // empty password
-        $row[3] = '';
-        // cellphone
-        if (isset($user['cellphone']) && !empty($user['cellphone'])) {
-            $row[4] = (string) $user['cellphone'];
-        } else {
-            $row[4] = '';
-        }
-        // voicemail
-        if (isset($user['voicemails']) && !empty($user['voicemails'])) {
-            $row[5] = 'TRUE';
-        } else {
-            $row[5] = 'FALSE';
-        }
-        // WebRTC extension
-        if (count($extensions)>1) {
-            $row[6] = 'TRUE';
-        } else {
-            $row[6] = 'FALSE';
-        }
-        // CTI groups
-        if (isset($users_groups[$user['username']])) {
-            $row[7] = (string) implode('|',$users_groups[$user['username']]);
-        } else {
-            $row[7] = '';
-        }
-        //CTI profiles
-        $profiles = getOldCTIProfiles();
-        if (isset($profiles[$user['profile_id']])) {
-            $row[8] = $profiles[$user['profile_id']];
-        } else {
-            $row[8] = '';
-        }
-        $res[] = (array) $row;
-    }
-    return $res;
-}
-
 function cloneOldCTIProfile($name) {
     // Skip if there is already a profile with this name
     $errors = array(); $warnings = array(); $infos = array();
