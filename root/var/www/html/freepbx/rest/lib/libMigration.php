@@ -914,12 +914,12 @@ function migrateIVRs() {
         $oldIVRs_entries = $sth->fetchAll(\PDO::FETCH_ASSOC);
 
         foreach ($oldIVRs_details as $oldIVR) {
-            if (!checkDestination($oldIVR['invalid_destination'])) {
+            if (!checkDestination($oldIVR['invalid_destination']) && !empty($oldIVR['invalid_destination'])) {
                 $warnings[] =  $oldIVR['invalid_destination'] . ' destination not migrated';
                 storeMigrationReport(__FUNCTION__,$oldIVR['invalid_destination'] . ' destination not migrated','warnings');
                 $oldIVR['invalid_destination'] = 'app-blackhole,hangup,1';
             }
-            if (!checkDestination($oldIVR['timeout_destination'])) {
+            if (!checkDestination($oldIVR['timeout_destination']) && !empty($oldIVR['invalid_destination'])) {
                 $warnings[] =  $oldIVR['timeout_destination'] . ' destination not migrated';
                 storeMigrationReport(__FUNCTION__,$oldIVR['timeout_destination'] . ' destination not migrated','warnings');
                 $oldIVR['timeout_destination'] = 'app-blackhole,hangup,1';
