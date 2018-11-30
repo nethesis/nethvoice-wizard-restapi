@@ -190,10 +190,16 @@ function getMigrationReport(){
 function getOldUsers(){
     try {
         $oldDb = OldDB::Database();
-        $sql = 'SELECT `extension`, `username`, `secret`, `users`.`name`, `cellphone`, `email`, `voicemail`, `outboundcid`,`profile_id` FROM users LEFT JOIN (SELECT id,data AS secret FROM sip WHERE keyword="secret") AS sip ON users.extension = sip.id LEFT JOIN (SELECT `username`, `cellphone`, `email`, `profile_id`, SUBSTRING_INDEX(`extensions`,",",1) AS ext FROM nethcti_users ) AS nethcti_users ON users.extension = nethcti_users.ext';
+        $sql = 'SELECT `extension`, `username`, `secret`, `users`.`name`, `cellphone`, `email`, `voicemail`, `outboundcid`,`profile_id` FROM users LEFT JOIN (SELECT id,data AS secret FROM sip WHERE keyword="secret") AS sip ON users.extension = sip.id LEFT JOIN (SELECT `username`, `cellphone`, `email`, `profile_id`, SUBSTRING_INDEX(`extensions`,",",1) AS ext FROM nethcti_users ) AS nethcti_users ON users.extension = nethcti_users.ext'; 
         $sth = $oldDb->prepare($sql);
         $sth->execute(array());
         $result = $sth->fetchAll(\PDO::FETCH_ASSOC);
+        if (empty($result)) {
+            $sql = 'SELECT `extension`, "" as `username`, `secret`, `users`.`name`, "" as `cellphone`, "" as `email`, `voicemail`, `outboundcid`,"" as `profile_id` FROM users LEFT JOIN (SELECT id,data AS secret FROM sip WHERE keyword="secret") AS sip ON users.extension = sip.id';
+            $sth = $oldDb->prepare($sql);
+            $sth->execute(array());
+            $result = $sth->fetchAll(\PDO::FETCH_ASSOC);
+        }
         return $result;
     } catch (Exception $e) {
         error_log($e->getMessage());
