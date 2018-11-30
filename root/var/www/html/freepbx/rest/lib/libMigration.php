@@ -1262,31 +1262,6 @@ function getCdrRowCount(){
     }
 }
 
-function postMigration(){
-    try {
-        $errors = array(); $warnings = array(); $infos = array();
-        # Migrate CTI phonebook
-        exec('/usr/bin/sudo /var/www/html/freepbx/rest/lib/ctiMigrationHelper.sh',$output,$return);
-        if ($return === 0) {
-            $status = true;
-            $infos[] = 'CTI phonebook migrated';
-        } else {
-            $status = false;
-            $errors[] = 'Unknown error migrating CTI phonebook';
-        }
-        # make sure SIP channel driver is "both" (chan_sip and pjsip)
-        $db = FreePBX::Database();
-        $sql = 'UPDATE `freepbx_settings` SET `value` = "both" WHERE `keyword` = "ASTSIPDRIVER"';
-        $sth = $db->prepare($sql);
-        $sth->execute(array());
-        return array('status' => $status, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
-    } catch (Exception $e) {
-        error_log($e->getMessage());
-        $errors[] = $e->getMessage();
-        return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
-    }
-}
-
 function migrateIAX(){
     try {
         $db = FreePBX::Database();
@@ -1386,4 +1361,151 @@ function migrateIAX(){
         return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
     }
 }
+
+function migrateOldTable($table,$fields,$destinationtocheck = false){
+    try {
+        $errors = array(); $warnings = array(); $infos = array();
+        $db = FreePBX::Database();
+        $oldDb = OldDB::Database();
+
+        $sql = 'SELECT '.implode(',',$fields).' FROM '.$table;
+        $sth = $oldDb->prepare($sql);
+        $sth->execute(array());
+        $rows = $sth->fetchAll(\PDO::FETCH_NUM);
+        if (count($rows) === 0) {
+            $infos[] = 'Table "' . $table . '" empty, nothing to migrate';
+            return array('status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
+        }
+        $sql = 'SELECT COUNT(*) FROM '.$table;
+        $sth = $db->prepare($sql);
+        $sth->execute(array());
+        $count = $sth->fetchAll(\PDO::FETCH_NUM)[0][0];
+        if ($count > 0) {
+            $warnings[] = 'Table "' . $table . '" not migrated: it already contains some data';
+            return array('status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
+        }
+
+        $question_marks = array();
+        $q = array();
+        foreach ($fields as $field) {
+            $q[] = '?';
+        }
+        foreach ($rows as $index => $row) {
+            $question_marks[] = '(' . implode(',',$q) . ')';
+            if ($destinationtocheck !== false) {
+                foreach ($destinationtocheck as $dest) {
+                    // get index of destination into $fields array
+                    $i = array_search($dest,$fields);
+                    if (!checkDestination($row[$i]) && $row[$i] != '') {
+                        $rows[$index][$i] = 'app-blackhole,hangup,1';
+                        $warnings[] = $table . ' "' . $row[$i] . '" destination not migrated';
+                    }
+                }
+            }
+        }
+        $sql = 'INSERT INTO '.$table.' ('. implode(',',$fields) . ') VALUES ' . implode(',',$question_marks);
+        $sth = $db->prepare($sql);
+        $sth->execute(array_merge(... $rows));
+        $infos[] = 'Table "' . $table . '" migrated';
+        return array('status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
+    } catch (Exception $e) {
+        $errors[] = 'Error migrating table "' . $table . '": '.$e->getMessage();
+        return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
+    }
+}
+
+function postMigration(){
+    try {
+        $errors = array(); $warnings = array(); $infos = array();
+        $db = FreePBX::Database();
+        $oldDb = OldDB::Database();
+        // Migrate CTI phonebook
+        exec('/usr/bin/sudo /var/www/html/freepbx/rest/lib/ctiMigrationHelper.sh',$output,$return);
+        if ($return === 0) {
+            $status = true;
+            $infos[] = 'CTI phonebook migrated';
+        } else {
+            $status = false;
+            $errors[] = 'Unknown error migrating CTI phonebook';
+        }
+
+        // make sure SIP channel driver is "both" (chan_sip and pjsip)
+        $sql = 'UPDATE `freepbx_settings` SET `value` = "both" WHERE `keyword` = "ASTSIPDRIVER"';
+        $sth = $db->prepare($sql);
+        $sth->execute(array());
+
+        $objs = array(
+            // Conference
+            array(
+                'table' => 'meetme',
+                'fields' => array('exten','options','userpin','adminpin','description','joinmsg_id','music','users')
+            ),
+            // DISA
+            array(
+                'table' => 'disa',
+                'fields' => array('disa_id','displayname','pin','cid','context','digittimeout','resptimeout','needconf','hangup')
+            ),
+            // Paging
+            array(
+                'table' => 'paging_config',
+                'fields' => array('page_group','force_page','duplex','description')
+            ),
+            array(
+                'table' => 'paging_groups',
+                'fields' => array('page_number','ext')
+            ),
+            // Custom contexts
+            array(
+                'table' => 'customcontexts_contexts',
+                'fields' => array('context','description','dialrules','faildestination','featurefaildestination','failpin','failpincdr','featurefailpin','featurefailpincdr'),
+                'destinationtocheck' => array('faildestination','featurefaildestination')
+            ),
+            array(
+                'table' => 'customcontexts_contexts_list',
+                'fields' => array('context','description','locked')
+            ),
+            array(
+                'table' => 'customcontexts_includes',
+                'fields' => array('context','include','sort','userules')
+            ),
+            array(
+                'table' => 'customcontexts_includes_list',
+                'fields' => array('context','include','description','missing','sort')
+            ),
+            array(
+                'table' => 'customcontexts_module',
+                'fields' => array('id','value')
+            ),
+            // Queue priority
+            array(
+                'table' => 'queueprio',
+                'fields' => array('queueprio_id','queue_priority','description','dest'),
+                'destinationtocheck' => array('dest')
+            ),
+            // Set CID
+            array(
+                'table' => 'setcid',
+                'fields' => array('cid_id','cid_name','cid_num','description','dest'),
+                'destinationtocheck' => array('dest')
+            )
+        );
+
+        foreach ($objs as $obj) {
+            if (!isset($obj['destinationtocheck'])) {
+                $obj['destinationtocheck'] = false;
+            }
+            $res = migrateOldTable($obj['table'],$obj['fields'],$obj['destinationtocheck']);
+            $infos = array_merge($infos,$res['infos']);
+            $warnings = array_merge($warnings,$res['warnings']);
+            $errors = array_merge($errors,$res['errors']);
+        }
+
+        return array('status' => $status, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        $errors[] = $e->getMessage();
+        return array('status' => false, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos);
+    }
+}
+
 
