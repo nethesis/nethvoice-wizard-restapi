@@ -41,6 +41,16 @@ $app->post('/migration/endmigration', function (Request $request, Response $resp
     }
 });
 
+$app->post('/migration/migrationstatus', function (Request $request, Response $response, $args) {
+    $status = $request->getParsedBody();
+    $res = setMigration($status);
+    if ($res['status']) {
+        return $response->withJson($res,200);
+    } else {
+        return $response->withJson($res,500);
+    }
+});
+
 $app->get('/migration/migrationstatus', function (Request $request, Response $response, $args) {
     $res = getMigrationStatus();
     if ($res !== false) {
