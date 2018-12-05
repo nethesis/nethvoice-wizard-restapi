@@ -111,7 +111,7 @@ function isMigration(){
 function setMigration($status = 'done') {
     try {
         $dbh = FreePBX::Database();
-        $sql = 'DELETE FROM `admin` WHERE `variable`="migration_status"; INSERT IGNORE INTO `admin` (`variable`,`value`) VALUES ("migration_status",?)';
+        $sql = 'DELETE IGNORE FROM `admin` WHERE `variable`="migration_status"; INSERT IGNORE INTO `admin` (`variable`,`value`) VALUES ("migration_status",?)';
         $sth = $dbh->prepare($sql);
         $sth->execute(array($status));
         return array('status' => true, 'errors' => array(), 'infos' => array('migration_status changed'), 'warnings' => array());
@@ -128,6 +128,9 @@ function getMigrationStatus() {
         $sth = $dbh->prepare($sql);
         $sth->execute(array());
         $res = $sth->fetchAll()[0][0];
+        if (empty($res)) {
+            return 'ready';
+        }
         return $res;
     } catch (Exception $e) {
         error_log($e->getMessage());
