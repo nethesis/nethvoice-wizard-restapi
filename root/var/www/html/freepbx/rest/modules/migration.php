@@ -109,14 +109,15 @@ $app->post('/migration/importusers', function (Request $request, Response $respo
                     $row[7] = '';
                 }
                 //CTI profiles
-                if (isset($profiles[$user['profile_id']])) {
-                    $row[8] = $user['profile_id'];
+                if (isset($user['profile_id']) && isset($profiles[$user['profile_id']])) {
+                    $row[8] = $profiles[$user['profile_id']];
                 } else {
                     $row[8] = '';
                 }
                 $csv .= implode(',',$row)."\n";
             }
         }
+
         $base64csv = base64_encode($csv);
         system("/usr/bin/scl enable rh-php56 -- php /var/www/html/freepbx/rest/lib/csvimport.php ".escapeshellarg($base64csv)." &> /dev/null &");
         setMigration('users');
