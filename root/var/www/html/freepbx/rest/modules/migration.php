@@ -42,7 +42,8 @@ $app->post('/migration/endmigration', function (Request $request, Response $resp
 });
 
 $app->post('/migration/migrationstatus', function (Request $request, Response $response, $args) {
-    $status = $request->getParsedBody();
+    $params = $request->getParsedBody();
+    $status = $params['status'];
     $res = setMigration($status);
     if ($res['status']) {
         return $response->withJson($res,200);
@@ -70,7 +71,6 @@ $app->get('/migration/report', function (Request $request, Response $response, $
     $res = getMigrationReport();
     return $response->withJson($res, 200);
 });
-
 
 $app->post('/migration/importusers', function (Request $request, Response $response, $args) {
     try {
