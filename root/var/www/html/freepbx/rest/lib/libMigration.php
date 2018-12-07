@@ -1470,20 +1470,8 @@ function postMigration(){
                 'destinationtocheck' => array('faildestination','featurefaildestination')
             ),
             array(
-                'table' => 'customcontexts_contexts_list',
-                'fields' => array('context','description','locked')
-            ),
-            array(
                 'table' => 'customcontexts_includes',
                 'fields' => array('context','include','sort','userules')
-            ),
-            array(
-                'table' => 'customcontexts_includes_list',
-                'fields' => array('context','include','description','missing','sort')
-            ),
-            array(
-                'table' => 'customcontexts_module',
-                'fields' => array('id','value')
             ),
             // Queue priority
             array(
