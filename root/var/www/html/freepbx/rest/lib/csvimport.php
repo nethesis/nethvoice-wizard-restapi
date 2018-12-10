@@ -126,8 +126,10 @@ try {
                     $err .= "Error adding main extension ".$row[2]." to user ".$username.": ".$create['message']."\n";
                 } else {
                     // assign physical device to user if it is a migration
-                    if (function_exists('assignPhysicalDevice')) {
-                        assignPhysicalDevice($row[2]);
+                    if (function_exists('isMigration') && isMigration()) {
+                        $secret = getOldSecret($row[2]);
+                        $extension = createExtension($row[2],false);
+                        useExtensionAsCustomPhysical($extension,$secret,'temporaryphysical');
                     }
                 }
             } else {
@@ -185,7 +187,7 @@ try {
             if (isset($row[6]) && !empty($row[6])) {
                 if (strtolower($row[6]) == 'true' || $row[6] == 1) {
                     # enable WebRTC
-                    $extension = createExtension($row[2]);
+                    $extension = createExtension($row[2],false);
                     if ($extension === false ) {
                         throw new Exception('Error creating extension');
                     }
@@ -194,7 +196,7 @@ try {
                         throw new Exception('Error associating webrtc extension');
                     }
 
-                    $extensionm = createExtension($row[2]);
+                    $extensionm = createExtension($row[2],false);
 
                     if ($extensionm === false ) {
                         throw new Exception('Error creating webrtc mobile extension');

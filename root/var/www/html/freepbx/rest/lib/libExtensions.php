@@ -30,11 +30,25 @@ function extensionExists($e, $extensions)
     return false;
 }
 
-function createExtension($mainextensionnumber){
+function createExtension($mainextensionnumber,$delete=false){
     try {
         global $astman;
         $fpbx = FreePBX::create();
         $dbh = FreePBX::Database();
+
+        if ($delete) {
+            $stmt = $dbh->prepare('SELECT `extension` FROM `rest_devices_phones` WHERE `extension` LIKE ? AND `type` = "temporaryphysical"');
+            $stmt->execute(array('%'.$mainextensionnumber));
+            $res = $stmt->fetchAll();
+            if (count($res) >0 ) {
+                foreach ($res as $extension) {
+                    // delete temporary extension
+                    deletePhysicalExtension($extension[0]);
+                    deleteExtension($extension[0]);
+                }
+            }
+        }
+
         $stmt = $dbh->prepare("SELECT * FROM `rest_devices_phones` WHERE `extension` = ?");
         $stmt->execute(array($mainextensionnumber));
         $res = $stmt->fetchAll();
@@ -160,20 +174,28 @@ function useExtensionAsWebRTC($extension,$isMobile = false) {
     }
 }
 
-function useExtensionAsCustomPhysical($extension,$web_user = null ,$web_password = null) {
+function useExtensionAsCustomPhysical($extension, $secret = false, $type = 'physical', $web_user = null ,$web_password = null) {
     try {
         //disable call waiting
         global $astman;
         $astman->database_del("CW",$extension);
+        $dbh = FreePBX::Database();
+
+        // Overwrite sip password with the one provided
+        if ($secret != false) {
+            $sql = 'UPDATE `sip` SET `data` = ? WHERE `id` = ? AND `keyword` = "secret"';
+            $stmt = $dbh->prepare($sql);
+            $stmt->execute(array($secret,$extension));
+        } else {
+            $secret = sql('SELECT data FROM `sip` WHERE id = "' . $extension . '" AND keyword="secret"', "getOne");
+        }
 
         // insert created physical extension in password table
-        $extension_secret = sql('SELECT data FROM `sip` WHERE id = "' . $extension . '" AND keyword="secret"', "getOne");
-        $dbh = FreePBX::Database();
         $sql = 'INSERT INTO `rest_devices_phones` SET user_id = ( '.
                'SELECT userman_users.id FROM userman_users WHERE userman_users.default_extension = ? '.
-               '), extension = ?, secret= ?, web_user = ?, web_password = ?, type = "physical"';
+               '), extension = ?, secret= ?, web_user = ?, web_password = ?, type = ?';
         $stmt = $dbh->prepare($sql);
-        $res = $stmt->execute(array(getMainExtension($extension),$extension,$extension_secret,$web_user,$web_password));
+        $res = $stmt->execute(array(getMainExtension($extension),$extension,$secret,$web_user,$web_password,$type));
         if (!$res) {
             throw new Exception("Error creating custom device");
         }
@@ -182,7 +204,6 @@ function useExtensionAsCustomPhysical($extension,$web_user = null ,$web_password
         error_log($e->getMessage());
         return false;
     }
-
 }
 
 function useExtensionAsPhysical($extension,$mac,$model,$line=false) {

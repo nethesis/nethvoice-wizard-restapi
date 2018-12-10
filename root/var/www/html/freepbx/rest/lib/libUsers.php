@@ -66,14 +66,44 @@ function setPassword($username, $password) {
     $stmt->execute(array($password, $username, $password));
 }
 
-function generateRandomPassword($length = 8) {
-    $characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+function _generateRandomPassword($length,$characters) {
     $charactersLength = strlen($characters);
     $randomString = '';
     for ($i = 0; $i < $length; $i++) {
         $randomString .= $characters[rand(0, $charactersLength - 1)];
     }
     return $randomString;
+}
+
+function generateRandomPassword($length = 8, $complex = true) {
+    $characters = array(
+        'abcdefghijklmnopqrstuvwxyz',
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        '0123456789',
+        '!#?,.'
+    );
+
+    if (!$complex) {
+        return _generateRandomPassword($length,$characters[0].$characters[1]);
+    }
+
+    if ($length < count($characters)) {
+        $length = count($characters); // length can't be less than 4 char if we want at least one between lowercase, uppercase, numbers and symbols
+    }
+    $typesCharNum = array();
+    foreach ($characters as $c) {
+        $typesCharNum[] = 1; //number of chars for each of types (lowercase, uppercase, numbers and symbols)
+    }
+    while (array_sum($typesCharNum) < $length) {
+        $typesCharNum[rand(0,3)] += 1; //add chars count to a random type of chars
+    }
+    $password = '';
+    foreach ($characters as $index => $c) {
+        $password .= _generateRandomPassword($typesCharNum[$index],$c);
+    }
+    $password = str_split($password); //convert string to array
+    shuffle($password); //mix array element
+    return implode('', $password); //return imploded array
 }
 
 function getUserID($username) {

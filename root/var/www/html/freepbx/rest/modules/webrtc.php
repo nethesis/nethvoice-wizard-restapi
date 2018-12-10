@@ -45,7 +45,7 @@ $app->post('/webrtc', function (Request $request, Response $response, $args) {
         $extensionnumber = $params['extension'];
         $fpbx = FreePBX::create();
 
-        $extension = createExtension($extensionnumber);
+        $extension = createExtension($extensionnumber,false);
 
         if ($extension === false ) {
             $response->withJson(array("status"=>"Error creating extension"), 500);
@@ -56,7 +56,7 @@ $app->post('/webrtc', function (Request $request, Response $response, $args) {
         }
 
         # Create extension for WebRTC Mobile
-        $extensionm = createExtension($extensionnumber);
+        $extensionm = createExtension($extensionnumber,false);
 
         if ($extensionm === false ) {
             $response->withJson(array("status"=>"Error creating webrtc mobile extension"), 500);

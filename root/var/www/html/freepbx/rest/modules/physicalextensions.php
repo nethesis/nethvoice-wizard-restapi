@@ -54,7 +54,12 @@ $app->post('/physicalextensions', function (Request $request, Response $response
         $web_password = $params['web_password'];
         $line = $params['line'];
 
-        $extension = createExtension($mainextensionnumber);
+        $delete = false;
+        if (isset($mac) && isset($model)) {
+            $delete = true;
+        }
+
+        $extension = createExtension($mainextensionnumber,$delete);
 
         if ($extension === false ) {
             $response->withJson(array("status"=>"Error creating extension"), 500);
@@ -65,13 +70,13 @@ $app->post('/physicalextensions', function (Request $request, Response $response
                 $response->withJson(array("status"=>"Error associating physical extension"), 500);
             }
         } else {
-            if (useExtensionAsCustomPhysical($extension,$web_user,$web_password) === false) {
+            if (useExtensionAsCustomPhysical($extension,false,'physical',$web_user,$web_password) === false) {
                 $response->withJson(array("status"=>"Error creating custom extension"), 500);
             }
         }
 
         system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
-        return $response->withJson(array('extension'=>$created_extension), 200);
+        return $response->withJson(array('extension'=>$extension), 200);
    } catch (Exception $e) {
        error_log($e->getMessage());
        return $response->withJson(array("status"=>$e->getMessage()), 500);
