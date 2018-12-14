@@ -164,11 +164,10 @@ $app->get('/devices/phones/list/{id}', function (Request $request, Response $res
                 continue;
             }
             $mac = preg_replace('/(..)(..)(..)(..)(..)(..)/', '$1:$2:$3:$4:$5:$6',$mac);
-            $manufacturer = 'Grandstream';
-            $phones[] = array('mac' => $mac, 'type' => 'phone', 'ipv4' => '', 'manufacturer' => 'App', 'model' => 'GS Wave', 'tftp-requested' => true);
-            $model = sql('SELECT model FROM `rest_devices_phones` WHERE mac = "' . $phones[$key]['mac'] . '"', "getOne");
+            $phones[] = array('mac' => $mac, 'type' => 'phone', 'ipv4' => '', 'manufacturer' => 'CTI App', 'model' => 'GS Wave', 'tftp-requested' => true);
+            $model = sql('SELECT model FROM `rest_devices_phones` WHERE mac = "' . $mac . '"', "getOne");
             if (!$model) {
-                addPhone($mac, 'App', 'GS Wave');
+                addPhone($mac, 'CTI App', 'GS Wave');
             }
         }
         fclose($fp);
