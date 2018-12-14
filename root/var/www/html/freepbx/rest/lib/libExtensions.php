@@ -310,6 +310,12 @@ function useExtensionAsApp($extension,$mac,$model) {
         } else {
             throw new Exception("Error adding device");
         }
+
+        //Allows unencrypted SRTP
+        $sql = 'UPDATE IGNORE `sip` SET `data` = ? WHERE `id` = ? AND `keyword` = ?';
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute(array('yes',$extension,'media_encryption_optimistic'));
+
         return true;
      } catch (Exception $e) {
         error_log($e->getMessage());
