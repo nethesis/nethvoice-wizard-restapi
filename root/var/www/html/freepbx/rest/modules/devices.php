@@ -89,6 +89,7 @@ $app->get('/devices/phones/list/{id}', function (Request $request, Response $res
             }
             $macs[] = '^'.str_replace(':','',$mac);
         }
+
         $matchString = implode('\|',$macs);
         // do match in shell because is faster
         $cmd = '/usr/bin/sudo /usr/bin/grep dnsmasq-tftp /var/log/messages ';
@@ -145,6 +146,33 @@ $app->get('/devices/phones/list/{id}', function (Request $request, Response $res
                 }
             }
         }
+
+        // Scan messages for GS Wave devices
+        $cmd = '/usr/bin/sudo /usr/bin/grep dnsmasq-tftp /var/log/messages ';
+        $cmd .= ' | grep \'\/var\/lib\/tftpboot\/cfg[0-9a-fA-F]\{12\}\.xml not found\' ';
+        // get only MAC addresses of string
+        $cmd .= ' | sed \'s/^.*tftpboot\/cfg\([0-9a-fA-F]\{12\}\)\.xml.*$/\1/\' ';
+        // MAC to uppercase
+        $cmd .= ' | tr \'[a-z]\' \'[A-Z]\' ';
+        // sort unique
+        $cmd .= " | sort -u ";
+
+        $fp=popen($cmd,'r');
+        while (!feof($fp)) {
+            $mac = trim(fgets($fp));
+            if ($mac == '') {
+                continue;
+            }
+            $mac = preg_replace('/(..)(..)(..)(..)(..)(..)/', '$1:$2:$3:$4:$5:$6',$mac);
+            $manufacturer = 'Grandstream';
+            $phones[] = array('mac' => $mac, 'type' => 'phone', 'ipv4' => '', 'manufacturer' => 'App', 'model' => 'GS Wave', 'tftp-requested' => true);
+            $model = sql('SELECT model FROM `rest_devices_phones` WHERE mac = "' . $phones[$key]['mac'] . '"', "getOne");
+            if (!$model) {
+                addPhone($mac, 'App', 'GS Wave');
+            }
+        }
+        fclose($fp);
+
 
         return $response->withJson($phones, 200);
     } catch (Exception $e) {
@@ -516,8 +544,8 @@ $app->post('/devices/phones/provision', function (Request $request, Response $re
             $phone_info = $endpoint->get_phone_info($mac_id);
             $res = $endpoint->prepare_configs($phone_info, false);
 
-          // Copy provisioning file to correct destination
-          system('/usr/bin/sudo /usr/bin/scl enable rh-php56 -- php /var/www/html/freepbx/rest/lib/moveProvisionFiles.php');
+            // Copy provisioning file to correct destination
+            system('/usr/bin/sudo /usr/bin/scl enable rh-php56 -- php /var/www/html/freepbx/rest/lib/moveProvisionFiles.php');
         } else {
             throw new Exception('device not found');
         }

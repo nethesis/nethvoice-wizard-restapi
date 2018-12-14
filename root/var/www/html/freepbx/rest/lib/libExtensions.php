@@ -209,7 +209,6 @@ function useExtensionAsCustomPhysical($extension, $secret = false, $type = 'phys
 function useExtensionAsPhysical($extension,$mac,$model,$line=false) {
     try {
         require_once(__DIR__. '/../lib/modelRetrieve.php');
-
         //disable call waiting
         global $astman;
         $astman->database_del("CW",$extension);
@@ -217,8 +216,8 @@ function useExtensionAsPhysical($extension,$mac,$model,$line=false) {
         // insert created physical extension in password table
         $extension_secret = sql('SELECT data FROM `sip` WHERE id = "' . $extension . '" AND keyword="secret"', "getOne");
         $dbh = FreePBX::Database();
-        $vendor = json_decode(file_get_contents(__DIR__. '/../lib/macAddressMap.json'), true);
-        $vendor = $vendor[substr($mac,0,8)];
+        $vendors = json_decode(file_get_contents(__DIR__. '/../lib/macAddressMap.json'), true);
+        $vendor = $vendors[substr($mac,0,8)];
         $stmt = $dbh->prepare('SELECT COUNT(*) AS num FROM `rest_devices_phones` WHERE mac = ?');
         $stmt->execute(array($mac));
         $res = $stmt->fetchAll()[0]['num'];
@@ -263,6 +262,50 @@ function useExtensionAsPhysical($extension,$mac,$model,$line=false) {
                     // add device to endpointman module
                     $mac_id = $endpoint->add_device($mac, $model_id, $extension, null, $line, $mainextension['name']);
                 }
+            }
+        } else {
+            throw new Exception("Error adding device");
+        }
+        return true;
+     } catch (Exception $e) {
+        error_log($e->getMessage());
+        return false;
+    }
+}
+
+function useExtensionAsApp($extension,$mac,$model) {
+    try {
+        //disable call waiting
+        global $astman;
+        $astman->database_del("CW",$extension);
+
+        // insert created physical extension in password table
+        $extension_secret = sql('SELECT data FROM `sip` WHERE id = "' . $extension . '" AND keyword="secret"', "getOne");
+        $dbh = FreePBX::Database();
+        $sql = 'UPDATE `rest_devices_phones` SET user_id = ( '.
+               'SELECT userman_users.id FROM userman_users WHERE userman_users.default_extension = ? '.
+               '), extension = ?, secret= ?, type = "physical" WHERE mac = ?';
+        $stmt = $dbh->prepare($sql);
+        $res = $stmt->execute(array(getMainExtension($extension),$extension,$extension_secret,$mac));
+
+        if ($res) {
+            // Add extension to endpointman
+            $endpoint = \FreePBX::Endpointmanager();
+            // brand id hardcoded to "App"
+            $brand = array('id' => 23, 'name' => 'App');
+            $models = $endpoint->models_available(null, $brand['id']);
+            $model_id = null;
+            foreach ($models as $m) {
+                if ($m['text'] === $model) {
+                    $model_id = $m['value'];
+                    break;
+                }
+            }
+            if (!$model_id) {
+                throw new Exception('model not found');
+            } else {
+                // add device to endpointman module
+                $mac_id = $endpoint->add_device($mac, $model_id, $extension, null, $line, $mainextension['name']);
             }
         } else {
             throw new Exception("Error adding device");
