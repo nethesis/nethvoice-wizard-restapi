@@ -103,3 +103,7 @@ UPDATE IGNORE `rest_cti_permissions` SET `name`='advanced_off_hour_tmp',`display
 UPDATE IGNORE `rest_cti_permissions` SET `name`='ad_off_hour',`displayname`='Admin Off Hour',`description`='Allow to change all incoming call paths' WHERE id = 27;
 UPDATE IGNORE `rest_cti_permissions` SET `name`='advanced_off_hour',`displayname`='Advanced Off Hour',`description`='Allow to change user\'s incoming call path and generic inbound routes' WHERE id = 25;
 DELETE IGNORE FROM `rest_cti_permissions` WHERE `id`=11 AND `name` = 'QueueMan';
+DELETE IGNORE FROM `rest_cti_permissions` WHERE `id`=14 AND `name` = 'ad_sms';
+DELETE IGNORE FROM `rest_cti_permissions` WHERE `id`=7 AND `name` = 'sms';
+DELETE IGNORE FROM `rest_cti_permissions` WHERE `id`=1 AND `name` = 'call_waiting';
+DELETE IGNORE FROM `rest_cti_permissions` WHERE `id`=10 AND `name` = 'oppanel';
