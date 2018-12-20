@@ -442,6 +442,11 @@ $app->post('/migration/daynight', function (Request $request, Response $response
         $sth->execute(array());
         $rows = $sth->fetchAll(\PDO::FETCH_NUM);
 
+        if (count($rows) === 0 ) {
+            $infos[] = 'DayNight empty';
+            return $response->withJson(array('status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos),200);
+        }
+
         // fill question marks string
         $question_marks = array();
         foreach ($rows as $index => $row) {
