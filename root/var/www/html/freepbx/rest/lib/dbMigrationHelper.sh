@@ -20,7 +20,12 @@
 # along with NethServer.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-
+# migrate queue_log
+/usr/bin/mysqldump --no-create-info --insert-ignore asteriskcdrdb11 queue_log | /usr/bin/mysql asteriskcdrdb
+# migrate queue_log_history
+/usr/bin/mysqldump --insert-ignore asteriskcdrdb11 queue_log_history | /usr/bin/mysql asteriskcdrdb
+# migrate voicemessages
+/usr/bin/mysqldump --no-create-info --insert-ignore asteriskcdrdb11 voicemessages | /usr/bin/mysql asteriskcdrdb
 # migrate CTI phonebook
 /usr/bin/mysql --defaults-file=/root/.my.cnf -N -B -e 'INSERT INTO nethcti3.cti_phonebook (SELECT * FROM nethcti2.cti_phonebook)'
 

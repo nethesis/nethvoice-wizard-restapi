@@ -1429,13 +1429,13 @@ function postMigration(){
         $db = FreePBX::Database();
         $oldDb = OldDB::Database();
         // Migrate CTI phonebook
-        exec('/usr/bin/sudo /var/www/html/freepbx/rest/lib/ctiMigrationHelper.sh',$output,$return);
+        exec('/usr/bin/sudo /var/www/html/freepbx/rest/lib/dbMigrationHelper.sh',$output,$return);
         if ($return === 0) {
             $status = true;
-            $infos[] = 'CTI phonebook migrated';
+            $infos[] = 'CTI phonebook and queue_log migrated';
         } else {
             $status = false;
-            $errors[] = 'Unknown error migrating CTI phonebook';
+            $errors[] = 'Unknown error migrating CTI phonebook and queue_log';
         }
 
         // make sure SIP channel driver is "both" (chan_sip and pjsip)
