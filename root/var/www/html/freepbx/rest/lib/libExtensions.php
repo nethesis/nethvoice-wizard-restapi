@@ -138,10 +138,10 @@ function useExtensionAsWebRTC($extension,$isMobile = false) {
         global $astman;
         $astman->database_del("CW",$extension);
 
-        //enable default codecs and vp8 video codec
+        //enable default codecs and video codecs
         $sql = 'UPDATE IGNORE `sip` SET `data` = ? WHERE `id` = ? AND `keyword` = ?';
         $stmt = $dbh->prepare($sql);
-        $stmt->execute(array('ulaw,alaw,gsm,g726,vp8',$extension,'allow'));
+        $stmt->execute(array('ulaw,alaw,gsm,g726,vp8,h264',$extension,'allow'));
 
         // insert WebRTC extension in password table
         $extension_secret = sql('SELECT data FROM `sip` WHERE id = "' . $extension . '" AND keyword="secret"', "getOne");
