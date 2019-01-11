@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.1.15
+Version: 14.2.0
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -38,6 +38,12 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Fri Jan 11 2019 Stefano Fancello <stefano.fancello@nethesis.it> - 14.2.0-1
+- Removed ad_sms,sms,call_waiting,oppanel permission nethesis/dev#5553
+- create new webrtc extensions with h264 enabled nethesis/dev#5546
+- Allows to generate configuration for GS Wave App nethesis/dev#5531
+- Nethvoice 11 to 14 upgrade wizard restapi (#72) nethesis/dev#5454
+
 * Tue Nov 20 2018 Stefano Fancello <stefano.fancello@nethesis.it> - 14.1.15-1
 - Add Fanvil device and mac address nethesis/dev#5515
 - Insert CTI permissions into mysql only if it is needed nethesis/dev#5499
