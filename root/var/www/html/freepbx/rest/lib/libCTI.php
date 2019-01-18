@@ -60,12 +60,73 @@ function getAllAvailableMacroPermissions() {
 function getAllAvailablePermissions($minified=false) {
     try {
         $dbh = FreePBX::Database();
+
+        // Add operator panel queues permissions if needed
+        $macropermissionid = 11; // Operator panel macro permission id is defined in /var/www/html/freepbx/rest/sql/rest_cti.sql
+        $query = 'SELECT * from rest_cti_permissions WHERE name LIKE "in_queue_%"';
+        $sth = $dbh->prepare($query);
+        $sth->execute(array());
+        $qpermissions = $sth->fetchAll(\PDO::FETCH_ASSOC);
+        // Get existing queues
+        $queues = FreePBX::Queues()->listQueues(false);
+
+        if (!empty($queues)) {
+            foreach ($queues as $queue) {
+                $add = true;
+                if (!empty($qpermissions)) {
+                    foreach ($qpermissions as $qpermission) {
+                        if ($qpermission['name'] === 'in_queue_'.$queue[0]) {
+                            //don't add permission
+                            $add = false;
+                            break;
+                        }
+                    }
+                }
+                if ($add) {
+                    // insert into permissions
+                    $sql = 'INSERT INTO rest_cti_permissions VALUES (NULL, ?, ?, ?)';
+                    $sth = $dbh->prepare($sql);
+                    $sth->execute(array('in_queue_'.$queue[0], 'Queue '.$queue[1].' ('.$queue[0].')','Use this queue for Operator Panel incoming calls'));
+                    // get permission id
+                    $sql = 'SELECT id FROM rest_cti_permissions WHERE name = ?';
+                    $sth = $dbh->prepare($sql);
+                    $sth->execute(array('in_queue_'.$queue[0]));
+                    $pid = $sth->fetchAll()[0][0];
+                    // Insert into macro permissions permissions
+                    $sql = 'INSERT INTO rest_cti_macro_permissions_permissions (macro_permission_id,permission_id) VALUES (?,?)';
+                    $sth = $dbh->prepare($sql);
+                    $sth->execute(array($macropermissionid,$pid));
+                }
+            }
+        }
+        // remove permissions for queues that don't exist
+        if (!empty($qpermissions)) {
+            foreach ($qpermissions as $qpermission){
+                $remove = true;
+                if (!empty($queues)) {
+                    foreach ($queues as $queue) {
+                        if ($qpermission['name'] === 'in_queue_'.$queue[0]) {
+                            //don't remove permission
+                            $remove = false;
+                            break;
+                        }
+                    }
+                }
+                if ($remove) {
+                    $sql = 'DELETE FROM rest_cti_permissions WHERE id = ?';
+                    $sth = $dbh->prepare($sql);
+                    $sth->execute(array($qpermission['id']));
+                }
+            }
+        }
+
         if ($minified) {
             $sql = 'SELECT `id`,`name` FROM `rest_cti_permissions`';
         } else {
             $sql = 'SELECT * FROM `rest_cti_permissions`';
         }
-        $tmp_permissions = $dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC);
+
+        $permissions = array();
         foreach ($dbh->sql($sql,"getAll",\PDO::FETCH_ASSOC) as $perm) {
             $permissions[$perm['id']] = $perm;
         }
