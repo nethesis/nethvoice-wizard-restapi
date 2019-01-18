@@ -109,6 +109,7 @@ INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (7,'streaming','Streaming
 INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (8,'off_hour','Off Hour','Allow to change of his incoming call paths');
 INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (9,'remote_sites','Remote Sites','Allow to view Remote Sites information');
 INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (10,'qmanager','Queue Manager','Allow to view and manage queues in real time');
+INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (11,'operator_panel','Operator Panel','Enables Operator Panel interface for operators');
 
 /*Permissions*/
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (2,'dnd','DND','Configure do Not Disturb');
