@@ -150,6 +150,8 @@ $app->get('/devices/phones/list/{id}', function (Request $request, Response $res
         // Scan messages for GS Wave devices
         $cmd = '/usr/bin/sudo /usr/bin/grep dnsmasq-tftp /var/log/messages ';
         $cmd .= ' | grep \'\/var\/lib\/tftpboot\/cfg[0-9a-fA-F]\{12\}\.xml not found\' ';
+        // take only UNKNOWN MACs
+        $cmd .= " | grep -v '$matchString' ";
         // get only MAC addresses of string
         $cmd .= ' | sed \'s/^.*tftpboot\/cfg\([0-9a-fA-F]\{12\}\)\.xml.*$/\1/\' ';
         // MAC to uppercase
