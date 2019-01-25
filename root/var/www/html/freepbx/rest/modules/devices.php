@@ -94,7 +94,7 @@ $app->get('/devices/phones/list/{id}', function (Request $request, Response $res
         // do match in shell because is faster
         $cmd = '/usr/bin/sudo /usr/bin/grep dnsmasq-tftp /var/log/messages ';
         // exclude family files, reset files ...
-        $cmd .= ' | grep -v \'/y[0-9]\{12\}\.cfg\|/y[0-9]\{12\}\.boot\|/[0-9]\{12\}-license\.cfg\' ';
+        $cmd .= ' | grep -v \'/y[0-9]\{12\}\.cfg\|/y[0-9]\{12\}\.boot\|/[0-9]\{12\}-license\.cfg\|/[0-9a-fA-F]\{12\}script.txt\' ';
         // get only MAC addresses of string
         $cmd .= ' | sed \'s/^.*\([0-9a-fA-F]\{12\}\).*$/\1/\' ';
         // MAC to uppercase
