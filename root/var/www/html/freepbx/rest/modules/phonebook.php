@@ -104,7 +104,7 @@ $app->delete('/phonebook/config/{id}', function (Request $request, Response $res
     try {
         $route = $request->getAttribute('route');
         $id = $route->getArgument('id');
-        $file = '/etc/phonebook/sources.d/custom_'.$id.'.json';
+        $file = '/etc/phonebook/sources.d/'.$id.'.json';
         $res = unlink($file);
         if (!$res) {
             throw new Exception("Error deleting $file");
