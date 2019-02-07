@@ -137,7 +137,7 @@ $app->post('/phonebook/test', function (Request $request, Response $response, $a
     }
 });
 
-$app->get('/phonebook/getcolumns', function (Request $request, Response $response, $args) {
+$app->post('/phonebook/getcolumns', function (Request $request, Response $response, $args) {
     try {
         $data = $request->getParsedBody();
         $cmd = "/usr/bin/sudo /usr/bin/python /usr/share/phonebooks/phonebook-import.py --get-db-cols";
