@@ -122,7 +122,8 @@ $app->post('/phonebook/test', function (Request $request, Response $response, $a
         $cmd = "/usr/bin/sudo /usr/bin/python /usr/share/phonebooks/phonebook-import.py --check-db-conn";
         foreach ( array('dbtype','host','port','user','password','dbname','dbtable') as $var) {
             if (!isset($data[$var]) || empty($data[$var])) {
-                throw new Exception("Missing value: $var");
+                error_log("Missing value: $var");
+                return $response->withJson(array("status"=>"Missing value: $var"), 400);
             }
             $cmd.= ' '.$var.'='.escapeshellarg($data[$var]);
         }
@@ -143,7 +144,8 @@ $app->post('/phonebook/getcolumns', function (Request $request, Response $respon
         $cmd = "/usr/bin/sudo /usr/bin/python /usr/share/phonebooks/phonebook-import.py --get-db-cols";
         foreach ( array('dbtype','host','port','user','password','dbname','dbtable') as $var) {
             if (!isset($data[$var]) || empty($data[$var])) {
-                throw new Exception("Missing value: $var");
+                error_log("Missing value: $var");
+                return $response->withJson(array("status"=>"Missing value: $var"), 400);
             }
             $cmd.= ' '.$var.'='.escapeshellarg($data[$var]);
         }
