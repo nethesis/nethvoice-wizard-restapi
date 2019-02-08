@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.2.0
+Version: 14.2.1
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -38,6 +38,14 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Fri Feb 08 2019 Stefano Fancello <stefano.fancello@nethesis.it> - 14.2.1-1
+- Add Panasonic phones to maps Nethesis/dev#5576
+- Exclude Sangoma gateways when scanning for phones Nethesis/dev#5567
+- Only show unknown devices as GS Wave devices Nethesis/dev#5567
+ - Add operator panel queues permissions Nethesis/dev#5549
+- Add operator panel macro permission Nethesis/dev#5549
+- Move default CTI macro permissions and permissions 
+
 * Fri Jan 11 2019 Stefano Fancello <stefano.fancello@nethesis.it> - 14.2.0-1
 - Removed ad_sms,sms,call_waiting,oppanel permission nethesis/dev#5553
 - create new webrtc extensions with h264 enabled nethesis/dev#5546
