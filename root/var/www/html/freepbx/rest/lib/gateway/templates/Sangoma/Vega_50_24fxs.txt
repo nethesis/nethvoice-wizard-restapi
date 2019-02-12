@@ -1053,7 +1053,7 @@
      set .planner.profile.24.plan.23.dest="IF:0123"
      set .planner.profile.24.plan.23.group="99"
      set .planner.profile.24.plan.23.name="From_SIP_To_FXS_23"
-     set .planner.profile.24.plan.23.srce="IF:99..,TEL:(FXSEXTENSION23)"
+     set .planner.profile.24.plan.23.srce="IF:99..,TEL:(FXSEXTENSION22)"
     cp .planner.profile.24.plan.24
      set .planner.profile.24.plan.24.cost="0"
      set .planner.profile.24.plan.24.dest="IF:0124"
