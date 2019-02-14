@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.2.1
+Version: 14.2.2
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -38,6 +38,9 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Thu Feb 14 2019 Stefano Fancello <stefano.fancello@nethesis.it> - 14.2.2-1
+- minor fix Vega 50 24 FXS template. nethesis/dev#5579
+
 * Fri Feb 08 2019 Stefano Fancello <stefano.fancello@nethesis.it> - 14.2.1-1
 - Add Panasonic phones to maps Nethesis/dev#5576
 - Exclude Sangoma gateways when scanning for phones Nethesis/dev#5567
