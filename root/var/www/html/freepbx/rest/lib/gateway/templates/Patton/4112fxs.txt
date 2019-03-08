@@ -113,7 +113,6 @@ location-service LOC_SERV_TRAIN5
   domain 1 ASTERISKIP
 
   identity FXSEXTENSION0
-    phone-context from-internal
 
     authentication outbound
       authenticate 1 authentication-service AUTH_TRAIN username FXSEXTENSION0
