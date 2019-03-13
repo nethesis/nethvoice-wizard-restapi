@@ -120,7 +120,7 @@ $app->delete('/phonebook/config/{id}', function (Request $request, Response $res
 $app->post('/phonebook/test', function (Request $request, Response $response, $args) {
     try {
         $data = $request->getParsedBody();
-        $cmd = "/usr/bin/sudo /usr/bin/python /usr/share/phonebooks/phonebook-import.py --check-db";
+        $cmd = "/usr/bin/python /usr/share/phonebooks/phonebook-import.py --check-db";
         if (isset($data['query']) && !empty($data['query'])) {
             $data['query'] = preg_replace('/;$|(LIMIT|limit) [0-9]*(;$|$)/','',$data['query']).' LIMIT 3;';
         }
@@ -150,7 +150,7 @@ $app->post('/phonebook/syncnow/{id}', function (Request $request, Response $resp
         $route = $request->getAttribute('route');
         $id = $route->getArgument('id');
         $file = '/etc/phonebook/sources.d/'.$id.'.json';
-        $cmd = "/usr/bin/sudo /usr/bin/python /usr/share/phonebooks/phonebook-import.py --source-id=".escapeshellarg($id);
+        $cmd = "/usr/bin/python /usr/share/phonebooks/phonebook-import.py --source-id=".escapeshellarg($id);
         exec($cmd,$output,$return);
         if ($return!=0) {
             return $response->withJson(array("status"=>false),500);
