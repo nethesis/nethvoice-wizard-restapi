@@ -116,44 +116,46 @@ $app->delete('/phonebook/config/{id}', function (Request $request, Response $res
     }
 });
 
+/* Test connection and query and get first 3 results*/
 $app->post('/phonebook/test', function (Request $request, Response $response, $args) {
     try {
         $data = $request->getParsedBody();
-        $cmd = "/usr/bin/sudo /usr/bin/python /usr/share/phonebooks/phonebook-import.py --check-db-conn";
-        foreach ( array('dbtype','host','port','user','password','dbname','dbtable') as $var) {
+        $cmd = "/usr/bin/sudo /usr/bin/python /usr/share/phonebooks/phonebook-import.py --check-db";
+        if (isset($data['query']) && !empty($data['query'])) {
+            $data['query'] = preg_replace('/;$|(LIMIT|limit) [0-9]*(;$|$)/','',$data['query']).' LIMIT 3;';
+        }
+        foreach ( array('dbtype','host','port','user','password','dbname','query') as $var) {
             if (!isset($data[$var]) || empty($data[$var])) {
                 error_log("Missing value: $var");
                 return $response->withJson(array("status"=>"Missing value: $var"), 400);
             }
             $cmd.= ' '.$var.'='.escapeshellarg($data[$var]);
         }
+        error_log($cmd);
         exec($cmd,$output,$return);
         if ($return!=0) {
             return $response->withJson(array("status"=>false),200);
         }
-        return $response->withJson(array("status"=>true),200);
+        $res = json_decode($output[0]);
+        return $response->withJson($res,200);
     } catch (Exception $e) {
         error_log($e->getMessage());
         return $response->withJson(array("status"=>$e->getMessage()), 500);
     }
 });
 
-$app->post('/phonebook/getcolumns', function (Request $request, Response $response, $args) {
+/* Sync now one configuration */
+$app->post('/phonebook/syncnow/{id}', function (Request $request, Response $response, $args) {
     try {
-        $data = $request->getParsedBody();
-        $cmd = "/usr/bin/sudo /usr/bin/python /usr/share/phonebooks/phonebook-import.py --get-db-cols";
-        foreach ( array('dbtype','host','port','user','password','dbname','dbtable') as $var) {
-            if (!isset($data[$var]) || empty($data[$var])) {
-                error_log("Missing value: $var");
-                return $response->withJson(array("status"=>"Missing value: $var"), 400);
-            }
-            $cmd.= ' '.$var.'='.escapeshellarg($data[$var]);
-        }
+        $route = $request->getAttribute('route');
+        $id = $route->getArgument('id');
+        $file = '/etc/phonebook/sources.d/'.$id.'.json';
+        $cmd = "/usr/bin/sudo /usr/bin/python /usr/share/phonebooks/phonebook-import.py --source-id=".escapeshellarg($id);
         exec($cmd,$output,$return);
         if ($return!=0) {
-            throw new Exception("Error testing phonebook-import.py");
+            return $response->withJson(array("status"=>false),500);
         }
-        return $response->withJson(json_decode($output[0]),200);
+        return $response->withJson(array("status"=>true),200);
     } catch (Exception $e) {
         error_log($e->getMessage());
         return $response->withJson(array("status"=>$e->getMessage()), 500);
