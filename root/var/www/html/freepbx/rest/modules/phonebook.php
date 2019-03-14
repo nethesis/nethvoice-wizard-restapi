@@ -168,7 +168,7 @@ $app->post('/phonebook/test', function (Request $request, Response $response, $a
             $newsource[$id][$var] = $data[$var];
         }
 
-        $res = file_put_contents($file, json_encode(array($id => $newsource)));
+        $res = file_put_contents($file, json_encode($newsource));
         if ($res === false) {
            throw new Exception("Error writing $file");
         }
