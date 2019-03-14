@@ -173,7 +173,7 @@ $app->post('/phonebook/test', function (Request $request, Response $response, $a
            throw new Exception("Error writing $file");
         }
 
-        $cmd = "/usr/bin/python /usr/share/phonebooks/phonebook-import.py --check --config ".escapeshellarg($file);
+        $cmd = "/usr/share/phonebooks/phonebook-import --check ".escapeshellarg($file);
         exec($cmd,$output,$return);
 
         // remove temporary file
@@ -196,7 +196,7 @@ $app->post('/phonebook/syncnow/{id}', function (Request $request, Response $resp
         $route = $request->getAttribute('route');
         $id = $route->getArgument('id');
         $file = '/etc/phonebook/sources.d/'.$id.'.json';
-        $cmd = "/usr/bin/python /usr/share/phonebooks/phonebook-import.py --config ".escapeshellarg($file);
+        $cmd = "/usr/share/phonebooks/phonebook-import ".escapeshellarg($file);
         exec($cmd,$output,$return);
         if ($return!=0) {
             return $response->withJson(array("status"=>false),500);
@@ -235,7 +235,7 @@ function delete_import_from_cron($id) {
         }
 
         foreach ($output as $row) {
-            if (strpos( $row , '/usr/bin/python /usr/share/phonebooks/phonebook-import.py --config') !== FALSE && strpos( $row , $file) !== FALSE ) {
+            if (strpos( $row , '/usr/share/phonebooks/phonebook-import ') !== FALSE && strpos( $row , $file) !== FALSE ) {
                 continue;
             }
             fwrite($pipes[0], $row."\n");
@@ -275,7 +275,7 @@ function write_import_in_cron($cron_time_interval, $id) {
             throw new Exception("Error opening crontab pipe");
         }
 
-        $output[] = $cron_time_interval.' '.'/usr/bin/python /usr/share/phonebooks/phonebook-import.py --config '.escapeshellarg($file);
+        $output[] = $cron_time_interval.' '.'/usr/share/phonebooks/phonebook-import '.escapeshellarg($file);
 
         fwrite($pipes[0], join("\n", $output)."\n");
         fclose($pipes[0]);
