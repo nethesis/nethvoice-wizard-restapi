@@ -90,7 +90,7 @@ $app->post('/phonebook/config[/{id}]', function (Request $request, Response $res
             $new = true;
         }
 
-        foreach ( array('dbtype','host','port','user','password','dbname','query') as $var) {
+        foreach ( array('dbtype','host','port','user','password','dbname','query','mapping') as $var) {
             if (!isset($data[$var]) || empty($data[$var])) {
                 error_log("Missing value: $var");
                 return $response->withJson(array("status"=>"Missing value: $var"), 400);
