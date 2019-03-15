@@ -100,6 +100,7 @@ $app->post('/phonebook/config[/{id}]', function (Request $request, Response $res
         // optional parameters
         $newsource['interval'] = empty($data['interval']) ? 1440 : $data['interval'];
         $newsource['type'] = empty($data['type']) ? $id : $data['type'];
+        $newsource['enabled'] = empty($data['enabled']) ? true : $data['enabled'];
 
         $file = $config_dir.'/'.$id.'.json';
         $res = file_put_contents($file, json_encode(array($id => $newsource)));
