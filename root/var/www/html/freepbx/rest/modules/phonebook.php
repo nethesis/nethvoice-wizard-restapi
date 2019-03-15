@@ -90,7 +90,7 @@ $app->post('/phonebook/config[/{id}]', function (Request $request, Response $res
             $new = true;
         }
 
-        foreach ( array('dbtype','host','port','user','password','dbname','query','mapping') as $var) {
+        foreach ( array('dbtype','host','port','user','password','dbname','query','mapping','interval') as $var) {
             if (!isset($data[$var]) || empty($data[$var])) {
                 error_log("Missing value: $var");
                 return $response->withJson(array("status"=>"Missing value: $var"), 400);
@@ -155,7 +155,6 @@ $app->delete('/phonebook/config/{id}', function (Request $request, Response $res
 $app->post('/phonebook/test', function (Request $request, Response $response, $args) {
     try {
         $data = $request->getParsedBody();
-
         // write a temporary configuration file
         $id = 'phonebook_test';
         $file = '/tmp/'.$id.'.json';
