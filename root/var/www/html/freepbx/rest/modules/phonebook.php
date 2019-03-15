@@ -89,14 +89,17 @@ $app->post('/phonebook/config[/{id}]', function (Request $request, Response $res
             $id = 'custom_'.$i;
             $new = true;
         }
-
-        foreach ( array('dbtype','host','port','user','password','dbname','query','mapping','interval') as $var) {
+        // mandatory parameters
+        foreach ( array('dbtype','host','port','user','password','dbname','query','mapping') as $var) {
             if (!isset($data[$var]) || empty($data[$var])) {
                 error_log("Missing value: $var");
                 return $response->withJson(array("status"=>"Missing value: $var"), 400);
             }
             $newsource[$var] = $data[$var];
         }
+        // optional parameters
+        $newsource['interval'] = empty($data['interval']) ? 1440 : $data['interval'];
+        $newsource['type'] = empty($data['type']) ? $id : $data['type'];
 
         $file = $config_dir.'/'.$id.'.json';
         $res = file_put_contents($file, json_encode(array($id => $newsource)));
@@ -139,6 +142,14 @@ $app->delete('/phonebook/config/{id}', function (Request $request, Response $res
         if (!$res) {
             throw new Exception("Error deleting $file from crontab!");
         }
+
+        // delete from phonebook
+        $cmd = "/usr/share/phonebooks/phonebook-import --deleteonly ".escapeshellarg($file);
+        exec($cmd,$output,$return);
+        if ($return !== 0 ) {
+            throw new Exception("Error deleting $id entries from phonebook");
+        }
+
         $file = '/etc/phonebook/sources.d/'.$id.'.json';
         $res = unlink($file);
         if (!$res) {
@@ -159,7 +170,7 @@ $app->post('/phonebook/test', function (Request $request, Response $response, $a
         $id = 'phonebook_test';
         $file = '/tmp/'.$id.'.json';
         $newsource = array();
-        foreach ( array('dbtype','host','port','user','password','dbname','query') as $var) {
+        foreach ( array('type','dbtype','host','port','user','password','dbname','query') as $var) {
             if (!isset($data[$var]) || empty($data[$var])) {
                 error_log("Missing value: $var");
                 return $response->withJson(array("status"=>"Missing value: $var"), 400);
