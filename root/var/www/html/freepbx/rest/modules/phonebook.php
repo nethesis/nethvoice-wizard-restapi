@@ -122,10 +122,12 @@ $app->post('/phonebook/config[/{id}]', function (Request $request, Response $res
             throw new Exception("Error deleting $file from crontab!");
         }
 
-        // Write new configuration in cron
-        $res = write_import_in_cron($cron_time_interval, $id);
-        if (!$res) {
-            throw new Exception("Error adding $file to crontab!");
+        if ($newsource['enabled']) {
+            // Write new configuration in cron
+            $res = write_import_in_cron($cron_time_interval, $id);
+            if (!$res) {
+                throw new Exception("Error adding $file to crontab!");
+            }
         }
 
         return $response->withStatus(200);
