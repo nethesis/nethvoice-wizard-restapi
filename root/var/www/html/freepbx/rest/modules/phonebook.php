@@ -168,7 +168,7 @@ $app->post('/phonebook/test', function (Request $request, Response $response, $a
     try {
         $data = $request->getParsedBody();
         // write a temporary configuration file
-        $id = 'phonebook_test';
+        $id = uniqid('phonebook_test_');
         $file = '/tmp/'.$id.'.json';
         $newsource = array();
         foreach ( array('type','dbtype','host','port','user','password','dbname','query') as $var) {
