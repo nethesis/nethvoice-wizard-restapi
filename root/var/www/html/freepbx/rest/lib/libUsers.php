@@ -108,7 +108,7 @@ function generateRandomPassword($length = 8, $complex = true) {
 
 function getUserID($username) {
     $dbh = FreePBX::Database();
-    $sql = 'SELECT `id` FROM `userman_users` WHERE `lname` = ?';
+    $sql = 'SELECT `id` FROM `userman_users` WHERE `username` = ?';
     $sth = $dbh->prepare($sql);
     $sth->execute(array($username));
     $data = $sth->fetchAll()[0][0];
