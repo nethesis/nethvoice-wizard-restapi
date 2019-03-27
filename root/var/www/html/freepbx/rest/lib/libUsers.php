@@ -61,7 +61,7 @@ function setPassword($username, $password) {
     $sql =  'SELECT id FROM userman_users WHERE username = ?' ;
     $stmt = $dbh->prepare($sql);
     $stmt->execute(array($username));
-    $id = $sth->fetchAll()[0][0];
+    $id = $stmt->fetchAll()[0][0];
     if (empty($id)) {
         fwconsole('userman --syncall --force');
     }
