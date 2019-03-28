@@ -55,8 +55,17 @@ function getPassword($username) {
 }
 
 function setPassword($username, $password) {
-    fwconsole('userman --syncall --force');
     $dbh = FreePBX::Database();
+
+    // Check if we already know user id, sync userman if not
+    $sql =  'SELECT id FROM userman_users WHERE username = ?' ;
+    $stmt = $dbh->prepare($sql);
+    $stmt->execute(array($username));
+    $id = $stmt->fetchAll()[0][0];
+    if (empty($id)) {
+        fwconsole('userman --syncall --force');
+    }
+
     $sql =  'INSERT INTO rest_users (user_id,password)'.
             ' SELECT id, ?'.
             ' FROM userman_users'.

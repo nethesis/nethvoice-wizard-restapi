@@ -83,21 +83,9 @@ try {
             }
 
             # Set password
-            $tmp = tempnam("/tmp","ASTPWD");
             if ( ! isset($row[3]) || empty($row[3]) ){
                 $row[3] = generateRandomPassword();
             }
-            file_put_contents($tmp, $row[3]);
-            exec("/usr/bin/sudo /sbin/e-smith/signal-event password-modify '".getUser($row[0])."' $tmp", $out, $ret);
-            $result += $ret;
-            if ($ret > 0 ) {
-                $err .= "Error setting password for user ".$row[0].": ".$out['message']."\n";
-                continue;
-            } else {
-                setPassword($row[0], $row[3]);
-            }
-        } else {
-            $row[3] = '';
         }
         $csv[$k] = $row;
     }
@@ -113,8 +101,17 @@ try {
         $user_id = getUserID($row[0]);
         $username = $row[0];
 
+        // Set password
         if ( isset($row[3]) && ! empty($row[3]) ){
-            setPassword($username, $row[3]);
+            $tmp = tempnam("/tmp","ASTPWD");
+            file_put_contents($tmp, $row[3]);
+            exec("/usr/bin/sudo /sbin/e-smith/signal-event password-modify '".getUser($row[0])."' $tmp", $out, $ret);
+            $result += $ret;
+            if ($ret > 0 ) {
+                $err .= "Error setting password for user ".$row[0].": ".$out['message']."\n";
+            } else {
+                setPassword($username, $row[3]);
+            }
         }
 
         #create extension
