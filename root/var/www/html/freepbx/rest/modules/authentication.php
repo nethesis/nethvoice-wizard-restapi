@@ -41,6 +41,12 @@ $app->get('/login', function (Request $request, Response $response) {
     return $response->withJson(['success' => true]);
 });
 
+$app->get('/logout', function (Request $request, Response $response) {
+    session_start();
+    unset($_SESSION['AMP_user']);
+    return $response->withJson(['success' => true]);
+});
+
 $app->post('/testauth', function (Request $request, Response $response, $args) { 
     $params = $request->getParsedBody();
     $username = $params['username'];
