@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.3.0
+Version: 14.3.1
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -38,6 +38,10 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Fri Apr 05 2019 Stefano Fancello <stefano.fancello@nethesis.it> - 14.3.1-1
+- Fix getUserID() on AD nethesis/dev#5598
+- Speed up csvimport nethesis/dev#5599
+
 * Tue Mar 26 2019 Stefano Fancello <stefano.fancello@nethesis.it> - 14.3.0-1
 - Add phonebook API. nethesis/dev#5557
 - make app mac address recognition case insensitive
