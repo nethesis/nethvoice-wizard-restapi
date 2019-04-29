@@ -10,9 +10,9 @@ CREATE TABLE IF NOT EXISTS `outbound_routes_locales` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 LOCK TABLES `outbound_routes_locales` WRITE;
-INSERT IGNORE INTO `outbound_routes_locales` (`locale`,`key`,`prefix_value`,`pattern_value`) VALUES ('it','national','','0ZXXXX.');
-INSERT IGNORE INTO `outbound_routes_locales` (`locale`,`key`,`prefix_value`,`pattern_value`) VALUES ('it','national','+39','0ZXXXX.');
-INSERT IGNORE INTO `outbound_routes_locales` (`locale`,`key`,`prefix_value`,`pattern_value`) VALUES ('it','national','0039','0ZXXXX.');
+INSERT IGNORE INTO `outbound_routes_locales` (`locale`,`key`,`prefix_value`,`pattern_value`) VALUES ('it','national','','0ZXXX.');
+INSERT IGNORE INTO `outbound_routes_locales` (`locale`,`key`,`prefix_value`,`pattern_value`) VALUES ('it','national','+39','0ZXXX.');
+INSERT IGNORE INTO `outbound_routes_locales` (`locale`,`key`,`prefix_value`,`pattern_value`) VALUES ('it','national','0039','0ZXXX.');
 INSERT IGNORE INTO `outbound_routes_locales` (`locale`,`key`,`prefix_value`,`pattern_value`) VALUES ('it','national','','1XX');
 INSERT IGNORE INTO `outbound_routes_locales` (`locale`,`key`,`prefix_value`,`pattern_value`) VALUES ('it','national','','15XX');
 INSERT IGNORE INTO `outbound_routes_locales` (`locale`,`key`,`prefix_value`,`pattern_value`) VALUES ('it','national','','800XX.');
