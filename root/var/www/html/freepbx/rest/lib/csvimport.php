@@ -199,9 +199,6 @@ try {
                         throw new Exception('Error creating webrtc mobile extension');
                     }
 
-                    if (useExtensionAsWebRTCMobile($extensionm) === false) {
-                        throw new Exception('Error associating webrtc mobile extension');
-                    }
                 } else {
                     # disable WebRTC
                     $extension = getWebRTCExtension($row[2]);

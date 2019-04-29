@@ -55,17 +55,6 @@ $app->post('/webrtc', function (Request $request, Response $response, $args) {
             $response->withJson(array("status"=>"Error associating webrtc extension"), 500);
         }
 
-        # Create extension for WebRTC Mobile
-        $extensionm = createExtension($extensionnumber,false);
-
-        if ($extensionm === false ) {
-            $response->withJson(array("status"=>"Error creating webrtc mobile extension"), 500);
-        }
-
-        if (useExtensionAsWebRTCMobile($extensionm) === false) {
-            $response->withJson(array("status"=>"Error associating webrtc mobile extension"), 500);
-        }
-
         system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
         return $response->withJson(array('extension'=>$extension,'mobile_extension'=>$extensionm), 200);
     } catch (Exception $e) {
