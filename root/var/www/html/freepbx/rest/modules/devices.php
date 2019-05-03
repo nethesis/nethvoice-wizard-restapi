@@ -87,7 +87,7 @@ $app->get('/devices/phones/list/{id}', function (Request $request, Response $res
             if ($manufacturer === 'Patton' || $manufacturer === 'Mediatrix') {
                 continue;
             }
-            $macs[] = '^'.str_replace(':','',$mac);
+            $macs[] = '^'.str_replace(':','',$mac).'[0-9a-fA-F]\{6\}';
         }
 
         $matchString = implode('\|',$macs);
@@ -147,6 +147,11 @@ $app->get('/devices/phones/list/{id}', function (Request $request, Response $res
             }
         }
 
+        $macs = array();
+        foreach ($knownMacAddresses as $mac => $manufacturer) {
+            $macs[] = 'cfg'.str_replace(':','',$mac).'[0-9a-fA-F]\{6\}';
+        }
+        $matchString = implode('\|',$macs);
         // Scan messages for GS Wave devices
         $cmd = '/usr/bin/sudo /usr/bin/grep dnsmasq-tftp /var/log/messages ';
         $cmd .= ' | grep \'\/var\/lib\/tftpboot\/cfg[0-9a-fA-F]\{12\}\.xml not found\' ';
