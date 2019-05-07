@@ -1,0 +1,2 @@
+%asterisk ALL=NOPASSWD: \
+    /sbin/e-smith/signal-event nethserver-phonebook-mysql-save [A-Za-z]*
