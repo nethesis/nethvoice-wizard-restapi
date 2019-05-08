@@ -128,6 +128,9 @@ $app->post('/phonebook/config[/{id}]', function (Request $request, Response $res
             if (!$res) {
                 throw new Exception("Error adding $file to crontab!");
             }
+        } else {
+            # launch nethserver-phonebook-mysql-save to clean and reload phonebook
+            exec("/usr/bin/sudo /sbin/e-smith/signal-event nethserver-phonebook-mysql-save $id");
         }
 
         return $response->withStatus(200);
@@ -180,7 +183,7 @@ $app->post('/phonebook/test', function (Request $request, Response $response, $a
             }
             $newsource[$id][$var] = $data[$var];
         }
-
+        $newsource[$id]['enabled'] = true;
         $res = file_put_contents($file, json_encode($newsource));
         if ($res === false) {
            throw new Exception("Error writing $file");
@@ -208,9 +211,10 @@ $app->post('/phonebook/syncnow/{id}', function (Request $request, Response $resp
     try {
         $route = $request->getAttribute('route');
         $id = $route->getArgument('id');
-        $file = '/etc/phonebook/sources.d/'.$id.'.json';
-        $cmd = "/usr/share/phonebooks/phonebook-import ".escapeshellarg($file);
-        exec($cmd,$output,$return);
+
+        # launch nethserver-phonebook-mysql-save to clean and reload phonebook
+        exec("/usr/bin/sudo /sbin/e-smith/signal-event nethserver-phonebook-mysql-save $id",$output,$return);
+
         if ($return!=0) {
             return $response->withJson(array("status"=>false),500);
         }
@@ -254,6 +258,10 @@ function delete_import_from_cron($id) {
             fwrite($pipes[0], $row."\n");
         }
         fclose($pipes[0]);
+
+        # launch nethserver-phonebook-mysql-save to clean and reload phonebook
+        exec("/usr/bin/sudo /sbin/e-smith/signal-event nethserver-phonebook-mysql-save $id");
+
         return true;
     } catch (Exception $e) {
         error_log($e->getMessage());
