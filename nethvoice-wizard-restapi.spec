@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.3.1
+Version: 14.3.2
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -38,6 +38,12 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Thu May 09 2019 Stefano Fancello <stefano.fancello@nethesis.it> - 14.3.2-1
+- Add sudoers right to execute nethserver-phonebook-mysql-save event. Nethesis/dev#5623
+- use nethserver-phonebook-mysql-save event to clear and sync phonebook sources. Nethesis/dev#5623
+- Fix default national IT outbound pattern to allow 6 digit numbers
+- Fix mac addresses string for app recognition
+
 * Fri Apr 05 2019 Stefano Fancello <stefano.fancello@nethesis.it> - 14.3.1-1
 - Fix getUserID() on AD nethesis/dev#5598
 - Speed up csvimport nethesis/dev#5599
