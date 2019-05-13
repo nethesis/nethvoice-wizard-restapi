@@ -83,10 +83,10 @@ context cs switch
     route default dest-interface IF_VOIP_ASTERISK2 FXO_03
 
  routing-table called-e164 to_fxo
-    route TRUNKNUMBER1.% dest-interface fxo-00 cutpref
-    route TRUNKNUMBER2.% dest-interface fxo-01 cutpref
-    route TRUNKNUMBER3.% dest-interface fxo-02 cutpref
-    route TRUNKNUMBER4.% dest-interface fxo-03 cutpref
+    route TRUNKNUMBER1.% dest-service OUTSERV0 cutpref
+    route TRUNKNUMBER2.% dest-service OUTSERV1 cutpref
+    route TRUNKNUMBER3.% dest-service OUTSERV2 cutpref
+    route TRUNKNUMBER4.% dest-service OUTSERV3 cutpref
 
   mapping-table called-e164 to called-e164 FXO_00
     map default to LINENUMBER1
@@ -166,6 +166,54 @@ context cs switch
     ring-number on-caller-id
     dial-after timeout 1
     mute-dialing
+
+  service hunt-group OUTSERV0
+    drop-cause normal-unspecified
+    drop-cause no-circuit-channel-available
+    drop-cause network-out-of-order
+    drop-cause temporary-failure
+    drop-cause switching-equipment-congestion
+    drop-cause access-info-discarded
+    drop-cause circuit-channel-not-available
+    drop-cause resources-unavailable
+    drop-cause user-busy
+    route call 1 dest-interface fxo-00
+
+  service hunt-group OUTSERV1
+    drop-cause normal-unspecified
+    drop-cause no-circuit-channel-available
+    drop-cause network-out-of-order
+    drop-cause temporary-failure
+    drop-cause switching-equipment-congestion
+    drop-cause access-info-discarded
+    drop-cause circuit-channel-not-available
+    drop-cause resources-unavailable
+    drop-cause user-busy
+    route call 1 dest-interface fxo-01
+
+  service hunt-group OUTSERV2
+    drop-cause normal-unspecified
+    drop-cause no-circuit-channel-available
+    drop-cause network-out-of-order
+    drop-cause temporary-failure
+    drop-cause switching-equipment-congestion
+    drop-cause access-info-discarded
+    drop-cause circuit-channel-not-available
+    drop-cause resources-unavailable
+    drop-cause user-busy
+    route call 1 dest-interface fxo-02
+
+  service hunt-group OUTSERV3
+    drop-cause normal-unspecified
+    drop-cause no-circuit-channel-available
+    drop-cause network-out-of-order
+    drop-cause temporary-failure
+    drop-cause switching-equipment-congestion
+    drop-cause access-info-discarded
+    drop-cause circuit-channel-not-available
+    drop-cause resources-unavailable
+    drop-cause user-busy
+    route call 1 dest-interface fxo-03
 
 context cs switch
   no shutdown
