@@ -121,17 +121,8 @@ function createExtension($mainextensionnumber,$delete=false){
     }
 }
 
-function useExtensionAsWebRTCMobile($extension) {
-    return useExtensionAsWebRTC($extension,true);
-}
-
-function useExtensionAsWebRTC($extension,$isMobile = false) {
+function useExtensionAsWebRTC($extension) {
     try {
-        if ($isMobile) {
-            $type = 'webrtc_mobile';
-        } else {
-            $type = 'webrtc';
-        }
         $dbh = FreePBX::Database();
 
         //disable call waiting
@@ -154,17 +145,17 @@ function useExtensionAsWebRTC($extension,$isMobile = false) {
                 ' WHERE userman_users.default_extension = ? LIMIT 1';
         if (empty($res)) {
             $sql = 'INSERT INTO `rest_devices_phones`'.
-                ' SET user_id = ('. $uidquery. '), extension = ?, secret= ?, type = ?, mac = NULL, line = NULL';
+                ' SET user_id = ('. $uidquery. '), extension = ?, secret= ?, type = "webrtc", mac = NULL, line = NULL';
             $stmt = $dbh->prepare($sql);
 
-            if ($stmt->execute(array(getMainExtension($extension),$extension,$extension_secret,$type))) {
+            if ($stmt->execute(array(getMainExtension($extension),$extension,$extension_secret))) {
                 return true;
             }
         } else {
             $sql = 'UPDATE `rest_devices_phones`'. 
-                ' SET user_id = ('. $uidquery. '), secret= ?, type = ?' .
+                ' SET user_id = ('. $uidquery. '), secret= ?, type = "webrtc"' .
                 ' WHERE extension = ?';
-            if ($stmt->execute(array(getMainExtension($extension),$extension_secret,$extension,$type))) {
+            if ($stmt->execute(array(getMainExtension($extension),$extension_secret,$extension))) {
                 return true;
             }
         } 
