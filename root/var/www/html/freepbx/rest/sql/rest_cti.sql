@@ -134,6 +134,7 @@ INSERT IGNORE INTO `rest_cti_permissions` VALUES (24,'lost_queue_call','Lost Que
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (25,'advanced_off_hour','Advanced Off Hour','Allow to change user\'s incoming call path and generic inbound routes');
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (26,'ad_phone','Advanced Phone','Use phone features (hangup, call, answer) on conversations not owned by the user');
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (27,'ad_off_hour','Admin Off Hour','Allow to change all incoming call paths');
+INSERT IGNORE INTO `rest_cti_permissions` VALUES (28,'screen_sharing','Screen Sharing','Allow to share the desktop');
 
 /*Permission inside macro permissions*/
 INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (1,2);
@@ -143,6 +144,7 @@ INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (1,5);
 INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (1,6);
 INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (1,8);
 INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (1,9);
+INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (1,28);
 INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (2,12);
 INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (3,13);
 INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (5,15);
