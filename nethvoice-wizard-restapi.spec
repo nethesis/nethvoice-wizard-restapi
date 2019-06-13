@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.3.2
+Version: 14.3.3
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -38,6 +38,10 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Thu Jun 13 2019 Alessandro Polidori <alessandro.polidori@nethesis.it> - 14.3.3-1
+- NethCTI 3: desktop sharing - nethesis/dev#5607
+- NethVoice14: don't create mobile extension when webrtc is enabled - nethesis/dev#5622
+
 * Thu May 09 2019 Stefano Fancello <stefano.fancello@nethesis.it> - 14.3.2-1
 - Add sudoers right to execute nethserver-phonebook-mysql-save event. Nethesis/dev#5623
 - use nethserver-phonebook-mysql-save event to clear and sync phonebook sources. Nethesis/dev#5623
