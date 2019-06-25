@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.3.3
+Version: 14.3.4
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -38,6 +38,9 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Tue Jun 25 2019 Stefano Fancello <stefano.fancello@nethesis.it> - 14.3.4-1
+- voip trunks: change voipvoice domain
+
 * Thu Jun 13 2019 Alessandro Polidori <alessandro.polidori@nethesis.it> - 14.3.3-1
 - NethCTI 3: desktop sharing - nethesis/dev#5607
 - NethVoice14: don't create mobile extension when webrtc is enabled - nethesis/dev#5622
