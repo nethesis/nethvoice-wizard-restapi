@@ -376,6 +376,9 @@ function deleteExtension($extension) {
         $sql = 'DELETE FROM `rest_devices_phones` WHERE user_id IS NULL AND mac IS NULL';
         $stmt = $dbh->prepare($sql);
         $stmt->execute(array());
+        $sql = 'DELETE FROM `pin` WHERE extension = ?';
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute(array($extension));
         return true;
     } catch (Exception $e) {
         error_log($e->getMessage());
