@@ -76,9 +76,11 @@ function createExtension($mainextensionnumber,$delete=false){
             if (!isset($extension)) {
                 throw ("There aren't available extension numbers");
             }
+
             //delete extension
-            $fpbx->Core->delDevice($extension, true);
-            $fpbx->Core->delUser($extension, true);
+            deletePhysicalExtension($extension);
+            deleteExtension($extension);
+
             //create physical extension
             $data['name'] = $mainextension['name'];
             $mainextdata = $fpbx->Core->getUser($mainextension['extension']);
@@ -349,11 +351,11 @@ function getMainExtension($extension) {
 }
 
 
-function deleteExtension($extension) {
+function deleteExtension($extension,$wipemain=false) {
     try {
         global $astman;
         $dbh = FreePBX::Database();
-        if (isMainExtension($extension) === false) {
+        if (isMainExtension($extension) === false || $wipemain) {
             $mainextensions = substr($extension, 2);
             // clean extension
             $fpbx = FreePBX::create();
@@ -389,20 +391,14 @@ function deletePhysicalExtension($extension) {
         $dbh = FreePBX::Database();
         //Get device lines
         $mac = $dbh->sql('SELECT `mac` FROM `rest_devices_phones` WHERE `extension` = "'.$extension.'"', "getOne");
-        $usedlinecount = $dbh->sql('SELECT COUNT(*) FROM `rest_devices_phones` WHERE `mac` = "'.$mac.'" AND `extension` != "" AND `extension`', "getOne");
+        $usedlinecount = $dbh->sql('SELECT COUNT(*) FROM `rest_devices_phones` WHERE `mac` = "'.$mac.'" AND `extension` != ""', "getOne");
 
         // Remove endpoint from endpointman
         $endpoint = FreePBX::endpointmanager();
         $mac_id = $dbh->sql('SELECT id FROM endpointman_mac_list WHERE mac = "'.preg_replace('/:/', '', $mac).'"', "getOne");
         if (!empty($mac_id)) {
             $luid = $dbh->sql('SELECT luid FROM endpointman_line_list WHERE mac_id = "'.$mac_id.'" AND ext = "'.$extension.'"', "getOne");
-            if ($usedlinecount > 1) {
-                //There are other configured lines for this device
-                $endpoint->delete_line($luid, false);
-            } else {
-                //last line, also remove device
-                $endpoint->delete_line($luid, true);
-            }
+            $endpoint->delete_line($luid, true);
         }
         return true;
     } catch (Exception $e) {
@@ -465,9 +461,8 @@ function createMainExtensionForUser($username,$mainextension,$outboundcid='') {
         }
         // clean extension and associated extensions
         foreach ($ext_to_del as $extension) {
-            $fpbx->Core->delUser($extension);
-            $fpbx->Core->delDevice($extension);
-
+            deletePhysicalExtension($extension);
+            deleteExtension($extension,true);
         }
         // set values to NULL for physical devices
         $sql = 'UPDATE rest_devices_phones'.
