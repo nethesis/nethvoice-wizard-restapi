@@ -114,6 +114,11 @@ function createExtension($mainextensionnumber,$delete=false){
         $stmt = $dbh->prepare($sql);
         $stmt->execute(array($extension));
 
+        // disable directmedia
+        $sql = 'UPDATE IGNORE `sip` SET `data` = "no" WHERE `id` = ? AND `keyword` = "direct_media"';
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute(array($extension));
+
         return $extension;
     } catch (Exception $e) {
        error_log($e->getMessage());
