@@ -524,10 +524,7 @@ $app->delete('/devices/gateways/{id}', function (Request $request, Response $res
              $mac = false;
          }
          $config = gateway_generate_configuration_file($name,$mac);
-         $response->withHeader('Content-Type', 'application/octet-stream');
-         $response->withHeader('Content-Disposition', 'attachment; filename='. $name. '.txt');
-
-         return $response->write($config);
+         return $response->withJson(base64_encode($config),200);
      } catch (Exception $e) {
          error_log($e->getMessage());
          return $response->withStatus(500);
