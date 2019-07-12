@@ -116,6 +116,11 @@ function createExtension($mainextensionnumber,$delete=false){
         $stmt = $dbh->prepare($sql);
         $stmt->execute(array($extension));
 
+        // disable directmedia
+        $sql = 'UPDATE IGNORE `sip` SET `data` = "no" WHERE `id` = ? AND `keyword` = "direct_media"';
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute(array($extension));
+
         return $extension;
     } catch (Exception $e) {
        error_log($e->getMessage());
@@ -536,16 +541,6 @@ function createMainExtensionForUser($username,$mainextension,$outboundcid='') {
 
         return [array('message'=>$res['message']), 500];
     }
-
-    //Configure Follow me for the extension
-    $data['fmfm']='yes';
-    $fpbx->Findmefollow->processQuickCreate('pjsip', $mainextension, $data);
-    $fpbx->Findmefollow->addSettingById($mainextension, 'strategy', $fpbx->Config->get('FOLLOWME_RG_STRATEGY'));
-    $fpbx->Findmefollow->addSettingById($mainextension, 'pre_ring', '0');
-    $fpbx->Findmefollow->addSettingById($mainextension, 'grptime', $fpbx->Config->get('FOLLOWME_TIME'));
-    $fpbx->Findmefollow->addSettingById($mainextension, 'dring', '<http://www.notused >;info=ring2');
-    $fpbx->Findmefollow->addSettingById($mainextension, 'postdest', 'app-blackhole,hangup,1');
-
     return true;
 }
 
