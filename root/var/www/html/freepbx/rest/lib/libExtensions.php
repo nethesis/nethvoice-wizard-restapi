@@ -372,7 +372,7 @@ function deleteExtension($extension,$wipemain=false) {
             }
         }
 
-        $sql = 'UPDATE rest_devices_phones SET user_id = NULL, extension = NULL, secret = NULL, type = NULL WHERE extension = ?';
+        $sql = 'UPDATE rest_devices_phones SET user_id = NULL, extension = NULL, secret = NULL WHERE extension = ?';
         $stmt = $dbh->prepare($sql);
         $stmt->execute(array($extension));
         $sql = 'DELETE FROM `rest_devices_phones` WHERE user_id IS NULL AND mac IS NULL';
