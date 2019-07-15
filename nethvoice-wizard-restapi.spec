@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.3.4
+Version: 14.4.0
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -38,6 +38,11 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Mon Jul 15 2019 Stefano Fancello <stefano.fancello@nethesis.it> - 14.4.0-1
+- Changed the gateways's download returned value format nethesis/dev#5678
+- Delete all extensions and EPM devices when deleting an extension nethesis/dev#5671
+- Delete pin when extension is removed nethesis/dev#5671
+
 * Tue Jun 25 2019 Stefano Fancello <stefano.fancello@nethesis.it> - 14.3.4-1
 - voip trunks: change voipvoice domain
 
