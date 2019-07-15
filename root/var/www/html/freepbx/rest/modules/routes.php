@@ -72,15 +72,13 @@ $app->post('/inboundroutes', function (Request $request, Response $response, $ar
     return $response->withStatus(200);
 });
 
-
 /**
- * @api {delete} /inboundroutes/:id Delete an inbound route
+ * @api {post} /inboundroutes/delete Delete an inbound route
  */
-$app->delete('/inboundroutes/{id}', function (Request $request, Response $response, $args) {
-  $route = $request->getAttribute('route');
-  $cidex = explode('-', $route->getArgument('id'));
-  $extension = $cidex[0];
-  $cidnum = $cidex[1];
+$app->post('/inboundroutes/delete', function (Request $request, Response $response, $args) {
+  $params = $request->getParsedBody();
+  $extension = $params['extension'];
+  $cidnum = $params['cid'];
 
   try {
     $res = FreePBX::Core()->getDID($extension, $cidnum ? $cidnum : '');
