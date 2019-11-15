@@ -371,9 +371,12 @@ function deleteExtension($extension,$wipemain=false) {
             $existingdevices = $astman->database_get("AMPUSER", $mainextension."/device");
             if (!empty($existingdevices)) {
                 $existingdevices_array = explode('&', $existingdevices);
-                unset($existingdevices_array[$extension]);
-                $existingdevices = implode('&', $existingdevices_array);
-                $astman->database_put("AMPUSER", $mainextension."/device", $existingdevices);
+                $arraykey = array_search($extension,$existingdevices_array);
+                if ($arraykey !== FALSE ) {
+                    unset($existingdevices_array[$arraykey]);
+                    $existingdevices = implode('&', $existingdevices_array);
+                    $astman->database_put("AMPUSER", $mainextension."/device", $existingdevices);
+                }
             }
         }
 
