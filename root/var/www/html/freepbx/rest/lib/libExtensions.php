@@ -361,7 +361,7 @@ function deleteExtension($extension,$wipemain=false) {
         global $astman;
         $dbh = FreePBX::Database();
         if (isMainExtension($extension) === false || $wipemain) {
-            $mainextensions = substr($extension, 2);
+            $mainextension = substr($extension, 2);
             // clean extension
             $fpbx = FreePBX::create();
             $fpbx->Core->delUser($extension);
