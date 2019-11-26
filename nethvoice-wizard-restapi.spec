@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.4.2
+Version: 14.5.0
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -38,6 +38,11 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Tue Nov 26 2019 Stefano Fancello <stefano.fancello@nethesis.it> - 14.5.0-1
+- Add Timenet as VoIP provider - nethesis/dev#5741
+- Dial malformed - Bug nethesis/dev#5739
+- Add VivaVox VoIP provider - nethesis/dev#5733
+
 * Mon Nov 11 2019 Stefano Fancello <stefano.fancello@nethesis.it> - 14.4.2-1
 - Upadate gateway description nethesis/dev#5713
 
