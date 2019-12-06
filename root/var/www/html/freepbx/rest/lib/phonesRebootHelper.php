@@ -27,6 +27,7 @@ if ($argc != 2) {
 $mac = $argv[1];
 
 include_once('/etc/freepbx_db.conf');
+include_once('/var/www/html/freepbx/rest/lib/CronHelper.php');
 
 // Get extension and brand from mac address
 $sql = 'SELECT vendor,extension FROM rest_devices_phones WHERE mac = ?';
@@ -78,6 +79,7 @@ while ($row = $sth->fetch(\PDO::FETCH_ASSOC)) {
          exit(126);
     }
     echo $argv[0].': '.$row['vendor']." phone $mac rebooted!: " . $out . "\n";
+    CronHelper::delete_same_time($mac);
     exit(0);
 }
 

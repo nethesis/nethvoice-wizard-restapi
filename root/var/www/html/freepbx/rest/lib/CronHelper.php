@@ -45,10 +45,10 @@ class CronHelper
                     }
                     $ret[$mac]['code'] = 204;
                 } catch (Exception $e) {
-                    error_log(__CLASS__ . '->' . __FUNCTION__ . '->' . $e->getMessage);
+                    error_log(__CLASS__ . '->' . __FUNCTION__ . '->' . $e->getMessage());
                     $ret[$mac]['title'] = 'Unknown error';
                     $ret[$mac]['code'] = 500;
-                    $ret[$mac]['detail'] = $e->getMessage;
+                    $ret[$mac]['detail'] = $e->getMessage();
                 }
                 continue;
             }
@@ -104,12 +104,12 @@ class CronHelper
             }
             proc_close($process);
         } catch (Exception $e) {
-            error_log(__CLASS__ . '->' . __FUNCTION__ . '->' . $e->getMessage);
+            error_log(__CLASS__ . '->' . __FUNCTION__ . '->' . $e->getMessage());
             foreach ($macs as $mac) {
                 if (!array_key_exists($mac,$ret)) {
                     $ret[$mac]['title'] = 'Unknown error while writing cron';
                     $ret[$mac]['code'] = 500;
-                    $ret[$mac]['detail'] = $e->getMessage;
+                    $ret[$mac]['detail'] = $e->getMessage();
                 }
             }
         }
@@ -173,12 +173,12 @@ class CronHelper
             }
             proc_close($process);
         } catch (Exception $e) {
-            error_log(__CLASS__ . '->' . __FUNCTION__ . '->' . $e->getMessage);
+            error_log(__CLASS__ . '->' . __FUNCTION__ . '->' . $e->getMessage());
             foreach ($macs as $mac) {
                 if (!array_key_exists($mac,$ret)) {
                     $ret[$mac]['title'] = 'Unknown error while writing cron';
                     $ret[$mac]['code'] = 500;
-                    $ret[$mac]['detail'] = $e->getMessage;
+                    $ret[$mac]['detail'] = $e->getMessage();
                 }
             }
         }
@@ -196,7 +196,7 @@ class CronHelper
         return $ret;
     }
 
-    public function read($mac = null){
+    public function read($mac = null) {
         // Read crontab content
         exec('/usr/bin/crontab -l 2>/dev/null', $output, $ret);
         if ($ret != 0) {
@@ -213,5 +213,55 @@ class CronHelper
             }
         }
         return $ret;
+    }
+
+    public static function delete_same_time($mac) {
+        try {
+            // Read crontab content
+            exec('/usr/bin/crontab -l 2>/dev/null', $content, $return);
+            if ($return != 0) {
+                throw new Exception("Error reading crontab");
+            }
+
+            // Open crontab in a pipe
+            if(!file_exists('/var/log/pbx/www-error.log')) {
+                touch('/var/log/pbx/www-error.log');
+            }
+            $descriptorspec = array(
+                0 => array("pipe", "r"),  // stdin
+                1 => array("pipe", "w"),  // stdout
+                2 => array("file", "/var/log/pbx/www-error.log", "a") // stderr
+            );
+
+            $process = proc_open('/usr/bin/crontab -', $descriptorspec, $pipes);
+            if (!is_resource($process)) {
+                throw new Exception("Error opening crontab pipe");
+            }
+
+            foreach ($content as $key => $row) {
+                if (preg_match("/([0-9]{2}) ([0-9]{2}) \* \* \* ".str_replace('/','\/',REBOOT_HELPER_SCRIPT)." $mac$/", $row, $matches)) {
+                    $hours = $matches[2];
+                    $minutes = $matches[1];
+                    continue;
+                }
+            }
+            if (!empty($hours) && !empty($minutes)) {
+                foreach ($content as $key => $row) {
+                    if (preg_match("/^$minutes $hours \* \* \* ".str_replace('/','\/',REBOOT_HELPER_SCRIPT)."/",$row)) {
+                        unset($content[$key]);
+                    }
+                }
+            }
+
+            fwrite($pipes[0], join("\n", $content)."\n");
+            foreach ($pipes as $key => $value) {
+                fclose($pipes[$key]);
+            }
+            proc_close($process);
+        } catch (Exception $e) {
+            error_log(__CLASS__ . '->' . __FUNCTION__ . '->' . $e->getMessage());
+            echo(__CLASS__ . '->' . __FUNCTION__ . '->' . $e->getMessage() . "\n");
+            exit(1);
+        }
     }
 }
