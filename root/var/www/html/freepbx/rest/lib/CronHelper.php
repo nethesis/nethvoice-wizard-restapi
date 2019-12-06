@@ -114,7 +114,7 @@ class CronHelper
             }
         }
         foreach ($this->read() as $mac => $time) {
-            if (!array_key_exists($mac,$ret)) {
+            if (!array_key_exists($mac,$ret) && array_key_exists($mac,$macs)) {
                 $ret[$mac]['code'] = 204;
             }
         }
