@@ -26,7 +26,7 @@ if ($argc != 2) {
 }
 $mac = $argv[1];
 
-include_once('/etc/freepbx_db.conf'); 
+include_once('/etc/freepbx_db.conf');
 
 // Get extension and brand from mac address
 $sql = 'SELECT vendor,extension FROM rest_devices_phones WHERE mac = ?';
@@ -77,7 +77,7 @@ while ($row = $sth->fetch(\PDO::FETCH_ASSOC)) {
          error_log($argv[0].': '.'ERROR rebooting phone '.$mac.': '.$out);
          exit(126);
     }
-    echo $argv[0].': '.$row['vendor']." phone $mac rebooted!: " . $out . "\n";  
+    echo $argv[0].': '.$row['vendor']." phone $mac rebooted!: " . $out . "\n";
     exit(0);
 }
 

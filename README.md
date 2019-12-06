@@ -688,3 +688,71 @@ Get allowed codecs for VoIP trunks, ordered and enabled
 ```
 GET /codecs/voip
 ```
+
+### Reboot phones
+
+There are three API to manage phones reboot:
+
+Plan phones reboot:
+
+```
+POST /phones/reboot
+```
+Parameters:
+```
+{
+  "00-11-22-33-44-55":
+  {
+    "hours":12,
+    "minutes":45
+  },
+  "00-11-22-33-44-55": {}
+
+}
+```
+
+If "hours" and "minutes" are omitted, phones are rebooted immediately.
+
+This API returns list of mac address with a status code for each mac. For instance:
+```
+{
+  "00-11-22-33-44-61a": {
+    "title": "Malformed MAC address",
+    "detail": "Malformed MAC address: 00-11-22-33-44-61a",
+    "code": 400
+  },
+  "00-11-22-33-44-91": {
+    "code": 204
+  }
+}
+```
+
+```
+DELETE /phones/reboot
+```
+
+Removes phones to rebbot saved into crontab.
+Parameters:
+```
+["00-11-22-33-44-91","00-11-22-33-44-53"]
+```
+Return is the same as POST
+
+```
+GET /phones/reboot
+```
+This API return configured reboot in crontab:
+
+```
+{
+  "00-11-22-33-44-91": {
+    "hours": "22",
+    "minutes": "22"
+  },
+  "00-11-22-33-44-92": {
+    "hours": "22",
+    "minutes": "22"
+  }
+}
+```
+
