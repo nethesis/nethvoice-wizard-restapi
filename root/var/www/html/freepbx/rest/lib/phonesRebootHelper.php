@@ -75,7 +75,9 @@ while ($row = $sth->fetch(\PDO::FETCH_ASSOC)) {
     $cmd = "/usr/sbin/asterisk -rx 'pjsip send notify $notify_string endpoint ".$row['extension']."'";
     $out = system($cmd);
     if (preg_match('/failed.$/',$out) || preg_match('/^Unable/',$out)) {
-         error_log($argv[0].': '.'ERROR rebooting phone '.$mac.': '.$out);
+         $emsg = $argv[0].': '.'ERROR rebooting phone '.$mac.': '.$out;
+         error_log($emsg);
+         echo($emsg."\n");
          exit(126);
     }
     echo $argv[0].': '.$row['vendor']." phone $mac rebooted!: " . $out . "\n";
@@ -83,6 +85,8 @@ while ($row = $sth->fetch(\PDO::FETCH_ASSOC)) {
     exit(0);
 }
 
-error_log($argv[0].': '."ERROR. Can't find phone $mac in rest_devices_phone");
+$emsg = $argv[0].': '."ERROR. Can't find phone $mac in rest_devices_phone";
+error_log($emsg);
+echo($emsg."\n");
 exit(126);
 
