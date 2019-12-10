@@ -39,9 +39,9 @@ class CronHelper
             if (empty($time)) {
                 //no time provided, launch reboot now
                 try {
-                    $out = system(REBOOT_HELPER_SCRIPT.' '.$mac, $return);
+                    exec(REBOOT_HELPER_SCRIPT.' '.$mac, $out ,$return);
                     if ($return != 0) {
-                        throw new Exception($out);
+                        throw new Exception(implode("\n",$out));
                     }
                     $ret[$mac]['code'] = 204;
                 } catch (Exception $e) {
