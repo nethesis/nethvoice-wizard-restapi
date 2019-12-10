@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 #
 # Copyright (C) 2019 Nethesis S.r.l.
