@@ -35,6 +35,12 @@ $sql = 'SELECT vendor,extension FROM rest_devices_phones WHERE mac = ?';
 $sth = $db->prepare($sql);
 $sth->execute(array(str_replace('-',':',$mac)));
 while ($row = $sth->fetch(\PDO::FETCH_ASSOC)) {
+    if(empty($row['extension'])) {
+        $emsg = $argv[0].': '."ERROR. No extension associated with device $mac";
+	error_log($emsg);
+	echo($emsg."\n");
+	exit(126);
+    }
     switch ($row['vendor']) {
         case 'Aastra':
             $notify_string = 'aastra-check-cfg';
