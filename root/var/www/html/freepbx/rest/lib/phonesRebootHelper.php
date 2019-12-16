@@ -83,7 +83,9 @@ while ($row = $sth->fetch(\PDO::FETCH_ASSOC)) {
         $notify_string = 'reboot-yealink';
         break;
     default:
-        error_log($argv[0].': '."ERROR. Reboot for ".$row['vendor']." is not supported");
+        $emsg = $argv[0].': '."ERROR. Reboot for ".$row['vendor']." is not supported";
+        error_log($emsg);
+        echo($emsg."\n");
         exit(126);
         break;
     }
