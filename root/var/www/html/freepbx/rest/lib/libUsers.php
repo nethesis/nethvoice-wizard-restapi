@@ -125,10 +125,21 @@ function getUserID($username) {
 }
 
 function getAllUsers() {
+    global $astman;
     $blacklist = ['admin', 'administrator', 'guest', 'krbtgt','ldapservice'];
     $users = FreePBX::create()->Userman->getAllUsers();
     $dbh = FreePBX::Database();
     $i = 0;
+    // Get registration status of extensions
+    if (empty($astman->memAstDB)) {
+        $astman->LoadAstDB();
+    }
+    $registrations = array();
+    foreach ($astman->getDBCache() as $key => $value) {
+        if (strpos($key,'/registrar/contact/') === 0) {
+            $registrations[] = preg_replace('/^\/registrar\/contact\/([0-9]*);@[a-z0-9]*$/', '$1' ,$key);
+        }
+    }
     foreach ($users as $user) {
         if (in_array(strtolower($users[$i]['username']), $blacklist)) {
             unset($users[$i]);
@@ -144,8 +155,14 @@ function getAllUsers() {
                 $stmt = $dbh->prepare($sql);
                 $stmt->execute(array($users[$i]['default_extension']));
                 $users[$i]['devices'] = array();
-                while ($d = $stmt->fetch(\PDO::FETCH_ASSOC))
+                while ($d = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                    if (array_search($d['extension'],$registrations)!==FALSE) {
+                        $d['registered'] = TRUE;
+                    } else {
+                        $d['registered'] = FALSE;
+                    }
                     $users[$i]['devices'][] = $d;
+                }
                 $sql = 'SELECT rest_users.profile_id'.
                   ' FROM rest_users'.
                   ' JOIN userman_users ON rest_users.user_id = userman_users.id'.
