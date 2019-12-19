@@ -302,7 +302,6 @@ function tancredi_useExtensionAsPhysical($extension,$mac,$model,$line=false) {
            'SELECT userman_users.id FROM userman_users WHERE userman_users.default_extension = ? '.
            '), extension = ?, secret= ?, type = "physical" WHERE mac = ?';
     $stmt = $dbh->prepare($sql);
-    setFalconieri($mac,$token);
     $res = $stmt->execute(array(getMainExtension($extension),$extension,$extension_secret,$mac));
     if ($res) {
         return true;
