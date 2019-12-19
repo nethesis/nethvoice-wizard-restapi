@@ -204,7 +204,18 @@ function useExtensionAsCustomPhysical($extension, $secret = false, $type = 'phys
     }
 }
 
-function useExtensionAsPhysical($extension,$mac,$model,$line=false) {
+function useExtensionAsPhysical($extension,$mac,$model,$line=false,$provisioning_token=null) {
+    exec("/usr/bin/sudo /sbin/e-smith/config getprop nethvoice ProvisioningEngine", $out);
+    if ($out[0] == 'freepbx') {
+        return legacy_useExtensionAsPhysical($extension,$mac,$model,false);
+    } elseif ($out[0] == 'tancredi') {
+        return tancredi_useExtensionAsPhysical($extension,$mac,$model = '',false,$provisioning_token);
+    } else {
+        throw new Exception('Unknow provisioning '.implode("\n",$out));
+    }
+}
+
+function legacy_useExtensionAsPhysical($extension,$mac,$model,$line=false) {
     try {
         require_once(__DIR__. '/../lib/modelRetrieve.php');
         //disable call waiting
@@ -269,6 +280,103 @@ function useExtensionAsPhysical($extension,$mac,$model,$line=false) {
         error_log($e->getMessage());
         return false;
     }
+}
+
+function tancredi_useExtensionAsPhysical($extension,$mac,$model,$line=false) {
+    //disable call waiting
+    global $astman;
+    $astman->database_del("CW",$extension);
+
+    // insert created physical extension in password table
+    $extension_secret = sql('SELECT data FROM `sip` WHERE id = "' . $extension . '" AND keyword="secret"', "getOne");
+    $dbh = FreePBX::Database();
+    $vendors = json_decode(file_get_contents(__DIR__. '/../lib/macAddressMap.json'), true);
+    $vendor = $vendors[substr($mac,0,8)];
+    $stmt = $dbh->prepare('SELECT COUNT(*) AS num FROM `rest_devices_phones` WHERE mac = ?');
+    $stmt->execute(array($mac));
+    $res = $stmt->fetchAll()[0]['num'];
+    if ($res == 0) {
+        addPhone($mac, $vendor, $model);
+    }
+    $sql = 'UPDATE `rest_devices_phones` SET user_id = ( '.
+           'SELECT userman_users.id FROM userman_users WHERE userman_users.default_extension = ? '.
+           '), extension = ?, secret= ?, type = "physical" WHERE mac = ?';
+    $stmt = $dbh->prepare($sql);
+    setFalconieri($mac,$token);
+    $res = $stmt->execute(array(getMainExtension($extension),$extension,$extension_secret,$mac));
+    if ($res) {
+        return true;
+    }
+    return false;
+}
+
+function setFalconieriRPS($mac,$token) {
+    $vendors = json_decode(file_get_contents(__DIR__. '/../lib/macAddressMap.json'), true);
+    $vendor = $vendors[substr($mac,0,8)];
+    switch ($vendor) {
+    case 'Snom':
+    case 'Gigaset':
+    case 'Fanvil':
+        $provider = strtolower($vendor);
+        break;
+    case 'Yealink/Dreamwave':
+        $provider = 'yealink';
+        break;
+    default:
+        return array("httpCode" => 400, "error" => "provider_not_supported");
+        break;
+    }
+
+    //get LK
+    exec("/usr/bin/sudo /sbin/e-smith/config getprop subscription SystemId", $tmp);
+    $lk = $tmp[0];
+    unset($tmp);
+    //get secret
+    exec("/usr/bin/sudo /sbin/e-smith/config getprop subscription Secret", $tmp);
+    $secret = $tmp[0];
+    unset($tmp);
+
+    $queryUrl = 'https://';
+    $queryUrl .= 'rps.nethserver.net';
+    $queryUrl .= '/providers';
+    $queryUrl .= '/'.$provider;
+    $queryUrl .= '/'.str_replace(':','-',"$mac");
+
+    $provisioningUrl = 'https://';
+    $provisioningUrl .= gethostname();
+    $provisioningUrl .= '/provisioning';
+    $provisioningUrl .= '/' . $token .'/';
+
+    $data = array("url" => $provisioningUrl);
+    if ($provider === 'Gigaset') {
+        $data['crc'] = crc32(str_replace(':','-',"$mac"));
+    }
+    $data = json_encode($data);
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $queryUrl);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    curl_setopt($ch, CURLOPT_USERPWD, $lk . ':' . $secret);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+    curl_setopt($ch, CURLOPT_HEADER, FALSE);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        "Content-Type: application/json;charset=utf-8",
+        "Accept: application/json;charset=utf-8",
+        "Content-length: ".strlen($data),
+    ));
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    $result = array();
+    $result['httpCode'] = $httpCode;
+    if ($result['httpCode'] != 200) {
+        error_log("got HTTP ".$result['httpCode']. " response from Falconieri RPS gateway. Try to execute\n    $ curl -kv '$queryUrl' --basic --user $lk:$secret -H 'Content-Type: application/json' -H 'Content-length: ".strlen($data)."' -X PUT --data '$data'");
+    }
+    return array_merge($result,(array) json_decode($response));
 }
 
 function useExtensionAsApp($extension,$mac,$model) {
@@ -657,3 +765,34 @@ function checkFreeExtension($extension){
         return $e->getMessage();
     }
 }
+
+function addPhone($mac, $vendor, $model)
+{
+    $dbh = FreePBX::Database();
+    $multiline_phones = array(
+        array('Snom'=>'M300'),
+        array('Snom'=>'M700')
+    );
+    $lines = 0;
+    if (in_array(array($vendor => $model), $multiline_phones)){
+        $sql = 'SELECT max_lines from `endpointman_model_list` WHERE `model`="'.$model.'" AND `brand` = (SELECT `id` FROM `endpointman_brand_list` WHERE `name` = "'.$vendor.'")';
+        $lines = $dbh->sql($sql, 'getOne');
+    }
+    $dbh->query('DELETE IGNORE FROM `rest_devices_phones` WHERE `mac` = "'.$mac.'"');
+    if ($lines === 0) {
+        $sql = 'INSERT INTO `rest_devices_phones` (`mac`,`vendor`, `model`) VALUES (?,?,?)';
+        $stmt = $dbh->prepare($sql);
+        return $stmt->execute(array($mac,$vendor,$model));
+    } else {
+        $ret = true;
+        for ($i=1; $i<=$lines; $i++) {
+            $sql = 'INSERT INTO `rest_devices_phones` (`mac`,`vendor`, `model`,`line`) VALUES (?,?,?,?)';
+            $stmt = $dbh->prepare($sql);
+            if (!$stmt->execute(array($mac,$vendor,$model,$i))) {
+                $ret = false ;
+            }
+        }
+        return $ret;
+    }
+}
+

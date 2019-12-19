@@ -28,7 +28,8 @@ define("JSON_FLAGS",JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
-include_once('lib/CronHelper.php');
+include_once 'lib/CronHelper.php';
+include_once 'lib/libExtensions.php';
 
 //$app = new \Slim\App;
 $container = $app->getContainer();
@@ -56,3 +57,10 @@ $app->delete('/phones/reboot', function (Request $request, Response $response, $
     return $response->withJson((object) $cron_response, 200, JSON_FLAGS);
 });
 
+$app->post('/phones/rps/{mac}', function (Request $request, Response $response, $args) {
+    $body = $request->getParsedBody();
+    $token = $body['token'];
+    $result = setFalconieriRPS($args['mac'],$token);
+    error_log('Set RPS using Falconieri: '.json_encode($result));
+    return $response->withStatus($result['httpCode']);
+});

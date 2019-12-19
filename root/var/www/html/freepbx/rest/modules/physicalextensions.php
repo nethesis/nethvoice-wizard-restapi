@@ -48,7 +48,7 @@ $app->post('/physicalextensions', function (Request $request, Response $response
     try {
         $params = $request->getParsedBody();
         $mainextensionnumber = $params['mainextension'];
-        $mac = $params['mac'];
+        $mac = str_replace('-',':',$params['mac']);
         $model = $params['model'];
         $web_user = $params['web_user'];
         $web_password = $params['web_password'];
