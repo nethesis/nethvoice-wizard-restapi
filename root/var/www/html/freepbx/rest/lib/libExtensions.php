@@ -311,7 +311,7 @@ function tancredi_useExtensionAsPhysical($extension,$mac,$model,$line=false) {
 
 function setFalconieriRPS($mac,$token) {
     $vendors = json_decode(file_get_contents(__DIR__. '/../lib/macAddressMap.json'), true);
-    $vendor = $vendors[substr($mac,0,8)];
+    $vendor = $vendors[substr(str_replace('-',':',"$mac"),0,8)];
     switch ($vendor) {
     case 'Snom':
     case 'Gigaset':
