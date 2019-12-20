@@ -64,3 +64,11 @@ $app->post('/phones/rps/{mac}', function (Request $request, Response $response, 
     error_log('Set RPS using Falconieri: '.json_encode($result));
     return $response->withStatus($result['httpCode']);
 });
+
+$app->get('/phones/account/{mac}', function (Request $request, Response $response, $args) {
+    $dbh = FreePBX::Database();
+    $stmt = $dbh->prepare('SELECT `extension`,`secret` FROM `rest_devices_phones` WHERE `mac` = ?');
+    $stmt->execute(array(str_replace('-',':',$args['mac'])));
+    $res = $stmt->fetch(\PDO::FETCH_ASSOC);
+    return $response->withJson((object) $res , 200, JSON_FLAGS);
+});
