@@ -209,7 +209,7 @@ function useExtensionAsPhysical($extension,$mac,$model,$line=false,$provisioning
     if ($out[0] == 'freepbx') {
         return legacy_useExtensionAsPhysical($extension,$mac,$model,false);
     } elseif ($out[0] == 'tancredi') {
-        return tancredi_useExtensionAsPhysical($extension,$mac,$model = '',false,$provisioning_token);
+        return tancredi_useExtensionAsPhysical($extension,$mac,$model,false,$provisioning_token);
     } else {
         throw new Exception('Unknow provisioning '.implode("\n",$out));
     }
