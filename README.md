@@ -360,6 +360,12 @@ Result:
 
 ```
 
+Get phone SIP credential:
+
+```
+GET /phones/account/{mac}
+```
+
 Get gateways scanned from all netwotks
 
 ```
@@ -756,3 +762,21 @@ This API return configured reboot in crontab:
 }
 ```
 
+### Configure remote provisioning
+
+Remote provisioning "RPS" allows to configure Yealink, Snom, Gigaset and Fanvil phones provisioning endpoint without configuring option 66 on DHCP
+It has been introduced with new provisioning engine.
+
+```
+POST /phones/rps/{mac}
+```
+Parameters:
+```
+{
+  "token": "TOKEN1"
+
+}
+```
+
+Falconieri RPS gateway will insert into vendor's cloud this provisionig url: `https://HOSTNAME/provisioning/TOKEN1/`
+https://github.com/nethesis/falconieri
