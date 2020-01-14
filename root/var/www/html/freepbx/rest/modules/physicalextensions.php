@@ -47,7 +47,6 @@ $app->get('/physicalextensions/{extension}', function (Request $request, Respons
 $app->post('/physicalextensions', function (Request $request, Response $response, $args) {
     try {
         $params = $request->getParsedBody();
-        $mainextensionnumber = $params['mainextension'];
         $mac = str_replace('-',':',$params['mac']);
         $model = $params['model'];
         $web_user = $params['web_user'];
@@ -59,8 +58,17 @@ $app->post('/physicalextensions', function (Request $request, Response $response
             $delete = true;
         }
 
-        $extension = createExtension($mainextensionnumber,$delete);
+        if (empty($params['mainextension'])) {
+            $vendors = json_decode(file_get_contents(__DIR__. '/../lib/macAddressMap.json'), true);
+            $vendor = $vendors[substr($mac,0,8)];
+            if (!empty($mac) && addPhone($mac, $vendor, $model)) {
+                $response->withStatus(200);
+            } else {
+                $response->withJson(array("status"=>"Error adding phone"), 500);
+            }
+        }
 
+        $extension = createExtension($params['mainextension'],$delete);
         if ($extension === false ) {
             $response->withJson(array("status"=>"Error creating extension"), 500);
         }
