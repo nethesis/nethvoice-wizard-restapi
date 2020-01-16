@@ -505,13 +505,9 @@ function deleteExtension($extension,$wipemain=false) {
 
 function deletePhysicalExtension($extension) {
     try {
-        global $astman;
-        $dbh = FreePBX::Database();
-        //Get device lines
-        $mac = $dbh->sql('SELECT `mac` FROM `rest_devices_phones` WHERE `extension` = "'.$extension.'"', "getOne");
-        $usedlinecount = $dbh->sql('SELECT COUNT(*) FROM `rest_devices_phones` WHERE `mac` = "'.$mac.'" AND `extension` != ""', "getOne");
-
         if (getProvisioningEngine() == 'freepbx') {
+            $dbh = FreePBX::Database();
+            $mac = $dbh->sql('SELECT `mac` FROM `rest_devices_phones` WHERE `extension` = "'.$extension.'"', "getOne");
             // Remove endpoint from endpointman
             $endpoint = FreePBX::endpointmanager();
             $mac_id = $dbh->sql('SELECT id FROM endpointman_mac_list WHERE mac = "'.preg_replace('/:/', '', $mac).'"', "getOne");
