@@ -205,10 +205,10 @@ function useExtensionAsCustomPhysical($extension, $secret = false, $type = 'phys
 }
 
 function useExtensionAsPhysical($extension,$mac,$model,$line=false,$provisioning_token=null) {
-    exec("/usr/bin/sudo /sbin/e-smith/config getprop nethvoice ProvisioningEngine", $out);
-    if ($out[0] == 'freepbx') {
+    $provisioningEngine = getProvisioningEngine();
+    if ($provisioningEngine == 'freepbx') {
         return legacy_useExtensionAsPhysical($extension,$mac,$model,false);
-    } elseif ($out[0] == 'tancredi') {
+    } elseif ($provisioningEngine == 'tancredi') {
         return tancredi_useExtensionAsPhysical($extension,$mac,$model,false,$provisioning_token);
     } else {
         throw new Exception('Unknow provisioning '.implode("\n",$out));
@@ -511,12 +511,14 @@ function deletePhysicalExtension($extension) {
         $mac = $dbh->sql('SELECT `mac` FROM `rest_devices_phones` WHERE `extension` = "'.$extension.'"', "getOne");
         $usedlinecount = $dbh->sql('SELECT COUNT(*) FROM `rest_devices_phones` WHERE `mac` = "'.$mac.'" AND `extension` != ""', "getOne");
 
-        // Remove endpoint from endpointman
-        $endpoint = FreePBX::endpointmanager();
-        $mac_id = $dbh->sql('SELECT id FROM endpointman_mac_list WHERE mac = "'.preg_replace('/:/', '', $mac).'"', "getOne");
-        if (!empty($mac_id)) {
-            $luid = $dbh->sql('SELECT luid FROM endpointman_line_list WHERE mac_id = "'.$mac_id.'" AND ext = "'.$extension.'"', "getOne");
-            $endpoint->delete_line($luid, true);
+        if (getProvisioningEngine() == 'freepbx') {
+            // Remove endpoint from endpointman
+            $endpoint = FreePBX::endpointmanager();
+            $mac_id = $dbh->sql('SELECT id FROM endpointman_mac_list WHERE mac = "'.preg_replace('/:/', '', $mac).'"', "getOne");
+            if (!empty($mac_id)) {
+                $luid = $dbh->sql('SELECT luid FROM endpointman_line_list WHERE mac_id = "'.$mac_id.'" AND ext = "'.$extension.'"', "getOne");
+                $endpoint->delete_line($luid, true);
+            }
         }
         return true;
     } catch (Exception $e) {
@@ -795,3 +797,7 @@ function addPhone($mac, $vendor, $model)
     }
 }
 
+function getProvisioningEngine() {
+    exec("/usr/bin/sudo /sbin/e-smith/config getprop nethvoice ProvisioningEngine", $out);
+    return $out[0];
+}

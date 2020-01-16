@@ -295,7 +295,7 @@ Parameter: { "mainextension": "mainextnumber" [, "extension": "extensionnumber"]
 Delete physical extension
 
 ```
-DELETE /physicalextensions/{extension}
+DELETE /physicalextensions/{extension|mac}
 ```
 
 ### Voicemail
