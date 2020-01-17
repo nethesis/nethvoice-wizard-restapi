@@ -72,3 +72,8 @@ $app->get('/phones/account/{mac}', function (Request $request, Response $respons
     $res = $stmt->fetch(\PDO::FETCH_ASSOC);
     return $response->withJson((object) $res , 200, JSON_FLAGS);
 });
+
+$app->get('/provisioning/engine', function (Request $request, Response $response, $args) {
+    return $response->withJson(getProvisioningEngine(), 200, JSON_FLAGS);
+});
+
