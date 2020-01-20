@@ -781,12 +781,34 @@ Parameters:
 Falconieri RPS gateway will insert into vendor's cloud this provisionig url: `https://HOSTNAME/provisioning/TOKEN1/`
 https://github.com/nethesis/falconieri
 
-###
-
-Provisioning engine
+### Provisioning engine
 
 ```
 GET /provisioning/engine
 ```
 
 return provisioning engine configured in configuration db nethvoice ProvisioningEngine prop. Possible values are "freepbx" or "tancredi"
+
+### Provisioning variables
+
+```
+GET /provisioning/variables return default variables that depends on server configuration
+```
+
+```
+GET /provisioning/variables/{extension} return default variables that depends on extension configuration
+```
+
+```
+GET /provisioning/cloud
+```
+
+Return (true|false) if the server is configured for cloud installation (correct FQDN, valid certificate, TSL by default)
+
+
+```
+POST /provisioning/cloud/(true|false)
+```
+
+Set if the server is configured for cloud installation (correct FQDN, valid certificate, TSL by default)
+
