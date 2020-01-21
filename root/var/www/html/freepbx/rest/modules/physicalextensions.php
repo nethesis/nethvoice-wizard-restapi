@@ -100,16 +100,18 @@ $app->delete('/physicalextensions/{id}', function (Request $request, Response $r
     try {
         $route = $request->getAttribute('route');
         $id = $route->getArgument('id');
+        $extension = $id;
         if (preg_match('/[A-F0-9]{2}-[A-F0-9]{2}-[A-F0-9]{2}-[A-F0-9]{2}-[A-F0-9]{2}-[A-F0-9]{2}/', $id) === 1) {
             // $id provided is a mac address, get extension from rest_devices_phone
             $dbh = FreePBX::Database();
+            $id = str_replace('-',':',$id);
             $sql = 'SELECT `extension` FROM `rest_devices_phones` WHERE `mac` = ? LIMIT 1';
             $stmt = $dbh->prepare($sql);
             $stmt->execute(array($id));
 	    $res = $stmt->fetch(\PDO::FETCH_ASSOC)[0]['extension'];
 	    $sql = 'DELETE FROM `rest_devices_phones` WHERE `mac` = ?';
 	    $stmt = $dbh->prepare($sql);
-	    $stmt->execute(array($mac));
+	    $stmt->execute(array($id));
             if (is_null($res)) {
                 system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
                 return $response->withStatus(200);
@@ -117,8 +119,6 @@ $app->delete('/physicalextensions/{id}', function (Request $request, Response $r
                 $extension = $res;
             }
         }
-
-        $extension = $id;
         if (deletePhysicalExtension($extension) && deleteExtension($extension)) {
             system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
             return $response->withStatus(200);

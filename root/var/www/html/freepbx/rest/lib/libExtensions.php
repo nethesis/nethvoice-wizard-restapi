@@ -74,7 +74,7 @@ function createExtension($mainextensionnumber,$delete=false){
             }
             //error if there aren't available extension numbers
             if (!isset($extension)) {
-                throw ("There aren't available extension numbers");
+                throw new Exception("There aren't available extension numbers");
             }
 
             //delete extension
@@ -87,7 +87,7 @@ function createExtension($mainextensionnumber,$delete=false){
             $data['outboundcid'] = $mainextdata['outboundcid'];
             $res = $fpbx->Core->processQuickCreate('pjsip', $extension, $data);
             if (!$res['status']) {
-                throw ("Error creating extension");
+                throw new Exception("Error creating extension");
             }
             //Set cid_masquerade (CID Num Alias)
             $astman->database_put("AMPUSER",$extension."/cidnum",$mainextensionnumber);
