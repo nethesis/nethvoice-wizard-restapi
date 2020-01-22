@@ -62,30 +62,30 @@ $app->post('/physicalextensions', function (Request $request, Response $response
             $vendors = json_decode(file_get_contents(__DIR__. '/../lib/macAddressMap.json'), true);
             $vendor = $vendors[substr($mac,0,8)];
             if (!empty($mac) && addPhone($mac, $vendor, $model)) {
-                $response->withStatus(200);
+                return $response->withStatus(200);
             } else {
-                $response->withJson(array("status"=>"Error adding phone"), 500);
+                return $response->withJson(array("status"=>"Error adding phone"), 500);
             }
         }
 
         $extension = createExtension($params['mainextension'],$delete);
         if ($extension === false ) {
-            $response->withJson(array("status"=>"Error creating extension"), 500);
+            return $response->withJson(array("status"=>"Error creating extension"), 500);
         }
 
         if (isset($mac) && isset($model)) {
             if ($model === 'GS Wave') {
                 if (useExtensionAsApp($extension,$mac,$model) === false) {
-                    $response->withJson(array("status"=>"Error associating app extension"), 500);
+                    return $response->withJson(array("status"=>"Error associating app extension"), 500);
                 }
             } else {
                 if (useExtensionAsPhysical($extension,$mac,$model,$line) === false) {
-                    $response->withJson(array("status"=>"Error associating physical extension"), 500);
+                    return $response->withJson(array("status"=>"Error associating physical extension"), 500);
                 }
             }
         } else {
             if (useExtensionAsCustomPhysical($extension,false,'physical',$web_user,$web_password) === false) {
-                $response->withJson(array("status"=>"Error creating custom extension"), 500);
+                return $response->withJson(array("status"=>"Error creating custom extension"), 500);
             }
         }
         system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
