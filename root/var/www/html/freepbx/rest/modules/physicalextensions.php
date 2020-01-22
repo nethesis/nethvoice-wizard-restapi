@@ -84,7 +84,11 @@ $app->post('/physicalextensions', function (Request $request, Response $response
                 }
             }
         } else {
-            if (useExtensionAsCustomPhysical($extension,false,'physical',$web_user,$web_password) === false) {
+            if (isset($mac) && getProvisioningEngine() === 'tancredi') {
+                if (useExtensionAsPhysical($extension,$mac,$model,$line) === false) {
+                    return $response->withJson(array("status"=>"Error associating physical extension without model"), 500);
+                }
+            } elseif (useExtensionAsCustomPhysical($extension,false,'physical',$web_user,$web_password) === false) {
                 return $response->withJson(array("status"=>"Error creating custom extension"), 500);
             }
         }
