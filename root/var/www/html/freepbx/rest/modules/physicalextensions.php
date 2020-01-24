@@ -134,3 +134,30 @@ $app->delete('/physicalextensions/{id}', function (Request $request, Response $r
         return $response->withStatus(500);
     }
 });
+
+$app->patch('/physicalextensions/{mac}', function (Request $request, Response $response, $args) {
+    try {
+        $route = $request->getAttribute('route');
+        $params = $request->getParsedBody();
+        $mac = $route->getArgument('mac');
+        $model = $params['model'];
+
+        if (preg_match('/[A-F0-9]{2}-[A-F0-9]{2}-[A-F0-9]{2}-[A-F0-9]{2}-[A-F0-9]{2}-[A-F0-9]{2}/', $mac) !== 1) {
+            return $response->withJson(array("status"=>"Invalid MAC address"), 500);
+        }
+
+        if (empty($model)) {
+            return $response->withJson(array("status"=>"Model is mandatory"), 500);
+        }
+
+        $mac = str_replace('-',':',$mac);
+        $dbh = FreePBX::Database();
+        $sql = 'UPDATE `rest_devices_phones` SET `model` = ? WHERE `mac` = ?';
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute(array($model, $mac));
+        return $response->withStatus(200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withJson(array("status"=>$e->getMessage()), 500);
+    }
+});
