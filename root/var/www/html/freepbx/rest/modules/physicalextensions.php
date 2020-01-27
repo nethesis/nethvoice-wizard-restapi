@@ -147,7 +147,7 @@ $app->patch('/physicalextensions/{mac}', function (Request $request, Response $r
         }
 
         if (empty($model)) {
-            return $response->withJson(array("status"=>"Model is mandatory"), 500);
+            $model = NULL;
         }
 
         $mac = str_replace('-',':',$mac);
