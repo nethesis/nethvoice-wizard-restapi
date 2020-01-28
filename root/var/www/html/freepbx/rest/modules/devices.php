@@ -257,6 +257,7 @@ $app->get('/devices/gateways/list/{id}', function (Request $request, Response $r
 
 $app->get('/devices/phones/list', function (Request $request, Response $response, $args) {
     try {
+        global $astman;
         $basedir='/var/run/nethvoice';
         $files = scandir($basedir);
         $res=array();
@@ -341,6 +342,7 @@ $app->get('/devices/phones/list', function (Request $request, Response $response
                 continue;
             }
 
+            $state = $astman->ExtensionState($obj['extension'],'ext-local');
             $phone['mac'] = $obj['mac'];
             $phone['model'] = $obj['model'];
             $phone['manufacturer'] = $obj['vendor'];
@@ -351,7 +353,9 @@ $app->get('/devices/phones/list', function (Request $request, Response $response
                 "line"=>$obj['line'],
                 "secret"=>$obj['secret'],
                 "username"=>$obj['username'],
-                "displayname"=>$obj['displayname']
+                "displayname"=>$obj['displayname'],
+                "status"=>$state['Status'],
+                "statusText"=>$state['StatusText'],
             );
             $res[] = $phone;
         }
