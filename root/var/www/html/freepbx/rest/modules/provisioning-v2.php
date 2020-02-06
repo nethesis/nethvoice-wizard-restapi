@@ -232,7 +232,8 @@ function isCloud() {
     $stmt->execute(array());
     $res = $stmt->fetchAll(\PDO::FETCH_ASSOC)[0];
     if ($res['value'] === '1' || $res['value'] === 'true') return true;
-    return false;
+    if ($res['value'] === '0' || $res['value'] === 'false') return false;
+    return null;
 }
 
 function setCloud($enabled = TRUE) {
