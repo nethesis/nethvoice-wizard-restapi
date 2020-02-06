@@ -763,6 +763,30 @@ function checkFreeExtension($extension){
     }
 }
 
+function setSipData($extension,$keyword,$data) {
+    $dbh = \FreePBX::Database();
+    $sql = 'REPLACE INTO `sip` SET `id` = ?, `keyword` = ?, data = ?';
+    $stmt = $dbh->prepare($sql);
+    $res = $stmt->execute(array($extension,$keyword,$data));
+    return $res;
+}
+
+function getSipData() {
+    $dbh = \FreePBX::Database();
+    $sql = 'SELECT `id`,`keyword`,`data` FROM `sip`';
+    $stmt = $dbh->prepare($sql);
+    $stmt->execute(array());
+    $res = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+    $result = array();
+    foreach ($res as $row) {
+        if (!array_key_exists($row['id'],$result)) $result[$row['id']] = array();
+        $result[$row['id']][$row['keyword']] = $row['data'];
+    }
+
+    return $result;
+}
+
 function addPhone($mac, $vendor, $model)
 {
     $dbh = FreePBX::Database();

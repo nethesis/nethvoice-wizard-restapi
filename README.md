@@ -812,3 +812,16 @@ POST /provisioning/cloud/(true|false)
 
 Set if the server is configured for cloud installation (correct FQDN, valid certificate, TSL by default)
 
+### SRTP
+
+```
+GET /extensions/{extension}/srtp
+```
+
+Return (true|false) if the extension has srtp enabled
+
+```
+POST /extensions/{extension}/srtp/(true|false)
+```
+
+Enable or disable SRTP for the extension

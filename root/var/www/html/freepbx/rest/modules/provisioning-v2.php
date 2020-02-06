@@ -97,6 +97,37 @@ $app->post('/provisioning/cloud/{status}', function (Request $request, Response 
     return $response->withStatus(204);
 });
 
+$app->get('/phones/state', function (Request $request, Response $response, $args) {
+    global $astman;
+    $res = array();
+    foreach (FreePBX::Core()->getAllUsersByDeviceType() as $extension) {
+        $ext = $extension['extension'];
+        $state = $astman->ExtensionState($ext,'');
+        $res[$ext] = $state;
+    }
+    return $response->withJson($res, 200, JSON_FLAGS);
+});
+
+$app->get('/extensions/{extension}/srtp', function (Request $request, Response $response, $args) {
+    $sip = getSipData();
+    if (array_key_exists($args['extension'], $sip) && array_key_exists('media_encryption',$sip[$args['extension']])) {
+        $media_encryption = $sip[$args['extension']]['media_encryption'];
+        if ($media_encryption == 'sdes' || $media_encryption == 'dtls') {
+            return $response->withJson(TRUE, 200, JSON_FLAGS);
+        }
+    }
+    return $response->withJson(FALSE, 200, JSON_FLAGS);
+});
+
+$app->post('/extensions/{extension}/srtp/{enabled}', function (Request $request, Response $response, $args) {
+    $media_encryption = ($args['enabled'] == 'true') ? 'sdes' : 'no';
+    if (setSipData($args['extension'],'media_encryption',$media_encryption)) {
+        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
+        return $response->withStatus(200);
+    }
+    return $response->withStatus(500);
+});
+
 function getFeaturcodes(){
     $dbh = FreePBX::Database();
     $sql = 'SELECT modulename,featurename,defaultcode,customcode FROM featurecodes';
