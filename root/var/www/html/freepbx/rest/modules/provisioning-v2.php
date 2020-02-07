@@ -224,30 +224,3 @@ function getExtensionSpecificVariables($extension){
     return $variables;
 }
 
-function isCloud() {
-    // Get extension sip data
-    $dbh = FreePBX::Database();
-    $sql = 'SELECT `variable`,`value` FROM `admin` WHERE `variable` = "cloud"';
-    $stmt = $dbh->prepare($sql);
-    $stmt->execute(array());
-    $res = $stmt->fetchAll(\PDO::FETCH_ASSOC)[0];
-    if ($res['value'] === '1' || $res['value'] === 'true') return true;
-    if ($res['value'] === '0' || $res['value'] === 'false') return false;
-    return null;
-}
-
-function setCloud($enabled = TRUE) {
-    $dbh = FreePBX::Database();
-    $dbh->sql('DELETE IGNORE FROM `admin` WHERE `variable` = "cloud"');
-    $sql = 'INSERT INTO `admin` (`variable`,`value`) VALUES ("cloud",?)';
-    $stmt = $dbh->prepare($sql);
-    if ($enabled) {
-        $value = 'true';
-    } else {
-        $value = 'false';
-    }
-    $stmt->execute(array($value));
-}
-
-
-

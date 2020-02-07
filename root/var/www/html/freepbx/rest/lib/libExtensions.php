@@ -335,14 +335,25 @@ function setFalconieriRPS($mac,$token) {
     $secret = $tmp[0];
     unset($tmp);
 
-    $queryUrl = 'https://';
-    $queryUrl .= 'rps.nethserver.net';
+    $queryUrl = 'https://rps.nethserver.net';
     $queryUrl .= '/providers';
     $queryUrl .= '/'.$provider;
     $queryUrl .= '/'.str_replace(':','-',"$mac");
 
-    $provisioningUrl = 'https://';
-    $provisioningUrl .= gethostname();
+    if (!isCloud()) {
+        // Get local green address
+        $dbh = FreePBX::Database();
+        $sql = 'SELECT `variable`,`value` FROM `admin` WHERE `variable` = "ip"';
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute(array());
+        $res = $stmt->fetchAll(\PDO::FETCH_ASSOC)[0];
+        $provisioningUrl = 'http://';
+        $provisioningUrl .= $res['value'];
+    } else {
+        $provisioningUrl = 'https://';
+        $provisioningUrl .= getHostname();
+    }
+
     $provisioningUrl .= '/provisioning';
     $provisioningUrl .= '/' . $token .'/';
 
@@ -377,6 +388,31 @@ function setFalconieriRPS($mac,$token) {
     }
     return array_merge($result,(array) json_decode($response));
 }
+
+function isCloud() {
+    // Get extension sip data
+    $dbh = FreePBX::Database();
+    $sql = 'SELECT `variable`,`value` FROM `admin` WHERE `variable` = "cloud"';
+    $stmt = $dbh->prepare($sql);
+    $stmt->execute(array());
+    $res = $stmt->fetchAll(\PDO::FETCH_ASSOC)[0];
+    if ($res['value'] === '1' || $res['value'] === 'true') return true;
+    return false;
+}
+
+function setCloud($enabled = TRUE) {
+    $dbh = FreePBX::Database();
+    $dbh->sql('DELETE IGNORE FROM `admin` WHERE `variable` = "cloud"');
+    $sql = 'INSERT INTO `admin` (`variable`,`value`) VALUES ("cloud",?)';
+    $stmt = $dbh->prepare($sql);
+    if ($enabled) {
+        $value = 'true';
+    } else {
+        $value = 'false';
+    }
+    $stmt->execute(array($value));
+}
+
 
 function useExtensionAsApp($extension,$mac,$model) {
     try {
