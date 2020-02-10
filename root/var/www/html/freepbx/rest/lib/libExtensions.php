@@ -335,7 +335,7 @@ function setFalconieriRPS($mac,$token) {
     $secret = $tmp[0];
     unset($tmp);
 
-    $queryUrl = 'https://rps.nethserver.net';
+    $queryUrl = 'https://rps.nethesis.it';
     $queryUrl .= '/providers';
     $queryUrl .= '/'.$provider;
     $queryUrl .= '/'.str_replace(':','-',"$mac");
