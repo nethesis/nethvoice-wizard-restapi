@@ -112,7 +112,7 @@ $app->delete('/physicalextensions/{id}', function (Request $request, Response $r
             $sql = 'SELECT `extension` FROM `rest_devices_phones` WHERE `mac` = ? LIMIT 1';
             $stmt = $dbh->prepare($sql);
             $stmt->execute(array($id));
-	    $res = $stmt->fetch(\PDO::FETCH_ASSOC)[0]['extension'];
+	    $res = $stmt->fetchAll(\PDO::FETCH_ASSOC)[0]['extension'];
 	    $sql = 'DELETE FROM `rest_devices_phones` WHERE `mac` = ?';
 	    $stmt = $dbh->prepare($sql);
 	    $stmt->execute(array($id));
