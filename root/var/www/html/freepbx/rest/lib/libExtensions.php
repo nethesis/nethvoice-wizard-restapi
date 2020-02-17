@@ -312,11 +312,13 @@ function tancredi_useExtensionAsPhysical($extension,$mac,$model,$line=false) {
 function setFalconieriRPS($mac,$token) {
     $vendors = json_decode(file_get_contents(__DIR__. '/../lib/macAddressMap.json'), true);
     $vendor = $vendors[substr(str_replace('-',':',"$mac"),0,8)];
+    $filename = '';
     switch ($vendor) {
     case 'Snom':
     case 'Gigaset':
     case 'Fanvil':
         $provider = strtolower($vendor);
+        $filename = '$mac.cfg';
         break;
     case 'Yealink/Dreamwave':
         $provider = 'yealink';
@@ -355,7 +357,7 @@ function setFalconieriRPS($mac,$token) {
     }
 
     $provisioningUrl .= '/provisioning';
-    $provisioningUrl .= '/' . $token .'/';
+    $provisioningUrl .= '/' . $token .'/' .$filename;
 
     $data = array("url" => $provisioningUrl);
     if ($provider === 'Gigaset') {
