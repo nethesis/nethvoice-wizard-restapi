@@ -315,6 +315,9 @@ function setFalconieriRPS($mac,$token) {
     $filename = '';
     switch ($vendor) {
     case 'Snom':
+        $provider = 'snom';
+        $filename = '{mac}.cfg';
+        break;
     case 'Gigaset':
     case 'Fanvil':
         $provider = strtolower($vendor);
