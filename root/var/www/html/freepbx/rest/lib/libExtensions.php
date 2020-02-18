@@ -320,7 +320,7 @@ function setFalconieriRPS($mac,$token) {
         break;
     case 'Gigaset':
     case 'Fanvil':
-        $provider = strtolower($vendor);
+        $provider = 'fanvil';
         $filename = '$mac.cfg';
         break;
     case 'Yealink/Dreamwave':
