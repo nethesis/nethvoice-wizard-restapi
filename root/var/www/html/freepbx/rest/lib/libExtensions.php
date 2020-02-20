@@ -319,6 +319,9 @@ function setFalconieriRPS($mac,$token) {
         $filename = '{mac}.xml';
         break;
     case 'Gigaset':
+        $provider = 'gigaset';
+        $filename = '%MACD.xml';
+        break;
     case 'Fanvil':
         $provider = 'fanvil';
         $filename = '$mac.cfg';
