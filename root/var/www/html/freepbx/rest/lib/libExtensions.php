@@ -375,7 +375,6 @@ function setFalconieriRPS($mac,$token) {
 
     curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
     curl_setopt($ch, CURLOPT_USERPWD, $lk . ':' . $secret);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
     curl_setopt($ch, CURLOPT_HEADER, FALSE);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array(
         "Content-Type: application/json;charset=utf-8",
