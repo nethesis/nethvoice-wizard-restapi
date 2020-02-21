@@ -379,13 +379,12 @@ function setFalconieriRPS($mac,$token) {
     curl_setopt($ch, CURLOPT_HTTPHEADER, array(
         "Content-Type: application/json;charset=utf-8",
         "Accept: application/json;charset=utf-8",
-        "Content-length: ".strlen($data),
     ));
 
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
-    $result = array_merge(array('httpCode' => $httpCode), json_decode($response, TRUE));
+    $result = array_merge(array('httpCode' => $httpCode), (array) json_decode($response, TRUE));
     if ($httpCode != 200) {
         error_log(sprintf('[ERROR] Unexpected HTTP response from Falconieri RPS gateway: %s - %s', $httpCode, $response));
         error_log(sprintf('[ERROR] ...To replay the request run: curl -v %s --basic --user %s -H \'Content-Type: application/json\' -X PUT --data %s',
