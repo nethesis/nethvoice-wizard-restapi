@@ -310,6 +310,7 @@ function tancredi_useExtensionAsPhysical($extension,$mac,$model,$line=false) {
 }
 
 function setFalconieriRPS($mac,$token) {
+    $mac = strtr(strtoupper($mac), ':', '-'); // MAC format sanitization
     $vendors = json_decode(file_get_contents(__DIR__. '/../lib/macAddressMap.json'), true);
     $vendor = $vendors[substr(str_replace('-',':',"$mac"),0,8)];
     $filename = '';
@@ -346,7 +347,7 @@ function setFalconieriRPS($mac,$token) {
     $queryUrl = 'https://rps.nethesis.it';
     $queryUrl .= '/providers';
     $queryUrl .= '/'.$provider;
-    $queryUrl .= '/'.str_replace(':','-',"$mac");
+    $queryUrl .= '/'.$mac;
 
     if (!isCloud()) {
         // Get local green address
@@ -386,7 +387,7 @@ function setFalconieriRPS($mac,$token) {
     curl_close($ch);
     $result = array_merge(array('httpCode' => $httpCode), (array) json_decode($response, TRUE));
     if ($httpCode == 200) {
-        error_log(sprintf('[NOTICE] Registered MAC %s with Falconieri RPS. Raw response: %s', strtr($mac, ':', '-'), $response);
+        error_log(sprintf('[NOTICE] Registered MAC %s with Falconieri RPS. Raw response: %s', $mac, $response));
     } else {
         error_log(sprintf('[ERROR] Unexpected HTTP response from Falconieri RPS gateway: %s - %s', $httpCode, $response));
         error_log(sprintf('[ERROR] ...To replay the request run: curl -v %s --basic --user %s -H \'Content-Type: application/json\' -X PUT --data %s',
