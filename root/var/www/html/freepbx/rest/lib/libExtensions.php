@@ -366,9 +366,6 @@ function setFalconieriRPS($mac,$token) {
     $provisioningUrl .= '/' . $token .'/' .$filename;
 
     $data = array("url" => $provisioningUrl);
-    if ($provider === 'Gigaset') {
-        $data['crc'] = crc32(str_replace(':','-',"$mac"));
-    }
     $data = json_encode($data);
 
     $ch = curl_init();
