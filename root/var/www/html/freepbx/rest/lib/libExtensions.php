@@ -364,7 +364,7 @@ function setFalconieriRPS($mac,$token) {
     }
 
     $provisioningUrl .= '/provisioning';
-    $provisioningUrl .= '/' . $token .'/' .$filename;
+    $provisioningUrl .= '/' . $token .'/' . rawurlencode($filename);
 
     $data = array("url" => $provisioningUrl);
     $data = json_encode($data, JSON_UNESCAPED_SLASHES);
