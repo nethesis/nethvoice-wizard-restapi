@@ -385,12 +385,16 @@ function setFalconieriRPS($mac,$token) {
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
-    $result = array();
-    $result['httpCode'] = $httpCode;
-    if ($result['httpCode'] != 200) {
-        error_log("got HTTP ".$result['httpCode']. " response from Falconieri RPS gateway. Try to execute\n    $ curl -kv '$queryUrl' --basic --user $lk:$secret -H 'Content-Type: application/json' -H 'Content-length: ".strlen($data)."' -X PUT --data '$data'");
+    $result = array_merge(array('httpCode' => $httpCode), json_decode($response, TRUE));
+    if ($httpCode != 200) {
+        error_log(sprintf('[ERROR] Unexpected HTTP response from Falconieri RPS gateway: %s - %s', $httpCode, $response));
+        error_log(sprintf('[ERROR] ...To replay the request run: curl -v %s --basic --user %s -H \'Content-Type: application/json\' -X PUT --data %s',
+            escapeshellarg($queryUrl),
+            escapeshellarg("$lk:$secret"),
+            escapeshellarg($data)
+        ));
     }
-    return array_merge($result,(array) json_decode($response));
+    return $result;
 }
 
 function isCloud() {
