@@ -62,7 +62,6 @@ $app->post('/phones/rps/{mac}', function (Request $request, Response $response, 
     $body = $request->getParsedBody();
     $token = $body['token'];
     $result = setFalconieriRPS($args['mac'],$token);
-    error_log('Set RPS using Falconieri: '.json_encode($result));
     return $response->withStatus($result['httpCode']);
 });
 
