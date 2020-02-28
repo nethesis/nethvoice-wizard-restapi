@@ -320,7 +320,7 @@ function setFalconieriRPS($mac, $provisioningUrl) {
         $provider = 'gigaset';
     } elseif($vendor == 'Fanvil') {
         $provider = 'fanvil';
-    } elseif($vendor == 'Yealink/Dreamwave')
+    } elseif($vendor == 'Yealink/Dreamwave') {
         $provider = 'yealink';
     } else {
         return array("httpCode" => 400, "error" => "provider_not_supported");
