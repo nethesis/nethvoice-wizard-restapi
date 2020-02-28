@@ -79,12 +79,8 @@ $app->get('/provisioning/engine', function (Request $request, Response $response
     return $response->withJson(getProvisioningEngine(), 200, JSON_FLAGS);
 });
 
-$app->get('/provisioning/variables[/{extension}]', function (Request $request, Response $response, $args) {
-    if (array_key_exists('extension',$args)) {
-        return $response->withJson(getExtensionSpecificVariables($args['extension']), 200, JSON_FLAGS);
-    } else {
-        return $response->withJson(getGlobalVariables(), 200, JSON_FLAGS);
-    }
+$app->get('/provisioning/variables/{extension}', function (Request $request, Response $response, $args) {
+    return $response->withJson(getExtensionSpecificVariables($args['extension']), 200, JSON_FLAGS);
 });
 
 $app->get('/phones/state', function (Request $request, Response $response, $args) {
@@ -129,14 +125,6 @@ function getFeaturcodes(){
         $featurecodes[$featurecode['modulename'].$featurecode['featurename']] = (!empty($featurecode['customcode'])?$featurecode['customcode']:$featurecode['defaultcode']);
     }
     return $featurecodes;
-}
-
-function getGlobalVariables(){
-    global $amp_conf;
-    $variables = array();
-    $variables['tonezone'] = $amp_conf['TONEZONE'];
-    $variables['timezone'] = $amp_conf['PHPTIMEZONE'];
-    return $variables;
 }
 
 function getExtensionSpecificVariables($extension){
