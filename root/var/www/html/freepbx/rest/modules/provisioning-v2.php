@@ -133,39 +133,8 @@ function getFeaturcodes(){
 
 function getGlobalVariables(){
     global $amp_conf;
-    if (!isCloud()) {
-        // Get local green address
-        $dbh = FreePBX::Database();
-        $sql = 'SELECT `variable`,`value` FROM `admin` WHERE `variable` = "ip"';
-        $stmt = $dbh->prepare($sql);
-        $stmt->execute(array());
-        $res = $stmt->fetchAll(\PDO::FETCH_ASSOC)[0];
-        $host = $res['value'];
-        $variables['provisioning_protocol'] = 'http';
-        $variables['network_time_server'] = 'pool.ntp.org';
-    } else {
-        $host = gethostname();
-        $variables['provisioning_protocol'] = 'https';
-        $variables['network_time_server'] = $host;
-    }
-    $variables['ldap_server'] = $host;
-    $variables['host'] = $host;
-    $variables['provisioning_url'] = "provisioning";
-    $variables['firmware_url'] = 'firmware';
-    $variables['dect_firmware_url'] = 'firmware/dect';
-    $variables['w52h_firmware_url'] = 'firmware/w52h';
-    $variables['w53h_firmware_url'] = 'firmware/w53h';
-    $variables['w56h_firmware_url'] = 'firmware/w56h';
-
-    // get admin password
-    $host = $res['value'];
-    $variables['adminpw'] = '';
+    $variables = array();
     $variables['tonezone'] = $amp_conf['TONEZONE'];
-    $variables['ldap_port'] = '10389';
-    $variables['ldap_user'] = '';
-    $variables['ldap_password'] = '';
-    $variables['ldap_tls'] = '';
-    #$variables['language'] = '';
     $variables['timezone'] = $amp_conf['PHPTIMEZONE'];
     return $variables;
 }
