@@ -60,8 +60,10 @@ $app->delete('/phones/reboot', function (Request $request, Response $response, $
 
 $app->post('/phones/rps/{mac}', function (Request $request, Response $response, $args) {
     $body = $request->getParsedBody();
-    $token = $body['token'];
-    $result = setFalconieriRPS($args['mac'],$token);
+    if(!$body['url']) {
+        return $response->withStatus(400);
+    }
+    $result = setFalconieriRPS($args['mac'], $body['url']);
     return $response->withStatus($result['httpCode']);
 });
 
@@ -83,17 +85,6 @@ $app->get('/provisioning/variables[/{extension}]', function (Request $request, R
     } else {
         return $response->withJson(getGlobalVariables(), 200, JSON_FLAGS);
     }
-});
-
-$app->get('/provisioning/cloud', function (Request $request, Response $response, $args) {
-    return $response->withJson(isCloud(), 200, JSON_FLAGS);
-});
-
-$app->post('/provisioning/cloud/{status}', function (Request $request, Response $response, $args) {
-    if ($args['status'] == 'true') setCloud(TRUE);
-    elseif ($args['status'] == 'false') setCloud(FALSE);
-    else return $response->withStatus(400);
-    return $response->withStatus(204);
 });
 
 $app->get('/phones/state', function (Request $request, Response $response, $args) {

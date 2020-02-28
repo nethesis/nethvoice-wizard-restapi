@@ -309,30 +309,21 @@ function tancredi_useExtensionAsPhysical($extension,$mac,$model,$line=false) {
     return false;
 }
 
-function setFalconieriRPS($mac,$token) {
+function setFalconieriRPS($mac, $provisioningUrl) {
     $mac = strtr(strtoupper($mac), ':', '-'); // MAC format sanitization
     $vendors = json_decode(file_get_contents(__DIR__. '/../lib/macAddressMap.json'), true);
     $vendor = $vendors[substr(str_replace('-',':',"$mac"),0,8)];
-    $filename = '';
-    switch ($vendor) {
-    case 'Snom':
+
+    if($vendor == 'Snom') {
         $provider = 'snom';
-        $filename = '{mac}.xml';
-        break;
-    case 'Gigaset':
+    } elseif($vendor == 'Gigaset') {
         $provider = 'gigaset';
-        $filename = '%MACD.xml';
-        break;
-    case 'Fanvil':
+    } elseif($vendor == 'Fanvil') {
         $provider = 'fanvil';
-        $filename = '$mac.cfg';
-        break;
-    case 'Yealink/Dreamwave':
+    } elseif($vendor == 'Yealink/Dreamwave')
         $provider = 'yealink';
-        break;
-    default:
+    } else {
         return array("httpCode" => 400, "error" => "provider_not_supported");
-        break;
     }
 
     //get LK
@@ -344,30 +335,8 @@ function setFalconieriRPS($mac,$token) {
     $secret = $tmp[0];
     unset($tmp);
 
-    $queryUrl = 'https://rps.nethesis.it';
-    $queryUrl .= '/providers';
-    $queryUrl .= '/'.$provider;
-    $queryUrl .= '/'.$mac;
-
-    if (!isCloud()) {
-        // Get local green address
-        $dbh = FreePBX::Database();
-        $sql = 'SELECT `variable`,`value` FROM `admin` WHERE `variable` = "ip"';
-        $stmt = $dbh->prepare($sql);
-        $stmt->execute(array());
-        $res = $stmt->fetchAll(\PDO::FETCH_ASSOC)[0];
-        $provisioningUrl = 'http://';
-        $provisioningUrl .= $res['value'];
-    } else {
-        $provisioningUrl = 'https://';
-        $provisioningUrl .= getHostname();
-    }
-
-    $provisioningUrl .= '/provisioning';
-    $provisioningUrl .= '/' . $token .'/' . rawurlencode($filename);
-
-    $data = array("url" => $provisioningUrl);
-    $data = json_encode($data, JSON_UNESCAPED_SLASHES);
+    $queryUrl = "https://rps.nethesis.it/providers/${provider}/${mac}";
+    $data = json_encode(array("url" => $provisioningUrl), JSON_UNESCAPED_SLASHES);
 
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $queryUrl);
@@ -399,29 +368,7 @@ function setFalconieriRPS($mac,$token) {
     return $result;
 }
 
-function isCloud() {
-    // Get extension sip data
-    $dbh = FreePBX::Database();
-    $sql = 'SELECT `variable`,`value` FROM `admin` WHERE `variable` = "cloud"';
-    $stmt = $dbh->prepare($sql);
-    $stmt->execute(array());
-    $res = $stmt->fetchAll(\PDO::FETCH_ASSOC)[0];
-    if ($res['value'] === '1' || $res['value'] === 'true') return true;
-    return false;
-}
 
-function setCloud($enabled = TRUE) {
-    $dbh = FreePBX::Database();
-    $dbh->sql('DELETE IGNORE FROM `admin` WHERE `variable` = "cloud"');
-    $sql = 'INSERT INTO `admin` (`variable`,`value`) VALUES ("cloud",?)';
-    $stmt = $dbh->prepare($sql);
-    if ($enabled) {
-        $value = 'true';
-    } else {
-        $value = 'false';
-    }
-    $stmt->execute(array($value));
-}
 
 
 function useExtensionAsApp($extension,$mac,$model) {
