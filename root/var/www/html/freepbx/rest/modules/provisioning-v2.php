@@ -60,8 +60,10 @@ $app->delete('/phones/reboot', function (Request $request, Response $response, $
 
 $app->post('/phones/rps/{mac}', function (Request $request, Response $response, $args) {
     $body = $request->getParsedBody();
-    $token = $body['token'];
-    $result = setFalconieriRPS($args['mac'],$token);
+    if(!$body['url']) {
+        return $response->withStatus(400);
+    }
+    $result = setFalconieriRPS($args['mac'], $body['url']);
     return $response->withStatus($result['httpCode']);
 });
 
@@ -77,23 +79,8 @@ $app->get('/provisioning/engine', function (Request $request, Response $response
     return $response->withJson(getProvisioningEngine(), 200, JSON_FLAGS);
 });
 
-$app->get('/provisioning/variables[/{extension}]', function (Request $request, Response $response, $args) {
-    if (array_key_exists('extension',$args)) {
-        return $response->withJson(getExtensionSpecificVariables($args['extension']), 200, JSON_FLAGS);
-    } else {
-        return $response->withJson(getGlobalVariables(), 200, JSON_FLAGS);
-    }
-});
-
-$app->get('/provisioning/cloud', function (Request $request, Response $response, $args) {
-    return $response->withJson(isCloud(), 200, JSON_FLAGS);
-});
-
-$app->post('/provisioning/cloud/{status}', function (Request $request, Response $response, $args) {
-    if ($args['status'] == 'true') setCloud(TRUE);
-    elseif ($args['status'] == 'false') setCloud(FALSE);
-    else return $response->withStatus(400);
-    return $response->withStatus(204);
+$app->get('/provisioning/variables/{extension}', function (Request $request, Response $response, $args) {
+    return $response->withJson(getExtensionSpecificVariables($args['extension']), 200, JSON_FLAGS);
 });
 
 $app->get('/phones/state', function (Request $request, Response $response, $args) {
@@ -138,45 +125,6 @@ function getFeaturcodes(){
         $featurecodes[$featurecode['modulename'].$featurecode['featurename']] = (!empty($featurecode['customcode'])?$featurecode['customcode']:$featurecode['defaultcode']);
     }
     return $featurecodes;
-}
-
-function getGlobalVariables(){
-    global $amp_conf;
-    if (!isCloud()) {
-        // Get local green address
-        $dbh = FreePBX::Database();
-        $sql = 'SELECT `variable`,`value` FROM `admin` WHERE `variable` = "ip"';
-        $stmt = $dbh->prepare($sql);
-        $stmt->execute(array());
-        $res = $stmt->fetchAll(\PDO::FETCH_ASSOC)[0];
-        $host = $res['value'];
-        $variables['provisioning_protocol'] = 'http';
-        $variables['network_time_server'] = 'pool.ntp.org';
-    } else {
-        $host = gethostname();
-        $variables['provisioning_protocol'] = 'https';
-        $variables['network_time_server'] = $host;
-    }
-    $variables['ldap_server'] = $host;
-    $variables['host'] = $host;
-    $variables['provisioning_url'] = "provisioning";
-    $variables['firmware_url'] = 'firmware';
-    $variables['dect_firmware_url'] = 'firmware/dect';
-    $variables['w52h_firmware_url'] = 'firmware/w52h';
-    $variables['w53h_firmware_url'] = 'firmware/w53h';
-    $variables['w56h_firmware_url'] = 'firmware/w56h';
-
-    // get admin password
-    $host = $res['value'];
-    $variables['adminpw'] = '';
-    $variables['tonezone'] = $amp_conf['TONEZONE'];
-    $variables['ldap_port'] = '10389';
-    $variables['ldap_user'] = '';
-    $variables['ldap_password'] = '';
-    $variables['ldap_tls'] = '';
-    #$variables['language'] = '';
-    $variables['timezone'] = $amp_conf['PHPTIMEZONE'];
-    return $variables;
 }
 
 function getExtensionSpecificVariables($extension){
