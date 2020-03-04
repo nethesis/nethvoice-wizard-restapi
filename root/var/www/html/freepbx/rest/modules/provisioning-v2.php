@@ -152,24 +152,26 @@ $app->post('/provisioning/connectivitycheck', function (Request $request, Respon
 
     // check provided host is reachable and is this machine
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, 'https://'.$body['host'].'/freepbx/rest/provisioning/ipcheck');
+    curl_setopt($ch, CURLOPT_URL, 'https://'.$body['host'].'/provisioning/check/ping');
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
     curl_setopt($ch, CURLOPT_TIMEOUT, 4);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $curl_header);
     $curl_result = curl_exec($ch);
     curl_close($ch);
 
-    if ($curl_result !== FALSE) {
+    if ($curl_result === (string)filemtime('/etc/tancredi.conf')) {
         $ret['is_reachable'] = TRUE;
         if ($body['schema'] === 'https' and $ret['host_type'] === 'FQDN') {
             // check certificate is valid
             $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, 'https://'.$body['host'].'/freepbx/rest/provisioning/ipcheck');
+            curl_setopt($ch, CURLOPT_URL, 'https://'.$body['host'].'/provisioning/check/ping');
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
             curl_setopt($ch, CURLOPT_TIMEOUT, 4);
             curl_setopt($ch, CURLOPT_HTTPHEADER, $curl_header);
             $curl_result = curl_exec($ch);
             curl_close($ch);
-            if ($curl_result !== FALSE) {
+            if ($curl_result === (string)filemtime('/etc/tancredi.conf')) {
                 $ret['valid_certificate'] = TRUE;
             }
         }
