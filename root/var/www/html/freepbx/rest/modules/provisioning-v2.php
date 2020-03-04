@@ -119,10 +119,10 @@ $app->post('/provisioning/connectivitycheck', function (Request $request, Respon
     $body = $request->getParsedBody();
     if (!$body['host']) {
         return $response->withJson(array('message' => 'missing host parameter'),400);
-    } elseif (!$body['schema']) {
-        return $response->withJson(array('message' => 'missing schema parameter'),400);
-    } elseif ($body['schema'] !== 'http' && $body['schema'] !== 'https') {
-         return $response->withJson(array('message' => 'Invalid schema provided'),400);
+    } elseif (!$body['scheme']) {
+        return $response->withJson(array('message' => 'missing scheme parameter'),400);
+    } elseif ($body['scheme'] !== 'http' && $body['scheme'] !== 'https') {
+         return $response->withJson(array('message' => 'Invalid scheme provided'),400);
     }
 
     $ret = array(
@@ -142,33 +142,31 @@ $app->post('/provisioning/connectivitycheck', function (Request $request, Respon
         return $response->withJson(array('message' => 'provided host isn\'t a valid IP address or FQDN'),400);
     }
 
-    $headers = $request->getHeaders();
-    $curl_header = array(
-        "User: ".$headers['HTTP_USER'][0],
-        "SecretKey: ".$headers['HTTP_SECRETKEY'][0],
-        "Content-Type: application/json;charset=utf-8",
-        "Accept: application/json;charset=utf-8",
-    );
-
     // check provided host is reachable and is this machine
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, 'https://'.$body['host'].'/provisioning/check/ping');
+    curl_setopt($ch, CURLOPT_URL, "{$body['scheme']}://{$body['host']}/provisioning/check/ping");
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
     curl_setopt($ch, CURLOPT_TIMEOUT, 4);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $curl_header);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        "Content-Type: application/json;charset=utf-8",
+        "Accept: application/json;charset=utf-8",
+    ));
     $curl_result = curl_exec($ch);
     curl_close($ch);
 
     if ($curl_result === (string)filemtime('/etc/tancredi.conf')) {
         $ret['is_reachable'] = TRUE;
-        if ($body['schema'] === 'https' and $ret['host_type'] === 'FQDN') {
+        if ($body['scheme'] === 'https' && $ret['host_type'] === 'FQDN') {
             // check certificate is valid
             $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, 'https://'.$body['host'].'/provisioning/check/ping');
+            curl_setopt($ch, CURLOPT_URL, "{$body['scheme']}://{$body['host']}/provisioning/check/ping");
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
             curl_setopt($ch, CURLOPT_TIMEOUT, 4);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $curl_header);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                "Content-Type: application/json;charset=utf-8",
+                "Accept: application/json;charset=utf-8",
+            ));
             $curl_result = curl_exec($ch);
             curl_close($ch);
             if ($curl_result === (string)filemtime('/etc/tancredi.conf')) {
