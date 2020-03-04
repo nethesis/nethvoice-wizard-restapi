@@ -130,7 +130,6 @@ $app->post('/provisioning/connectivitycheck', function (Request $request, Respon
         'valid_certificate' => FALSE
     );
 
-    // check if $body['host'] is an IP address
     $ip_regexp = '/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/';
     $fqdn_regexp = '/(?=^.{4,253}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)/';
     if (preg_match($ip_regexp,$body['host']) === 1 && $body['host'] !== '127.0.0.1') {
@@ -155,6 +154,7 @@ $app->post('/provisioning/connectivitycheck', function (Request $request, Respon
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, 'https://'.$body['host'].'/freepbx/rest/provisioning/ipcheck');
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 4);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $curl_header);
     $curl_result = curl_exec($ch);
     curl_close($ch);
@@ -165,6 +165,7 @@ $app->post('/provisioning/connectivitycheck', function (Request $request, Respon
             // check certificate is valid
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, 'https://'.$body['host'].'/freepbx/rest/provisioning/ipcheck');
+            curl_setopt($ch, CURLOPT_TIMEOUT, 4);
             curl_setopt($ch, CURLOPT_HTTPHEADER, $curl_header);
             $curl_result = curl_exec($ch);
             curl_close($ch);
