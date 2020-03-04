@@ -178,10 +178,6 @@ $app->post('/provisioning/connectivitycheck', function (Request $request, Respon
     return $response->withJson($ret,200);
 });
 
-$app->get('/provisioning/ipcheck', function (Request $request, Response $response, $args) {
-    return $response->withJson(array('response'=>true),200);
-});
-
 function getFeaturcodes(){
     $dbh = FreePBX::Database();
     $sql = 'SELECT modulename,featurename,defaultcode,customcode FROM featurecodes';
