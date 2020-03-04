@@ -114,6 +114,70 @@ $app->post('/extensions/{extension}/srtp/{enabled}', function (Request $request,
     return $response->withStatus(500);
 });
 
+$app->post('/provisioning/connectivitycheck', function (Request $request, Response $response, $args) {
+
+    $body = $request->getParsedBody();
+    if (!$body['host']) {
+        return $response->withJson(array('message' => 'missing host parameter'),400);
+    } elseif (!$body['scheme']) {
+        return $response->withJson(array('message' => 'missing scheme parameter'),400);
+    } elseif ($body['scheme'] !== 'http' && $body['scheme'] !== 'https') {
+         return $response->withJson(array('message' => 'Invalid scheme provided'),400);
+    }
+
+    $ret = array(
+        'is_reachable' => FALSE,
+        'valid_certificate' => FALSE
+    );
+
+    $ip_regexp = '/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/';
+    $fqdn_regexp = '/(?=^.{4,253}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)/';
+    if (preg_match($ip_regexp,$body['host']) === 1 && $body['host'] !== '127.0.0.1') {
+        // provided host is a valid IP address
+        $ret['host_type'] = 'IP';
+    } elseif (preg_match($fqdn_regexp,$body['host']) === 1 && $body['host'] !== 'localhost.localdomain') {
+        // provided host is a valid FQDN
+        $ret['host_type'] = 'FQDN';
+    } else {
+        return $response->withJson(array('message' => 'provided host isn\'t a valid IP address or FQDN'),400);
+    }
+
+    // check provided host is reachable and is this machine
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, "{$body['scheme']}://{$body['host']}/provisioning/check/ping");
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 4);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        "Content-Type: application/json;charset=utf-8",
+        "Accept: application/json;charset=utf-8",
+    ));
+    $curl_result = curl_exec($ch);
+    curl_close($ch);
+
+    if ($curl_result === (string)filemtime('/etc/tancredi.conf')) {
+        $ret['is_reachable'] = TRUE;
+        if ($body['scheme'] === 'https' && $ret['host_type'] === 'FQDN') {
+            // check certificate is valid
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, "{$body['scheme']}://{$body['host']}/provisioning/check/ping");
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 4);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                "Content-Type: application/json;charset=utf-8",
+                "Accept: application/json;charset=utf-8",
+            ));
+            $curl_result = curl_exec($ch);
+            curl_close($ch);
+            if ($curl_result === (string)filemtime('/etc/tancredi.conf')) {
+                $ret['valid_certificate'] = TRUE;
+            }
+        }
+    }
+
+    return $response->withJson($ret,200);
+});
+
 function getFeaturcodes(){
     $dbh = FreePBX::Database();
     $sql = 'SELECT modulename,featurename,defaultcode,customcode FROM featurecodes';
