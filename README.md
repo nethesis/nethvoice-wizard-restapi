@@ -799,17 +799,6 @@ GET /provisioning/variables return default variables that depends on server conf
 GET /provisioning/variables/{extension} return default variables that depends on extension configuration
 ```
 
-```
-GET /provisioning/cloud
-```
-
-Return (true|false) if the server is configured for cloud installation (correct FQDN, valid certificate, TSL by default)
-
-
-```
-POST /provisioning/cloud/(true|false)
-```
-
 Set if the server is configured for cloud installation (correct FQDN, valid certificate, TSL by default)
 
 ### SRTP
@@ -825,3 +814,21 @@ POST /extensions/{extension}/srtp/(true|false)
 ```
 
 Enable or disable SRTP for the extension
+
+### Connectivity check
+
+This API check the hostname or ip used for provisioning, verifing that it's reachable. It also try to use https to verify if certificate is valid
+
+POST /provisioning/connectivitycheck
+{
+    "host" : HOST,
+    "scheme": "SCHEME"
+}
+
+return:
+{
+    "host_type": <"FQDN"|"IP">,
+    "is_reachable" : <true|false>,
+    "valid_certificate" : <true|false>
+}
+
