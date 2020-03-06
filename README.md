@@ -773,13 +773,13 @@ POST /phones/rps/{mac}
 Parameters:
 ```
 {
-  "token": "TOKEN1"
-
+  "url": "https://mypbx.example.com/provisioning/tok2/{mac}.cfg"
 }
 ```
 
-Falconieri RPS gateway will insert into vendor's cloud this provisionig url: `https://HOSTNAME/provisioning/TOKEN1/`
-https://github.com/nethesis/falconieri
+Falconieri[1] RPS gateway will insert the given ``url`` into the vendor cloud service. Ensure the URL file name and path components are URL-encoded, i.e. ``%`` is escaped as ``%25`` and so on...
+
+[1]: https://github.com/nethesis/falconieri
 
 ### Provisioning engine
 
