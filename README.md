@@ -789,18 +789,6 @@ GET /provisioning/engine
 
 return provisioning engine configured in configuration db nethvoice ProvisioningEngine prop. Possible values are "freepbx" or "tancredi"
 
-### Provisioning variables
-
-```
-GET /provisioning/variables return default variables that depends on server configuration
-```
-
-```
-GET /provisioning/variables/{extension} return default variables that depends on extension configuration
-```
-
-Set if the server is configured for cloud installation (correct FQDN, valid certificate, TSL by default)
-
 ### SRTP
 
 ```

@@ -79,10 +79,6 @@ $app->get('/provisioning/engine', function (Request $request, Response $response
     return $response->withJson(getProvisioningEngine(), 200, JSON_FLAGS);
 });
 
-$app->get('/provisioning/variables/{extension}', function (Request $request, Response $response, $args) {
-    return $response->withJson(getExtensionSpecificVariables($args['extension']), 200, JSON_FLAGS);
-});
-
 $app->get('/phones/state', function (Request $request, Response $response, $args) {
     global $astman;
     $res = array();
@@ -189,49 +185,5 @@ function getFeaturcodes(){
         $featurecodes[$featurecode['modulename'].$featurecode['featurename']] = (!empty($featurecode['customcode'])?$featurecode['customcode']:$featurecode['defaultcode']);
     }
     return $featurecodes;
-}
-
-function getExtensionSpecificVariables($extension){
-    global $astman;
-    $variables = array();
-
-    // Get main extension
-    if (isMainExtension($extension)) {
-        $mainextension = $extension;
-    } else {
-        $mainextension = getMainExtension($extension);
-    }
-
-    // dnd_allow 0|1
-    $variables['dnd_allow'] = '1';
-
-    // fwd_allow 0|1
-    $variables['fwd_allow'] = '1';
-
-    // Get CTI profile id
-    $users = getAllUsers();
-    $profileid = null;
-    foreach ($users as $user) {
-         if ($user['default_extension'] == $mainextension) {
-             $profileid = $user['profile'];
-             break;
-         }
-    }
-
-    // Get CTI profile permissions
-    if (!empty($profileid)) {
-        $permissions = getCTIPermissionProfiles($profileid);
-        if ( array_key_exists('permissions',$permissions['macro_permissions']['settings'])) {
-            foreach ($permissions['macro_permissions']['settings']['permissions'] as $permission) {
-                if ($permission['name'] == 'dnd') {
-                    $variables['dnd_allow'] = (string)(int) $permission['value'];
-                }
-                if ($permission['name'] == 'call_forward') {
-                    $variables['fwd_allow'] = (string)(int) $permission['value'];
-                }
-            }
-        }
-    }
-    return $variables;
 }
 
