@@ -47,8 +47,7 @@ $app->get('/physicalextensions/{extension}', function (Request $request, Respons
 $app->post('/physicalextensions', function (Request $request, Response $response, $args) {
     try {
         $params = $request->getParsedBody();
-        $mainextensionnumber = $params['mainextension'];
-        $mac = $params['mac'];
+        $mac = str_replace('-',':',$params['mac']);
         $model = $params['model'];
         $web_user = $params['web_user'];
         $web_password = $params['web_password'];
@@ -59,25 +58,38 @@ $app->post('/physicalextensions', function (Request $request, Response $response
             $delete = true;
         }
 
-        $extension = createExtension($mainextensionnumber,$delete);
+        if (empty($params['mainextension'])) {
+            $vendors = json_decode(file_get_contents(__DIR__. '/../lib/macAddressMap.json'), true);
+            $vendor = $vendors[substr($mac,0,8)];
+            if (!empty($mac) && addPhone($mac, $vendor, $model)) {
+                return $response->withStatus(200);
+            } else {
+                return $response->withJson(array("status"=>"Error adding phone"), 500);
+            }
+        }
 
+        $extension = createExtension($params['mainextension'],$delete);
         if ($extension === false ) {
-            $response->withJson(array("status"=>"Error creating extension"), 500);
+            return $response->withJson(array("status"=>"Error creating extension"), 500);
         }
 
         if (isset($mac) && isset($model)) {
             if ($model === 'GS Wave') {
                 if (useExtensionAsApp($extension,$mac,$model) === false) {
-                    $response->withJson(array("status"=>"Error associating app extension"), 500);
+                    return $response->withJson(array("status"=>"Error associating app extension"), 500);
                 }
             } else {
                 if (useExtensionAsPhysical($extension,$mac,$model,$line) === false) {
-                    $response->withJson(array("status"=>"Error associating physical extension"), 500);
+                    return $response->withJson(array("status"=>"Error associating physical extension"), 500);
                 }
             }
         } else {
-            if (useExtensionAsCustomPhysical($extension,false,'physical',$web_user,$web_password) === false) {
-                $response->withJson(array("status"=>"Error creating custom extension"), 500);
+            if (isset($mac) && getProvisioningEngine() === 'tancredi') {
+                if (useExtensionAsPhysical($extension,$mac,$model,$line) === false) {
+                    return $response->withJson(array("status"=>"Error associating physical extension without model"), 500);
+                }
+            } elseif (useExtensionAsCustomPhysical($extension,false,'physical',$web_user,$web_password) === false) {
+                return $response->withJson(array("status"=>"Error creating custom extension"), 500);
             }
         }
         system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
@@ -88,12 +100,29 @@ $app->post('/physicalextensions', function (Request $request, Response $response
    }
 });
 
-$app->delete('/physicalextensions/{extension}', function (Request $request, Response $response, $args) {
+$app->delete('/physicalextensions/{id}', function (Request $request, Response $response, $args) {
     try {
-        global $astman;
         $route = $request->getAttribute('route');
-        $extension = $route->getArgument('extension');
-
+        $id = $route->getArgument('id');
+        $extension = $id;
+        if (preg_match('/[A-F0-9]{2}-[A-F0-9]{2}-[A-F0-9]{2}-[A-F0-9]{2}-[A-F0-9]{2}-[A-F0-9]{2}/', $id) === 1) {
+            // $id provided is a mac address, get extension from rest_devices_phone
+            $dbh = FreePBX::Database();
+            $id = str_replace('-',':',$id);
+            $sql = 'SELECT `extension` FROM `rest_devices_phones` WHERE `mac` = ? LIMIT 1';
+            $stmt = $dbh->prepare($sql);
+            $stmt->execute(array($id));
+	    $res = $stmt->fetchAll(\PDO::FETCH_ASSOC)[0]['extension'];
+	    $sql = 'DELETE FROM `rest_devices_phones` WHERE `mac` = ?';
+	    $stmt = $dbh->prepare($sql);
+	    $stmt->execute(array($id));
+            if (is_null($res)) {
+                system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
+                return $response->withStatus(200);
+            } else {
+                $extension = $res;
+            }
+        }
         if (deletePhysicalExtension($extension) && deleteExtension($extension)) {
             system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
             return $response->withStatus(200);
@@ -103,5 +132,32 @@ $app->delete('/physicalextensions/{extension}', function (Request $request, Resp
     } catch (Exception $e) {
         error_log($e->getMessage());
         return $response->withStatus(500);
+    }
+});
+
+$app->patch('/physicalextensions/{mac}', function (Request $request, Response $response, $args) {
+    try {
+        $route = $request->getAttribute('route');
+        $params = $request->getParsedBody();
+        $mac = $route->getArgument('mac');
+        $model = $params['model'];
+
+        if (preg_match('/[A-F0-9]{2}-[A-F0-9]{2}-[A-F0-9]{2}-[A-F0-9]{2}-[A-F0-9]{2}-[A-F0-9]{2}/', $mac) !== 1) {
+            return $response->withJson(array("status"=>"Invalid MAC address"), 500);
+        }
+
+        if (empty($model)) {
+            $model = NULL;
+        }
+
+        $mac = str_replace('-',':',$mac);
+        $dbh = FreePBX::Database();
+        $sql = 'UPDATE `rest_devices_phones` SET `model` = ? WHERE `mac` = ?';
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute(array($model, $mac));
+        return $response->withStatus(200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withJson(array("status"=>$e->getMessage()), 500);
     }
 });

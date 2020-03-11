@@ -140,3 +140,4 @@ $app->post('/configuration/wizard', function (Request $request, Response $respon
         return $response->withStatus(500);
     }
 });
+

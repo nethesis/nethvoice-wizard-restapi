@@ -295,7 +295,7 @@ Parameter: { "mainextension": "mainextnumber" [, "extension": "extensionnumber"]
 Delete physical extension
 
 ```
-DELETE /physicalextensions/{extension}
+DELETE /physicalextensions/{extension|mac}
 ```
 
 ### Voicemail
@@ -358,6 +358,12 @@ Result:
 ```
 {Sangoma}
 
+```
+
+Get phone SIP credential:
+
+```
+GET /phones/account/{mac}
 ```
 
 Get gateways scanned from all netwotks
@@ -688,3 +694,129 @@ Get allowed codecs for VoIP trunks, ordered and enabled
 ```
 GET /codecs/voip
 ```
+
+### Reboot phones
+
+There are three API to manage phones reboot:
+
+Plan phones reboot:
+
+```
+POST /phones/reboot
+```
+Parameters:
+```
+{
+  "00-11-22-33-44-55":
+  {
+    "hours":12,
+    "minutes":45
+  },
+  "00-11-22-33-44-55": {}
+
+}
+```
+
+If "hours" and "minutes" are omitted, phones are rebooted immediately.
+
+This API returns list of mac address with a status code for each mac. For instance:
+```
+{
+  "00-11-22-33-44-61a": {
+    "title": "Malformed MAC address",
+    "detail": "Malformed MAC address: 00-11-22-33-44-61a",
+    "code": 400
+  },
+  "00-11-22-33-44-91": {
+    "code": 204
+  }
+}
+```
+
+```
+DELETE /phones/reboot
+```
+
+Removes phones to rebbot saved into crontab.
+Parameters:
+```
+["00-11-22-33-44-91","00-11-22-33-44-53"]
+```
+Return is the same as POST
+
+```
+GET /phones/reboot
+```
+This API return configured reboot in crontab:
+
+```
+{
+  "00-11-22-33-44-91": {
+    "hours": "22",
+    "minutes": "22"
+  },
+  "00-11-22-33-44-92": {
+    "hours": "22",
+    "minutes": "22"
+  }
+}
+```
+
+### Configure remote provisioning
+
+Remote provisioning "RPS" allows to configure Yealink, Snom, Gigaset and Fanvil phones provisioning endpoint without configuring option 66 on DHCP
+It has been introduced with new provisioning engine.
+
+```
+POST /phones/rps/{mac}
+```
+Parameters:
+```
+{
+  "url": "https://mypbx.example.com/provisioning/tok2/{mac}.cfg"
+}
+```
+
+Falconieri[1] RPS gateway will insert the given ``url`` into the vendor cloud service. Ensure the URL file name and path components are URL-encoded, i.e. ``%`` is escaped as ``%25`` and so on...
+
+[1]: https://github.com/nethesis/falconieri
+
+### Provisioning engine
+
+```
+GET /provisioning/engine
+```
+
+return provisioning engine configured in configuration db nethvoice ProvisioningEngine prop. Possible values are "freepbx" or "tancredi"
+
+### SRTP
+
+```
+GET /extensions/{extension}/srtp
+```
+
+Return (true|false) if the extension has srtp enabled
+
+```
+POST /extensions/{extension}/srtp/(true|false)
+```
+
+Enable or disable SRTP for the extension
+
+### Connectivity check
+
+This API check the hostname or ip used for provisioning, verifing that it's reachable. It also try to use https to verify if certificate is valid
+
+POST /provisioning/connectivitycheck
+{
+    "host" : HOST,
+    "scheme": "SCHEME"
+}
+
+return:
+{
+    "host_type": <"FQDN"|"IP">,
+    "is_reachable" : <true|false>,
+    "valid_certificate" : <true|false>
+}
+

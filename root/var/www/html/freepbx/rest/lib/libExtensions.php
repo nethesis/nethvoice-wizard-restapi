@@ -74,7 +74,7 @@ function createExtension($mainextensionnumber,$delete=false){
             }
             //error if there aren't available extension numbers
             if (!isset($extension)) {
-                throw ("There aren't available extension numbers");
+                throw new Exception("There aren't available extension numbers");
             }
 
             //delete extension
@@ -87,7 +87,7 @@ function createExtension($mainextensionnumber,$delete=false){
             $data['outboundcid'] = $mainextdata['outboundcid'];
             $res = $fpbx->Core->processQuickCreate('pjsip', $extension, $data);
             if (!$res['status']) {
-                throw ("Error creating extension");
+                throw new Exception("Error creating extension");
             }
             //Set cid_masquerade (CID Num Alias)
             $astman->database_put("AMPUSER",$extension."/cidnum",$mainextensionnumber);
@@ -204,7 +204,18 @@ function useExtensionAsCustomPhysical($extension, $secret = false, $type = 'phys
     }
 }
 
-function useExtensionAsPhysical($extension,$mac,$model,$line=false) {
+function useExtensionAsPhysical($extension,$mac,$model,$line=false,$provisioning_token=null) {
+    $provisioningEngine = getProvisioningEngine();
+    if ($provisioningEngine == 'freepbx') {
+        return legacy_useExtensionAsPhysical($extension,$mac,$model,false);
+    } elseif ($provisioningEngine == 'tancredi') {
+        return tancredi_useExtensionAsPhysical($extension,$mac,$model,false,$provisioning_token);
+    } else {
+        throw new Exception('Unknow provisioning '.implode("\n",$out));
+    }
+}
+
+function legacy_useExtensionAsPhysical($extension,$mac,$model,$line=false) {
     try {
         require_once(__DIR__. '/../lib/modelRetrieve.php');
         //disable call waiting
@@ -270,6 +281,95 @@ function useExtensionAsPhysical($extension,$mac,$model,$line=false) {
         return false;
     }
 }
+
+function tancredi_useExtensionAsPhysical($extension,$mac,$model,$line=false) {
+    //disable call waiting
+    global $astman;
+    $astman->database_del("CW",$extension);
+
+    // insert created physical extension in password table
+    $extension_secret = sql('SELECT data FROM `sip` WHERE id = "' . $extension . '" AND keyword="secret"', "getOne");
+    $dbh = FreePBX::Database();
+    $vendors = json_decode(file_get_contents(__DIR__. '/../lib/macAddressMap.json'), true);
+    $vendor = $vendors[substr($mac,0,8)];
+    $stmt = $dbh->prepare('SELECT COUNT(*) AS num FROM `rest_devices_phones` WHERE mac = ?');
+    $stmt->execute(array($mac));
+    $res = $stmt->fetchAll()[0]['num'];
+    if ($res == 0) {
+        addPhone($mac, $vendor, $model);
+    }
+    $sql = 'UPDATE `rest_devices_phones` SET user_id = ( '.
+           'SELECT userman_users.id FROM userman_users WHERE userman_users.default_extension = ? '.
+           '), extension = ?, secret= ?, type = "physical" WHERE mac = ?';
+    $stmt = $dbh->prepare($sql);
+    $res = $stmt->execute(array(getMainExtension($extension),$extension,$extension_secret,$mac));
+    if ($res) {
+        return true;
+    }
+    return false;
+}
+
+function setFalconieriRPS($mac, $provisioningUrl) {
+    $mac = strtr(strtoupper($mac), ':', '-'); // MAC format sanitization
+    $vendors = json_decode(file_get_contents(__DIR__. '/../lib/macAddressMap.json'), true);
+    $vendor = $vendors[substr(str_replace('-',':',"$mac"),0,8)];
+
+    if($vendor == 'Snom') {
+        $provider = 'snom';
+    } elseif($vendor == 'Gigaset') {
+        $provider = 'gigaset';
+    } elseif($vendor == 'Fanvil') {
+        $provider = 'fanvil';
+    } elseif($vendor == 'Yealink/Dreamwave') {
+        $provider = 'yealink';
+    } else {
+        return array("httpCode" => 400, "error" => "provider_not_supported");
+    }
+
+    //get LK
+    exec("/usr/bin/sudo /sbin/e-smith/config getprop subscription SystemId", $tmp);
+    $lk = $tmp[0];
+    unset($tmp);
+    //get secret
+    exec("/usr/bin/sudo /sbin/e-smith/config getprop subscription Secret", $tmp);
+    $secret = $tmp[0];
+    unset($tmp);
+
+    $queryUrl = "https://rps.nethesis.it/providers/${provider}/${mac}";
+    $data = json_encode(array("url" => $provisioningUrl), JSON_UNESCAPED_SLASHES);
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $queryUrl);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    curl_setopt($ch, CURLOPT_USERPWD, $lk . ':' . $secret);
+    curl_setopt($ch, CURLOPT_HEADER, FALSE);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        "Content-Type: application/json;charset=utf-8",
+        "Accept: application/json;charset=utf-8",
+    ));
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    $result = array_merge(array('httpCode' => $httpCode), (array) json_decode($response, TRUE));
+    if ($httpCode == 200) {
+        error_log(sprintf('[NOTICE] Registered MAC %s with Falconieri RPS. Raw response: %s', $mac, $response ?: '<empty>'));
+    } else {
+        error_log(sprintf('[ERROR] Unexpected HTTP response from Falconieri RPS gateway: %s - %s', $httpCode, $response ?: '<empty>'));
+        error_log(sprintf('[ERROR] ...To replay the request run: curl -v %s --basic --user %s -H \'Content-Type: application/json\' -X PUT --data %s',
+            escapeshellarg($queryUrl),
+            escapeshellarg("$lk:$secret"),
+            escapeshellarg($data)
+        ));
+    }
+    return $result;
+}
+
+
+
 
 function useExtensionAsApp($extension,$mac,$model) {
     try {
@@ -398,18 +498,16 @@ function deleteExtension($extension,$wipemain=false) {
 
 function deletePhysicalExtension($extension) {
     try {
-        global $astman;
-        $dbh = FreePBX::Database();
-        //Get device lines
-        $mac = $dbh->sql('SELECT `mac` FROM `rest_devices_phones` WHERE `extension` = "'.$extension.'"', "getOne");
-        $usedlinecount = $dbh->sql('SELECT COUNT(*) FROM `rest_devices_phones` WHERE `mac` = "'.$mac.'" AND `extension` != ""', "getOne");
-
-        // Remove endpoint from endpointman
-        $endpoint = FreePBX::endpointmanager();
-        $mac_id = $dbh->sql('SELECT id FROM endpointman_mac_list WHERE mac = "'.preg_replace('/:/', '', $mac).'"', "getOne");
-        if (!empty($mac_id)) {
-            $luid = $dbh->sql('SELECT luid FROM endpointman_line_list WHERE mac_id = "'.$mac_id.'" AND ext = "'.$extension.'"', "getOne");
-            $endpoint->delete_line($luid, true);
+        if (getProvisioningEngine() == 'freepbx') {
+            $dbh = FreePBX::Database();
+            $mac = $dbh->sql('SELECT `mac` FROM `rest_devices_phones` WHERE `extension` = "'.$extension.'"', "getOne");
+            // Remove endpoint from endpointman
+            $endpoint = FreePBX::endpointmanager();
+            $mac_id = $dbh->sql('SELECT id FROM endpointman_mac_list WHERE mac = "'.preg_replace('/:/', '', $mac).'"', "getOne");
+            if (!empty($mac_id)) {
+                $luid = $dbh->sql('SELECT luid FROM endpointman_line_list WHERE mac_id = "'.$mac_id.'" AND ext = "'.$extension.'"', "getOne");
+                $endpoint->delete_line($luid, true);
+            }
         }
         return true;
     } catch (Exception $e) {
@@ -656,4 +754,63 @@ function checkFreeExtension($extension){
         error_log($e->getMessage());
         return $e->getMessage();
     }
+}
+
+function setSipData($extension,$keyword,$data) {
+    $dbh = \FreePBX::Database();
+    $sql = 'REPLACE INTO `sip` SET `id` = ?, `keyword` = ?, data = ?';
+    $stmt = $dbh->prepare($sql);
+    $res = $stmt->execute(array($extension,$keyword,$data));
+    return $res;
+}
+
+function getSipData() {
+    $dbh = \FreePBX::Database();
+    $sql = 'SELECT `id`,`keyword`,`data` FROM `sip`';
+    $stmt = $dbh->prepare($sql);
+    $stmt->execute(array());
+    $res = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+    $result = array();
+    foreach ($res as $row) {
+        if (!array_key_exists($row['id'],$result)) $result[$row['id']] = array();
+        $result[$row['id']][$row['keyword']] = $row['data'];
+    }
+
+    return $result;
+}
+
+function addPhone($mac, $vendor, $model)
+{
+    $dbh = FreePBX::Database();
+    $multiline_phones = array(
+        array('Snom'=>'M300'),
+        array('Snom'=>'M700')
+    );
+    $lines = 0;
+    if (in_array(array($vendor => $model), $multiline_phones)){
+        $sql = 'SELECT max_lines from `endpointman_model_list` WHERE `model`="'.$model.'" AND `brand` = (SELECT `id` FROM `endpointman_brand_list` WHERE `name` = "'.$vendor.'")';
+        $lines = $dbh->sql($sql, 'getOne');
+    }
+    $dbh->query('DELETE IGNORE FROM `rest_devices_phones` WHERE `mac` = "'.$mac.'"');
+    if ($lines === 0) {
+        $sql = 'INSERT INTO `rest_devices_phones` (`mac`,`vendor`, `model`) VALUES (?,?,?)';
+        $stmt = $dbh->prepare($sql);
+        return $stmt->execute(array($mac,$vendor,$model));
+    } else {
+        $ret = true;
+        for ($i=1; $i<=$lines; $i++) {
+            $sql = 'INSERT INTO `rest_devices_phones` (`mac`,`vendor`, `model`,`line`) VALUES (?,?,?,?)';
+            $stmt = $dbh->prepare($sql);
+            if (!$stmt->execute(array($mac,$vendor,$model,$i))) {
+                $ret = false ;
+            }
+        }
+        return $ret;
+    }
+}
+
+function getProvisioningEngine() {
+    exec("/usr/bin/sudo /sbin/e-smith/config getprop nethvoice ProvisioningEngine", $out);
+    return $out[0];
 }
