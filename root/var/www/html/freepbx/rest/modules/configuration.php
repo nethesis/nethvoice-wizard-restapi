@@ -141,25 +141,3 @@ $app->post('/configuration/wizard', function (Request $request, Response $respon
     }
 });
 
-$app->get('/configuration/defaults', function (Request $request, Response $response, $args) {
-    try {
-        $dbh = FreePBX::Database();
-        $res = array();
-
-        // get local green IP
-        $sql = 'SELECT `value` FROM `admin` WHERE `variable` = "ip"';
-        $stmt = $dbh->prepare($sql);
-        $stmt->execute(array());
-        $res['localip'] = $stmt->fetchAll(\PDO::FETCH_ASSOC)[0]['value'];
-
-        $res['hostname'] = gethostname();
-
-        $res['timezone'] = date_default_timezone_get();
-
-        return $response->withJson($res, 200);
-    } catch (Exception $e) {
-        error_log($e->getMessage());
-        return $response->withStatus(500);
-    }
-});
-
