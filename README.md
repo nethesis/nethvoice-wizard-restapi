@@ -298,6 +298,25 @@ Delete physical extension
 DELETE /physicalextensions/{extension|mac}
 ```
 
+### Mobile App
+
+Create a mobile app extension
+```
+POST /mobileapp
+```
+
+Parameter: {"mainextension": MAINEXTENSION}
+
+Get mobile app extensions for a mainextension
+```
+GET /mobileapp/{mainextension}
+```
+
+Delete a mobile app extension
+```
+DELETE /mobileapp/{extension}
+```
+
 ### Voicemail
 
 Retrieve list of all voicemails

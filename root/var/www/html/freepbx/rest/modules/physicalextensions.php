@@ -75,7 +75,7 @@ $app->post('/physicalextensions', function (Request $request, Response $response
 
         if (isset($mac) && isset($model)) {
             if ($model === 'GS Wave') {
-                if (useExtensionAsApp($extension,$mac,$model) === false) {
+                if (useExtensionAsGSWaveApp($extension,$mac,$model) === false) {
                     return $response->withJson(array("status"=>"Error associating app extension"), 500);
                 }
             } else {
@@ -159,5 +159,57 @@ $app->patch('/physicalextensions/{mac}', function (Request $request, Response $r
     } catch (Exception $e) {
         error_log($e->getMessage());
         return $response->withJson(array("status"=>$e->getMessage()), 500);
+    }
+});
+
+$app->post('/mobileapp', function (Request $request, Response $response, $args) {
+    try {
+        $params = $request->getParsedBody();
+        $mainextension = $params['mainextension'];
+        $fpbx = FreePBX::create();
+
+        $extension = createExtension($mainextension,false);
+
+        if ($extension === false ) {
+            $response->withJson(array("status"=>"Error creating extension"), 500);
+        }
+
+        if (useExtensionAsMobileApp($extension) === false) {
+            $response->withJson(array("status"=>"Error associating mobile app extension"), 500);
+        }
+
+        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
+        return $response->withJson(array('extension'=>$extension), 201);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
+$app->get('/mobileapp/{mainextension}', function (Request $request, Response $response, $args) {
+    $route = $request->getAttribute('route');
+    $mainextension = $route->getArgument('mainextension');
+
+    $extension = getMobileAppExtension($mainextension);
+    if (!empty($extension)) {
+        return $response->withJson($extension, 200);
+    } else {
+        return $response->withStatus(404);
+    }
+});
+
+$app->delete('/mobileapp/{extension}', function (Request $request, Response $response, $args) {
+    try {
+        $route = $request->getAttribute('route');
+        $extension = $route->getArgument('extension');
+        if (deleteExtension($extension)) {
+            system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
+            return $response->withStatus(204);
+        } else {
+            throw new Exception ("Error deleting extension");
+        }
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
     }
 });
