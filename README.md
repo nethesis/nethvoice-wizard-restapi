@@ -836,7 +836,6 @@ return:
         "enabled":true,
         "port":"10636",
         "user":"cn=ldapuser,dc=phonebook,dc=nh",
-        "phonebook":"1n2_E4WIa4H3Xwj9"
+        "password":"1n2_E4WIa4H3Xwj9"
     }
 }
-
