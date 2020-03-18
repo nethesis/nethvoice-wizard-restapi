@@ -830,7 +830,9 @@ return:
 {
     "ldap": {
         "enabled":true,
-        "port":"10389"
+        "port":"10389",
+        "user":"",
+        "password":""
     },
     "ldaps":{
         "enabled":true,
