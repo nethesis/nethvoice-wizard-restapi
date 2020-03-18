@@ -156,7 +156,7 @@ $app->get('/configuration/ldapphonebook', function (Request $request, Response $
         $configuration['ldaps']['enabled'] = ($tmp->props->status == 'enabled') ? true : false;
         $configuration['ldaps']['port'] = $tmp->props->TCPPort;
         $configuration['ldaps']['user'] = 'cn=ldapuser,dc=phonebook,dc=nh';
-        $configuration['ldaps']['phonebook'] = exec('/usr/bin/sudo /usr/bin/cat /var/lib/nethserver/secrets/LDAPPhonebookPasswd');
+        $configuration['ldaps']['password'] = exec('/usr/bin/sudo /usr/bin/cat /var/lib/nethserver/secrets/LDAPPhonebookPasswd');
 
         return $response->withJson($configuration, 200);
     } catch (Exception $e) {
@@ -164,4 +164,3 @@ $app->get('/configuration/ldapphonebook', function (Request $request, Response $
         return $response->withStatus(500);
     }
 });
-
