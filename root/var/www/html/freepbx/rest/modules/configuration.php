@@ -149,6 +149,8 @@ $app->get('/configuration/ldapphonebook', function (Request $request, Response $
         $configuration['ldap'] = array();
         $configuration['ldap']['enabled'] = ($tmp->props->status == 'enabled') ? true : false;
         $configuration['ldap']['port'] = $tmp->props->TCPPort;
+        $configuration['ldap']['user'] = '';
+        $configuration['ldap']['password'] = '';
         unset ($out);
         exec("/usr/bin/sudo /sbin/e-smith/config getjson phonebookjss", $out);
         $tmp = json_decode($out[0]);
