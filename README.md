@@ -820,3 +820,23 @@ return:
     "valid_certificate" : <true|false>
 }
 
+### LDAP phonebook
+
+This API return system LDAP phonebooks settings
+
+GET /configuration/ldapphonebook
+
+return:
+{
+    "ldap": {
+        "enabled":true,
+        "port":"10389"
+    },
+    "ldaps":{
+        "enabled":true,
+        "port":"10636",
+        "user":"cn=ldapuser,dc=phonebook,dc=nh",
+        "phonebook":"1n2_E4WIa4H3Xwj9"
+    }
+}
+

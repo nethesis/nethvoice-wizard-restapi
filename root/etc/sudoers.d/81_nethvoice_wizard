@@ -2,4 +2,7 @@
     /sbin/e-smith/signal-event nethserver-phonebook-mysql-save [A-Za-z]*, \
     /sbin/e-smith/config getprop nethvoice ProvisioningEngine, \
     /sbin/e-smith/config getprop subscription SystemId, \
-    /sbin/e-smith/config getprop subscription Secret
+    /sbin/e-smith/config getprop subscription Secret, \
+    /sbin/e-smith/config getjson phonebookjs, \
+    /sbin/e-smith/config getjson phonebookjss, \
+    /usr/bin/cat /var/lib/nethserver/secrets/LDAPPhonebookPasswd
