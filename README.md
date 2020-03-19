@@ -807,26 +807,47 @@ Enable or disable SRTP for the extension
 
 This API check the hostname or ip used for provisioning, verifing that it's reachable. It also try to use https to verify if certificate is valid
 
+```
 POST /provisioning/connectivitycheck
-{
-    "host" : HOST,
-    "scheme": "SCHEME"
-}
+```
 
-return:
+payload
+
+```json
 {
-    "host_type": <"FQDN"|"IP">,
-    "is_reachable" : <true|false>,
-    "valid_certificate" : <true|false>
+    "host" : "my.example.com",
+    "scheme": "https"
 }
+```
+
+* `scheme` can be (string) `http` or `https`
+* `host` can be a FQDN host name or IP address
+
+returns
+
+```json
+{
+    "host_type": "FQDN",
+    "is_reachable" : true,
+    "valid_certificate" : true
+}
+```
+
+* `host_type` can be a string, `FQDN` or `IP`
+* `is_reachable` is a boolean
+* `valid_certficate` is a boolean
 
 ### LDAP phonebook
 
 This API return system LDAP phonebooks settings
 
+```
 GET /configuration/ldapphonebook
+```
 
-return:
+returns
+
+```json
 {
     "ldap": {
         "enabled":true,
@@ -841,3 +862,4 @@ return:
         "password":"1n2_E4WIa4H3Xwj9"
     }
 }
+```
