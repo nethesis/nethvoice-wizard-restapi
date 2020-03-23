@@ -204,6 +204,31 @@ function useExtensionAsCustomPhysical($extension, $secret = false, $type = 'phys
     }
 }
 
+function useExtensionAsMobileApp($extension) {
+    try {
+        //disable call waiting
+        global $astman;
+        $astman->database_del("CW",$extension);
+        $dbh = FreePBX::Database();
+
+        $secret = sql('SELECT data FROM `sip` WHERE id = "' . $extension . '" AND keyword="secret"', "getOne");
+
+        // insert created physical extension in password table
+        $sql = 'INSERT INTO `rest_devices_phones` SET user_id = ( '.
+               'SELECT userman_users.id FROM userman_users WHERE userman_users.default_extension = ? '.
+               '), extension = ?, secret = ?, type = "mobile"';
+        $stmt = $dbh->prepare($sql);
+        $res = $stmt->execute(array(getMainExtension($extension),$extension,$secret));
+        if (!$res) {
+            throw new Exception("Error creating custom device");
+        }
+        return true;
+     } catch (Exception $e) {
+        error_log($e->getMessage());
+        return false;
+    }
+}
+
 function useExtensionAsPhysical($extension,$mac,$model,$line=false,$provisioning_token=null) {
     $provisioningEngine = getProvisioningEngine();
     if ($provisioningEngine == 'freepbx') {
@@ -371,7 +396,7 @@ function setFalconieriRPS($mac, $provisioningUrl) {
 
 
 
-function useExtensionAsApp($extension,$mac,$model) {
+function useExtensionAsGSWaveApp($extension,$mac,$model) {
     try {
         //disable call waiting
         global $astman;
@@ -516,25 +541,26 @@ function deletePhysicalExtension($extension) {
     }
 }
 
+function getMobileAppExtension($mainextension) {
+    return _getTypeExtension($mainextension,"mobile");
+}
+
 function getWebRTCExtension($mainextension) {
-    $dbh = FreePBX::Database();
-    $uidquery = 'SELECT userman_users.id'.
-       ' FROM userman_users'.
-       ' WHERE userman_users.default_extension = ?';
-    $sql = 'SELECT extension FROM `rest_devices_phones` WHERE user_id = ('. $uidquery. ') AND type = "webrtc" AND `extension`';
-    $stmt = $dbh->prepare($sql);
-    $stmt->execute(array($mainextension));
-    return $stmt->fetchAll()[0][0];
+    return _getTypeExtension($mainextension,"webrtc");
 }
 
 function getWebRTCMobileExtension($mainextension) {
+    return _getTypeExtension($mainextension,"webrtc_mobile");
+}
+
+function _getTypeExtension($mainextension,$type) {
     $dbh = FreePBX::Database();
     $uidquery = 'SELECT userman_users.id'.
        ' FROM userman_users'.
        ' WHERE userman_users.default_extension = ?';
-    $sql = 'SELECT extension FROM `rest_devices_phones` WHERE user_id = ('. $uidquery. ') AND type = "webrtc_mobile" AND `extension`';
+    $sql = 'SELECT extension FROM `rest_devices_phones` WHERE user_id = ('. $uidquery. ') AND type = ? AND `extension`';
     $stmt = $dbh->prepare($sql);
-    $stmt->execute(array($mainextension));
+    $stmt->execute(array($mainextension,$type));
     return $stmt->fetchAll()[0][0];
 }
 
