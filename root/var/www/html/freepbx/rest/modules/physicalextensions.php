@@ -73,7 +73,7 @@ $app->post('/physicalextensions', function (Request $request, Response $response
             return $response->withJson(array("status"=>"Error creating extension"), 500);
         }
 
-        if (isset($mac) && isset($model)) {
+        if (!empty($mac) && !empty($model)) {
             if ($model === 'GS Wave') {
                 if (useExtensionAsGSWaveApp($extension,$mac,$model) === false) {
                     return $response->withJson(array("status"=>"Error associating app extension"), 500);
@@ -84,7 +84,7 @@ $app->post('/physicalextensions', function (Request $request, Response $response
                 }
             }
         } else {
-            if (isset($mac) && getProvisioningEngine() === 'tancredi') {
+            if (!empty($mac) && getProvisioningEngine() === 'tancredi') {
                 if (useExtensionAsPhysical($extension,$mac,$model,$line) === false) {
                     return $response->withJson(array("status"=>"Error associating physical extension without model"), 500);
                 }
