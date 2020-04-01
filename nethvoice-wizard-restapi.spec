@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.5.0
+Version: 14.5.1
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -39,6 +39,13 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Wed Apr 01 2020 Stefano Fancello <stefano.fancello@nethesis.it> - 14.5.1-1
+- REST APIs for NethCTI app - nethesis/dev#5754
+- Add Gigaset new mac address - nethesis/dev#5756
+- Fix typo on voipvoice trunk address
+- APIs for Corbera, the new provisioning (#103)
+- Add Talkho VoIP provider
+
 * Tue Nov 26 2019 Stefano Fancello <stefano.fancello@nethesis.it> - 14.5.0-1
 - Add Timenet as VoIP provider - nethesis/dev#5741
 - Dial malformed - Bug nethesis/dev#5739
