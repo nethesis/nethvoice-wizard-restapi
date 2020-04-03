@@ -225,6 +225,29 @@ $app->post('/phonebook/syncnow/{id}', function (Request $request, Response $resp
     }
 });
 
+/*
+* POST /phonebook/[ldap|ldaps]/status/[enabled|disabled]
+* Set phonebookjs(s) service status [enabled|disabled]
+*/
+$app->post('/phonebook/{service:ldap|ldaps}/status/{status:enabled|disabled}', function (Request $request, Response $response, $args) {
+    $route = $request->getAttribute('route');
+    $service = $route->getArgument('service');
+    $status = $route->getArgument('status');
+    if ($service === 'ldap') {
+        exec("/usr/bin/sudo /sbin/e-smith/config setprop phonebookjs status $status", $out, $ret);
+    } elseif ($service === 'ldaps') {
+        exec("/usr/bin/sudo /sbin/e-smith/config setprop phonebookjss status $status", $out, $ret);
+    }
+    if ( $ret === 0 ) {
+        exec("/usr/bin/sudo /sbin/e-smith/signal-event nethserver-phonebook-mysql-save", $out, $ret);
+        if ( $ret === 0 ) {
+            return $response->withStatus(200);
+        }
+    }
+    return $response->withStatus(500);
+});
+
+
 function delete_import_from_cron($id) {
     try {
         $file = '/etc/phonebook/sources.d/'.$id.'.json';
