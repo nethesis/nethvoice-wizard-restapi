@@ -861,7 +861,7 @@ returns
 This API return system LDAP phonebooks settings
 
 ```
-GET /configuration/ldapphonebook
+GET /phonebook/ldap
 ```
 
 returns

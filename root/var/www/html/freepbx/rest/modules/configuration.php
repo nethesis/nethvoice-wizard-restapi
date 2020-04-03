@@ -141,28 +141,3 @@ $app->post('/configuration/wizard', function (Request $request, Response $respon
     }
 });
 
-$app->get('/configuration/ldapphonebook', function (Request $request, Response $response, $args) {
-    try {
-        $configuration = array();
-        exec("/usr/bin/sudo /sbin/e-smith/config getjson phonebookjs", $out);
-        $tmp = json_decode($out[0]);
-        $configuration['ldap'] = array();
-        $configuration['ldap']['enabled'] = ($tmp->props->status == 'enabled') ? true : false;
-        $configuration['ldap']['port'] = $tmp->props->TCPPort;
-        $configuration['ldap']['user'] = '';
-        $configuration['ldap']['password'] = '';
-        unset ($out);
-        exec("/usr/bin/sudo /sbin/e-smith/config getjson phonebookjss", $out);
-        $tmp = json_decode($out[0]);
-        $configuration['ldaps'] = array();
-        $configuration['ldaps']['enabled'] = ($tmp->props->status == 'enabled') ? true : false;
-        $configuration['ldaps']['port'] = $tmp->props->TCPPort;
-        $configuration['ldaps']['user'] = 'cn=ldapuser,dc=phonebook,dc=nh';
-        $configuration['ldaps']['password'] = exec('/usr/bin/sudo /usr/bin/cat /var/lib/nethserver/secrets/LDAPPhonebookPasswd');
-
-        return $response->withJson($configuration, 200);
-    } catch (Exception $e) {
-        error_log($e->getMessage());
-        return $response->withStatus(500);
-    }
-});
