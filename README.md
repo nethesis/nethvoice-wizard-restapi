@@ -882,3 +882,17 @@ returns
     }
 }
 ```
+
+Enable or disable the centralized phonebook to LDAP
+
+```
+POST /phonebook/ldap/status/[enabled|disabled]
+```
+
+Enable or disable the centralized phonebook to LDAP with SSL
+
+```
+POST /phonebook/ldaps/status/[enabled|disabled]
+```
+
+
