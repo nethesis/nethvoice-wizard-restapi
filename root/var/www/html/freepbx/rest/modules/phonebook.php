@@ -225,6 +225,59 @@ $app->post('/phonebook/syncnow/{id}', function (Request $request, Response $resp
     }
 });
 
+/*
+* GET /phonebook/ldap
+* Get configuration of ldap and ldaps system phonebooks
+*/
+$app->get('/phonebook/ldap', function (Request $request, Response $response, $args) {
+    try {
+        $configuration = array();
+        exec("/usr/bin/sudo /sbin/e-smith/config getjson phonebookjs", $out);
+        $tmp = json_decode($out[0]);
+        $configuration['ldap'] = array();
+        $configuration['ldap']['enabled'] = ($tmp->props->status == 'enabled') ? true : false;
+        $configuration['ldap']['port'] = $tmp->props->TCPPort;
+        $configuration['ldap']['user'] = '';
+        $configuration['ldap']['password'] = '';
+        unset ($out);
+        exec("/usr/bin/sudo /sbin/e-smith/config getjson phonebookjss", $out);
+        $tmp = json_decode($out[0]);
+        $configuration['ldaps'] = array();
+        $configuration['ldaps']['enabled'] = ($tmp->props->status == 'enabled') ? true : false;
+        $configuration['ldaps']['port'] = $tmp->props->TCPPort;
+        $configuration['ldaps']['user'] = 'cn=ldapuser,dc=phonebook,dc=nh';
+        $configuration['ldaps']['password'] = exec('/usr/bin/sudo /usr/bin/cat /var/lib/nethserver/secrets/LDAPPhonebookPasswd');
+
+        return $response->withJson($configuration, 200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
+/*
+* POST /phonebook/[ldap|ldaps]/status/[enabled|disabled]
+* Set phonebookjs(s) service status [enabled|disabled]
+*/
+$app->post('/phonebook/{service:ldap|ldaps}/status/{status:enabled|disabled}', function (Request $request, Response $response, $args) {
+    $route = $request->getAttribute('route');
+    $service = $route->getArgument('service');
+    $status = $route->getArgument('status');
+    if ($service === 'ldap') {
+        exec("/usr/bin/sudo /sbin/e-smith/config setprop phonebookjs status $status", $out, $ret);
+    } elseif ($service === 'ldaps') {
+        exec("/usr/bin/sudo /sbin/e-smith/config setprop phonebookjss status $status", $out, $ret);
+    }
+    if ( $ret === 0 ) {
+        exec("/usr/bin/sudo /sbin/e-smith/signal-event nethserver-phonebook-mysql-save", $out, $ret);
+        if ( $ret === 0 ) {
+            return $response->withStatus(200);
+        }
+    }
+    return $response->withStatus(500);
+});
+
+
 function delete_import_from_cron($id) {
     try {
         $file = '/etc/phonebook/sources.d/'.$id.'.json';
