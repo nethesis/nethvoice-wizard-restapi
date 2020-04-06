@@ -239,6 +239,15 @@ $app->get('/phonebook/ldap', function (Request $request, Response $response, $ar
         $configuration['ldap']['port'] = $tmp->props->TCPPort;
         $configuration['ldap']['user'] = '';
         $configuration['ldap']['password'] = '';
+        $configuration['ldap']['ldap_tls'] = 'none';
+        $configuration['ldap']['ldap_base'] = 'dc=phonebook,dc=nh';
+        $configuration['ldap']['ldap_name_display'] = '%cn %o';
+        $configuration['ldap']['ldap_mainphone_number_attr'] = 'telephoneNumber';
+        $configuration['ldap']['ldap_mobilephone_number_attr'] = 'mobile';
+        $configuration['ldap']['ldap_otherphone_number_attr'] = 'homePhone';
+        $configuration['ldap']['ldap_name_attr'] = 'cn o';
+        $configuration['ldap']['ldap_number_filter'] = '(|(telephoneNumber=%)(mobile=%)(homePhone=%))';
+        $configuration['ldap']['ldap_name_filter'] = '(|(cn=%)(o=%))';
         unset ($out);
         exec("/usr/bin/sudo /sbin/e-smith/config getjson phonebookjss", $out);
         $tmp = json_decode($out[0]);
@@ -247,6 +256,15 @@ $app->get('/phonebook/ldap', function (Request $request, Response $response, $ar
         $configuration['ldaps']['port'] = $tmp->props->TCPPort;
         $configuration['ldaps']['user'] = 'cn=ldapuser,dc=phonebook,dc=nh';
         $configuration['ldaps']['password'] = exec('/usr/bin/sudo /usr/bin/cat /var/lib/nethserver/secrets/LDAPPhonebookPasswd');
+        $configuration['ldaps']['ldap_tls'] = 'ldaps';
+        $configuration['ldaps']['ldap_base'] = 'dc=phonebook,dc=nh';
+        $configuration['ldaps']['ldap_name_display'] = '%cn %o';
+        $configuration['ldaps']['ldap_mainphone_number_attr'] = 'telephoneNumber';
+        $configuration['ldaps']['ldap_mobilephone_number_attr'] = 'mobile';
+        $configuration['ldaps']['ldap_otherphone_number_attr'] = 'homePhone';
+        $configuration['ldaps']['ldap_name_attr'] = 'cn o';
+        $configuration['ldaps']['ldap_number_filter'] = '(|(telephoneNumber=%)(mobile=%)(homePhone=%))';
+        $configuration['ldaps']['ldap_name_filter'] = '(|(cn=%)(o=%))';
 
         return $response->withJson($configuration, 200);
     } catch (Exception $e) {
