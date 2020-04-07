@@ -141,3 +141,40 @@ $app->post('/configuration/wizard', function (Request $request, Response $respon
     }
 });
 
+/*
+* GET /configuration/externalip
+*/
+$app->get('/configuration/externalip', function (Request $request, Response $response, $args) {
+    return $response->withJson(\FreePBX::create()->Sipsettings->getConfig('externip'),200);
+});
+
+/*
+* POST /configuration/externalip/{ip}
+*/
+$app->post('/configuration/externalip/{ip}', function (Request $request, Response $response, $args) {
+    $route = $request->getAttribute('route');
+    $ip = $route->getArgument('ip');
+    if (\FreePBX::create()->Sipsettings->setConfig('externip',$ip)) {
+        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
+        return $response->withStatus(200);
+    }
+    return $response->withStatus(500);
+});
+
+/*
+* GET /configuration/suggestedip
+*/
+$app->get('/configuration/suggestedip', function (Request $request, Response $response, $args) {
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, "http://ifconfig.io/ip");
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 4);
+    $curl_result = trim(curl_exec($ch));
+    curl_close($ch);
+    $ip_regexp = '/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/';
+    if (preg_match($ip_regexp, $curl_result) === 1) {
+        return $response->withJson($curl_result,200);
+    }
+    return $response->withStatus(500);
+});
+
