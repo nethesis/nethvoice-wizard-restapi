@@ -169,10 +169,6 @@ $app->get('/configuration/suggestedip', function (Request $request, Response $re
     curl_setopt($ch, CURLOPT_URL, "http://ifconfig.io/ip");
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
     curl_setopt($ch, CURLOPT_TIMEOUT, 4);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-        "Content-Type: application/json;charset=utf-8",
-        "Accept: application/json;charset=utf-8",
-    ));
     $curl_result = trim(curl_exec($ch));
     curl_close($ch);
     $ip_regexp = '/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/';
