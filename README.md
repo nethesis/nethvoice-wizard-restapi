@@ -808,6 +808,28 @@ GET /provisioning/engine
 
 return provisioning engine configured in configuration db nethvoice ProvisioningEngine prop. Possible values are "freepbx" or "tancredi"
 
+### External ip
+
+External IP is used by SIP to configure NAT. There are three APIs:
+
+```
+GET /configuration/externalip
+```
+
+return the configured external IP
+
+```
+POST /configuration/externalip/{ip}
+```
+
+Set the external IP
+
+```
+GET /configuration/suggestedip
+```
+
+Return the external IP as seen from an external service
+
 ### SRTP
 
 ```
