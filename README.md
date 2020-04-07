@@ -872,13 +872,31 @@ returns
         "enabled":true,
         "port":"10389",
         "user":"",
-        "password":""
+        "password":"",
+        "tls" : "none",
+        "base" : "dc=phonebook,dc=nh",
+        "name_display" : "%cn %o",
+        "mainphone_number_attr" : "telephoneNumber",
+        "mobilephone_number_attr" : "mobile",
+        "otherphone_number_attr" : "homePhone",
+        "name_attr" : "cn o",
+        "number_filter" : "(|(telephoneNumber=%)(mobile=%)(homePhone=%))",
+        "name_filter" : "(|(cn=%)(o=%))"
     },
     "ldaps":{
         "enabled":true,
         "port":"10636",
         "user":"cn=ldapuser,dc=phonebook,dc=nh",
         "password":"1n2_E4WIa4H3Xwj9"
+        "tls" : "ldaps",
+        "base" : "dc=phonebook,dc=nh",
+        "name_display" : "%cn %o",
+        "mainphone_number_attr" : "telephoneNumber",
+        "mobilephone_number_attr" : "mobile",
+        "otherphone_number_attr" : "homePhone",
+        "name_attr" : "cn o",
+        "number_filter" : "(|(telephoneNumber=%)(mobile=%)(homePhone=%))",
+        "name_filter" : "(|(cn=%)(o=%))"
     }
 }
 ```
