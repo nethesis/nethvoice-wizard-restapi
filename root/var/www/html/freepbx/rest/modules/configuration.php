@@ -175,7 +175,8 @@ $app->get('/configuration/suggestedip', function (Request $request, Response $re
     ));
     $curl_result = trim(curl_exec($ch));
     curl_close($ch);
-    if (!empty($curl_result)) {
+    $ip_regexp = '/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/';
+    if (preg_match($ip_regexp, $curl_result) === 1) {
         return $response->withJson($curl_result,200);
     }
     return $response->withStatus(500);
