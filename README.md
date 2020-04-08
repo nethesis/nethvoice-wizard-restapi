@@ -830,6 +830,20 @@ GET /configuration/suggestedip
 
 Return the external IP as seen from an external service
 
+### Allow or deny access to SIPS from red interfaces
+
+```
+GET /configuration/allowexternalsips
+```
+
+return the status of external SIPS access: "enabled" or "disabled"
+
+```
+POST /configuration/allowexternalsips/<enabled|disabled>
+```
+
+enable or disable access to SIPS from red interfaces (and to RTP ports)
+
 ### SRTP
 
 ```

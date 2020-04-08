@@ -1,6 +1,7 @@
 %asterisk ALL=NOPASSWD: \
     /sbin/e-smith/signal-event nethserver-phonebook-mysql-save [A-Za-z]*, \
     /sbin/e-smith/signal-event nethserver-phonebook-mysql-save, \
+    /sbin/e-smith/signal-event firewall-adjust, \
     /sbin/e-smith/config getprop nethvoice ProvisioningEngine, \
     /sbin/e-smith/config getprop subscription SystemId, \
     /sbin/e-smith/config getprop subscription Secret, \
@@ -10,4 +11,7 @@
     /sbin/e-smith/config setprop phonebookjs status disabled, \
     /sbin/e-smith/config setprop phonebookjss status enabled, \
     /sbin/e-smith/config setprop phonebookjss status disabled, \
+    /sbin/e-smith/config getprop asterisk AllowExternalSIPS, \
+    /sbin/e-smith/config setprop asterisk AllowExternalSIPS enabled, \
+    /sbin/e-smith/config setprop asterisk AllowExternalSIPS disabled, \
     /usr/bin/cat /var/lib/nethserver/secrets/LDAPPhonebookPasswd
