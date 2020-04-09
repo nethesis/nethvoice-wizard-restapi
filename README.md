@@ -858,7 +858,7 @@ Return the current configured localnetworks, for example:
 POST /configuration/localnetworks
 ```
 
-Accept a jason array of local networks and cidr in body:
+Accept a JSON array of local networks and CIDR mask in body:
 
 ```
 [
@@ -992,5 +992,4 @@ Enable or disable the centralized phonebook to LDAP with SSL
 ```
 POST /phonebook/ldaps/status/[enabled|disabled]
 ```
-
 
