@@ -830,6 +830,50 @@ GET /configuration/suggestedip
 
 Return the external IP as seen from an external service
 
+### Local networks
+
+SIP NAT configuration, requires the lost of networks to be used without NAT, that can be configured with these two APIs:
+
+```
+GET /configuration/localnetworks
+```
+
+Return the current configured localnetworks, for example:
+
+```
+[
+    {
+        "net":"192.168.122.0",
+        "mask":"24"
+    },
+    {
+        "net":"192.168.7.0",
+        "mask":"24"
+    }
+]
+```
+
+
+```
+POST /configuration/localnetworks
+```
+
+Accept a JSON array of local networks and CIDR mask in body:
+
+```
+[
+    {
+        "net":"192.168.122.0",
+        "mask":"24"
+    },
+    {
+        "net":"192.168.7.0",
+        "mask":"24"
+    }
+]
+```
+
+
 ### Allow or deny access to SIPS from red interfaces
 
 ```
@@ -948,5 +992,4 @@ Enable or disable the centralized phonebook to LDAP with SSL
 ```
 POST /phonebook/ldaps/status/[enabled|disabled]
 ```
-
 
