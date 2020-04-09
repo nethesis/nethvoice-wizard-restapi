@@ -205,3 +205,22 @@ $app->post('/configuration/allowexternalsips/{status:enabled|disabled}', functio
     return $response->withStatus(500);
 });
 
+/*
+* GET /configuration/localnetworks
+*/
+$app->get('/configuration/localnetworks', function (Request $request, Response $response, $args) {
+    return $response->withJson(json_decode(\FreePBX::create()->Sipsettings->getConfig('localnets')),200);
+});
+
+/*
+* POST /configuration/localnetworks
+*/
+$app->post('/configuration/localnetworks', function (Request $request, Response $response, $args) {
+    $body = $request->getParsedBody();
+    if (\FreePBX::create()->Sipsettings->setConfig('localnets',json_encode($body))) {
+        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
+        return $response->withStatus(200);
+    }
+    return $response->withStatus(500);
+});
+
