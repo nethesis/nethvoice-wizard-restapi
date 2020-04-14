@@ -139,10 +139,9 @@ $app->post('/users/{username}/password', function (Request $request, Response $r
                 return $response->withStatus(201);
             }
         }
-
         return $response->withStatus(422);
     }
-
+    system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
     return $response->withStatus(201);
 });
 
