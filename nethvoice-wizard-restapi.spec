@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.5.1
+Version: 14.5.2
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -39,6 +39,12 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Thu Apr 16 2020 Stefano Fancello <stefano.fancello@nethesis.it> - 14.5.2-1
+- Enable TLS and video automatically - nethesis/dev#5763
+- Wizard's dashboard can't be reached after admin password change - Bug nethesis/dev#5767
+- Allow or deny access to SIPS and RTP port from red interfaces from wizard - nethesis/dev#5772
+- Add API to Allow to enable/disable ldap phonebook from wizard - nethesis/dev#5766 
+
 * Wed Apr 01 2020 Stefano Fancello <stefano.fancello@nethesis.it> - 14.5.1-1
 - REST APIs for NethCTI app - nethesis/dev#5754
 - Add Gigaset new mac address - nethesis/dev#5756
