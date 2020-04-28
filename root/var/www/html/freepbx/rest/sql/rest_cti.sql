@@ -167,6 +167,7 @@ INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (8,27);
 UPDATE IGNORE `rest_cti_permissions` SET `name`='advanced_off_hour_tmp',`displayname`='Advanced Off Hour',`description`='Allow to change user\'s incoming call path and generic inbound routes' WHERE id = 25;
 UPDATE IGNORE `rest_cti_permissions` SET `name`='ad_off_hour',`displayname`='Admin Off Hour',`description`='Allow to change all incoming call paths' WHERE id = 27;
 UPDATE IGNORE `rest_cti_permissions` SET `name`='advanced_off_hour',`displayname`='Advanced Off Hour',`description`='Allow to change user\'s incoming call path and generic inbound routes' WHERE id = 25;
+UPDATE IGNORE `rest_cti_permissions` SET `description`='Allow the user to customize functions of physical phone buttons. These values correspond to the Line Keys settings shown in Devices -> Models and Configurations pages' WHERE id = 2000;
 DELETE IGNORE FROM `rest_cti_permissions` WHERE `id`=11 AND `name` = 'QueueMan';
 DELETE IGNORE FROM `rest_cti_permissions` WHERE `id`=14 AND `name` = 'ad_sms';
 DELETE IGNORE FROM `rest_cti_permissions` WHERE `id`=7 AND `name` = 'sms';
