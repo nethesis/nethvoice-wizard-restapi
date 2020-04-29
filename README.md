@@ -298,6 +298,12 @@ Delete physical extension
 DELETE /physicalextensions/{extension|mac}
 ```
 
+Change admin user web interface password for all physical extensions
+
+```
+POST /physicalextensions/adminpw/{adminpw}
+```
+
 ### Mobile App
 
 Create a mobile app extension
