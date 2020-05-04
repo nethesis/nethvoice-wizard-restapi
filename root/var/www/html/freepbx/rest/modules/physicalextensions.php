@@ -135,6 +135,16 @@ $app->delete('/physicalextensions/{id}', function (Request $request, Response $r
     }
 });
 
+$app->post('/physicalextensions/adminpw', function (Request $request, Response $response, $args) {
+    $params = $request->getParsedBody();
+    $adminpw = $params['adminpw'];
+    $dbh = FreePBX::Database();
+    $sql = 'UPDATE rest_devices_phones SET web_user = "admin", web_password = ? WHERE type = "physical" AND mac IS NOT NULL';
+    $stmt = $dbh->prepare($sql);
+    $stmt->execute(array($adminpw));
+    return $response->withStatus(200);
+});
+
 $app->patch('/physicalextensions/{mac}', function (Request $request, Response $response, $args) {
     try {
         $route = $request->getAttribute('route');
