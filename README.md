@@ -301,7 +301,11 @@ DELETE /physicalextensions/{extension|mac}
 Change admin user web interface password for all physical extensions
 
 ```
-POST /physicalextensions/adminpw/{adminpw}
+POST /physicalextensions/adminpw
+```
+
+```
+Parameters: { "adminpw": "PASSWORD" }
 ```
 
 ### Mobile App
