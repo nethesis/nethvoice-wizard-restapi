@@ -305,7 +305,7 @@ POST /physicalextensions/adminpw
 ```
 
 ```
-Parameters: { "adminpw": "PASSWORD" }
+Parameters: { "password": "PASSWORD" }
 ```
 
 ### Mobile App
@@ -1002,4 +1002,3 @@ Enable or disable the centralized phonebook to LDAP with SSL
 ```
 POST /phonebook/ldaps/status/[enabled|disabled]
 ```
-
