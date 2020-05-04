@@ -142,6 +142,7 @@ $app->post('/physicalextensions/adminpw', function (Request $request, Response $
     $sql = 'UPDATE rest_devices_phones SET web_user = "admin", web_password = ? WHERE type = "physical" AND mac IS NOT NULL';
     $stmt = $dbh->prepare($sql);
     $stmt->execute(array($adminpw));
+    system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
     return $response->withStatus(200);
 });
 
