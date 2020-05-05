@@ -298,6 +298,16 @@ Delete physical extension
 DELETE /physicalextensions/{extension|mac}
 ```
 
+Change admin user web interface password for all physical extensions
+
+```
+POST /physicalextensions/adminpw
+```
+
+```
+Parameters: { "password": "PASSWORD" }
+```
+
 ### Mobile App
 
 Create a mobile app extension
@@ -992,4 +1002,3 @@ Enable or disable the centralized phonebook to LDAP with SSL
 ```
 POST /phonebook/ldaps/status/[enabled|disabled]
 ```
-
