@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.5.2
+Version: 14.6.0
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -39,6 +39,9 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Wed May 06 2020 Davide Principi <davide.principi@nethesis.it> - 14.6.0-1
+- Modification to adminpw is not propagated into hosts.json for cti click2call - Bug nethesis/dev#5788
+
 * Thu Apr 16 2020 Stefano Fancello <stefano.fancello@nethesis.it> - 14.5.2-1
 - Enable TLS and video automatically - nethesis/dev#5763
 - Wizard's dashboard can't be reached after admin password change - Bug nethesis/dev#5767
