@@ -218,8 +218,12 @@ $app->get('/configuration/localnetworks', function (Request $request, Response $
 $app->post('/configuration/localnetworks', function (Request $request, Response $response, $args) {
     $body = $request->getParsedBody();
     if (\FreePBX::create()->Sipsettings->setConfig('localnets',$body)) {
-        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
-        return $response->withStatus(200);
+        // Reload FreePBX synchronously
+        do_reload();
+        exec("/usr/bin/sudo /usr/bin/systemctl restart asterisk", $out, $ret);
+        if ( $ret === 0 ) {
+            return $response->withStatus(200);
+        }
     }
     return $response->withStatus(500);
 });
