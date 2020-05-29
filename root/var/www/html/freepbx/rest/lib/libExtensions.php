@@ -123,15 +123,9 @@ function createExtension($mainextensionnumber,$delete=false){
 
         // Use mainextension in displayname
         if ($mainextensionnumber != $extension) {
-            // get current displayname
-            $sql = 'SELECT `data` FROM `sip` WHERE `id` = ? AND `keyword` = "callerid"';
+            $sql = 'UPDATE IGNORE `sip` SET `data` = REPLACE(`data`, ?, ?) WHERE `id` = ? AND `keyword` = "callerid"';
             $stmt = $dbh->prepare($sql);
-            $stmt->execute(array($extension));
-            $callerid = $stmt->fetchAll(\PDO::FETCH_ASSOC)[0]['data'];
-            $callerid = str_replace('<'.$extension.'>', '<'.$mainextensionnumber.'>',$callerid);
-            $sql = 'UPDATE IGNORE `sip` SET `data` = ? WHERE `id` = ? AND `keyword` = "callerid"';
-            $stmt = $dbh->prepare($sql);
-            $stmt->execute(array($callerid,$extension));
+            $stmt->execute(array("<$extension>", "<$mainextensionnumber>", $extension));
         }
 
         return $extension;
