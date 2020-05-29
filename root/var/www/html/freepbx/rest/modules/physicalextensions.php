@@ -79,7 +79,7 @@ $app->post('/physicalextensions', function (Request $request, Response $response
                     return $response->withJson(array("status"=>"Error associating app extension"), 500);
                 }
             } else {
-                if (useExtensionAsPhysical($extension,$mac,$model,$line) === false) {
+                if (useExtensionAsPhysical($extension,$mac,$model,$line,$web_user,$web_password) === false) {
                     return $response->withJson(array("status"=>"Error associating physical extension"), 500);
                 }
             }
