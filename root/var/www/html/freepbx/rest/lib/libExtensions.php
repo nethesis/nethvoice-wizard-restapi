@@ -121,6 +121,13 @@ function createExtension($mainextensionnumber,$delete=false){
         $stmt = $dbh->prepare($sql);
         $stmt->execute(array($extension));
 
+        // Use mainextension in displayname
+        if ($mainextensionnumber != $extension) {
+            $sql = 'UPDATE IGNORE `sip` SET `data` = REPLACE(`data`, ?, ?) WHERE `id` = ? AND `keyword` = "callerid"';
+            $stmt = $dbh->prepare($sql);
+            $stmt->execute(array("<$extension>", "<$mainextensionnumber>", $extension));
+        }
+
         return $extension;
     } catch (Exception $e) {
        error_log($e->getMessage());
