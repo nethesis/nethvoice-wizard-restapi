@@ -243,7 +243,7 @@ function useExtensionAsPhysical($extension,$mac,$model,$line=false,$provisioning
     } elseif ($provisioningEngine == 'tancredi') {
         return tancredi_useExtensionAsPhysical($extension,$mac,$model,false,$provisioning_token, $web_user, $web_password);
     } else {
-        throw new Exception('Unknow provisioning '.implode("\n",$out));
+        throw new Exception('Unknown provisioning!');
     }
 }
 
