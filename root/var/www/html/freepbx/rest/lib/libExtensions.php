@@ -236,18 +236,18 @@ function useExtensionAsMobileApp($extension) {
     }
 }
 
-function useExtensionAsPhysical($extension,$mac,$model,$line=false,$provisioning_token=null) {
+function useExtensionAsPhysical($extension,$mac,$model,$line=false,$provisioning_token=null, $web_user = null ,$web_password = null) {
     $provisioningEngine = getProvisioningEngine();
     if ($provisioningEngine == 'freepbx') {
-        return legacy_useExtensionAsPhysical($extension,$mac,$model,false);
+        return legacy_useExtensionAsPhysical($extension,$mac,$model,false, $web_user, $web_password);
     } elseif ($provisioningEngine == 'tancredi') {
-        return tancredi_useExtensionAsPhysical($extension,$mac,$model,false,$provisioning_token);
+        return tancredi_useExtensionAsPhysical($extension,$mac,$model,false,$provisioning_token, $web_user, $web_password);
     } else {
-        throw new Exception('Unknow provisioning '.implode("\n",$out));
+        throw new Exception('Unknown provisioning!');
     }
 }
 
-function legacy_useExtensionAsPhysical($extension,$mac,$model,$line=false) {
+function legacy_useExtensionAsPhysical($extension,$mac,$model,$line=false, $web_user = null ,$web_password = null) {
     try {
         require_once(__DIR__. '/../lib/modelRetrieve.php');
         //disable call waiting
@@ -268,15 +268,15 @@ function legacy_useExtensionAsPhysical($extension,$mac,$model,$line=false) {
         if ( isset($line) && $line ) {
             $sql = 'UPDATE `rest_devices_phones` SET user_id = ( '.
                    'SELECT userman_users.id FROM userman_users WHERE userman_users.default_extension = ? '.
-                   '), extension = ?, secret= ?, type = "physical" WHERE mac = ? AND line = ?';
+                   '), extension = ?, secret= ?, web_user = ?, web_password = ?, type = "physical" WHERE mac = ? AND line = ?';
             $stmt = $dbh->prepare($sql);
             $res = $stmt->execute(array(getMainExtension($extension),$extension,$extension_secret,$mac,$line));
         } else {
             $sql = 'UPDATE `rest_devices_phones` SET user_id = ( '.
                    'SELECT userman_users.id FROM userman_users WHERE userman_users.default_extension = ? '.
-                   '), extension = ?, secret= ?, type = "physical" WHERE mac = ?';
+                   '), extension = ?, secret= ?, web_user = ?, web_password = ?, type = "physical" WHERE mac = ?';
             $stmt = $dbh->prepare($sql);
-            $res = $stmt->execute(array(getMainExtension($extension),$extension,$extension_secret,$mac));
+            $res = $stmt->execute(array(getMainExtension($extension),$extension,$extension_secret,$web_user,$web_password,$mac));
         }
 
         if ($res) {
@@ -314,7 +314,7 @@ function legacy_useExtensionAsPhysical($extension,$mac,$model,$line=false) {
     }
 }
 
-function tancredi_useExtensionAsPhysical($extension,$mac,$model,$line=false) {
+function tancredi_useExtensionAsPhysical($extension,$mac,$model,$line=false,$web_user = null ,$web_password = null) {
     //disable call waiting
     global $astman;
     $astman->database_del("CW",$extension);
@@ -332,9 +332,9 @@ function tancredi_useExtensionAsPhysical($extension,$mac,$model,$line=false) {
     }
     $sql = 'UPDATE `rest_devices_phones` SET user_id = ( '.
            'SELECT userman_users.id FROM userman_users WHERE userman_users.default_extension = ? '.
-           '), extension = ?, secret= ?, type = "physical" WHERE mac = ?';
+           '), extension = ?, secret= ?, web_user = ?, web_password = ?, type = "physical" WHERE mac = ?';
     $stmt = $dbh->prepare($sql);
-    $res = $stmt->execute(array(getMainExtension($extension),$extension,$extension_secret,$mac));
+    $res = $stmt->execute(array(getMainExtension($extension),$extension,$extension_secret,$web_user,$web_password,$mac));
     if ($res) {
         return true;
     }
