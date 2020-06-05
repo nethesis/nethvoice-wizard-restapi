@@ -103,9 +103,13 @@ $app->get('/extensions/{extension}/srtp', function (Request $request, Response $
 
 $app->post('/extensions/{extension}/srtp/{enabled}', function (Request $request, Response $response, $args) {
     $media_encryption = ($args['enabled'] == 'true') ? 'sdes' : 'no';
-    if (setSipData($args['extension'],'media_encryption',$media_encryption)) {
-        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
-        return $response->withStatus(200);
+    if (extensionExists($args['extension'],FreePBX::Core()->getAllUsersByDeviceType())) {
+        if (setSipData($args['extension'],'media_encryption',$media_encryption)) {
+            system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
+            return $response->withStatus(200);
+        }
+    } else {
+        error_log('Warning: trying to change srtp to a non existing extension '.$args['extension']);
     }
     return $response->withStatus(500);
 });
