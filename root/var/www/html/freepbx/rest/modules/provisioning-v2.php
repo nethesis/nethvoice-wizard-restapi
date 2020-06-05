@@ -109,7 +109,7 @@ $app->post('/extensions/{extension}/srtp/{enabled}', function (Request $request,
             return $response->withStatus(200);
         }
     } else {
-        error_log('Error: trying to change srtp to a non existing extension '.$args['extension']);
+        error_log('Warning: trying to change srtp to a non existing extension '.$args['extension']);
     }
     return $response->withStatus(500);
 });
