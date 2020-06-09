@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.6.0
+Version: 14.6.1
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -39,6 +39,13 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Tue Jun 09 2020 Stefano Fancello <stefano.fancello@nethesis.it> - 14.6.1-1
+- Tancredi admin password not used when creating a physicalextension - Bug nethesis/dev#5818
+- Restart Asterisk when local NAT settings are changed - nethesis/dev#5814
+- Check that extension exists before changing its srtp (#125)
+- Use device admin password when saving extension (#124)
+- Set mainextension in displayname when creating a new secondary extension
+
 * Wed May 06 2020 Davide Principi <davide.principi@nethesis.it> - 14.6.0-1
 - Modification to adminpw is not propagated into hosts.json for cti click2call - Bug nethesis/dev#5788
 
