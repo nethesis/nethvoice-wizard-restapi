@@ -341,7 +341,7 @@ function tancredi_useExtensionAsPhysical($extension,$mac,$model,$line=false,$web
     return false;
 }
 
-function setFalconieriRPS($mac, $provisioningUrl) {
+function setFalconieriRPS($mac, $provisioningUrl, $lk = null, $secret = null) {
     $mac = strtr(strtoupper($mac), ':', '-'); // MAC format sanitization
     $vendors = json_decode(file_get_contents(__DIR__. '/../lib/macAddressMap.json'), true);
     $vendor = $vendors[substr(str_replace('-',':',"$mac"),0,8)];
@@ -359,13 +359,17 @@ function setFalconieriRPS($mac, $provisioningUrl) {
     }
 
     //get LK
-    exec("/usr/bin/sudo /sbin/e-smith/config getprop subscription SystemId", $tmp);
-    $lk = $tmp[0];
-    unset($tmp);
-    //get secret
-    exec("/usr/bin/sudo /sbin/e-smith/config getprop subscription Secret", $tmp);
-    $secret = $tmp[0];
-    unset($tmp);
+    if (empty($lk)) {
+        exec("/usr/bin/sudo /sbin/e-smith/config getprop subscription SystemId", $tmp);
+        $lk = $tmp[0];
+        unset($tmp);
+        //get secret
+    }
+    if (empty($secret)) {
+        exec("/usr/bin/sudo /sbin/e-smith/config getprop subscription Secret", $tmp);
+        $secret = $tmp[0];
+        unset($tmp);
+    }
 
     $queryUrl = "https://rps.nethesis.it/providers/${provider}/${mac}";
     $data = json_encode(array("url" => $provisioningUrl), JSON_UNESCAPED_SLASHES);
