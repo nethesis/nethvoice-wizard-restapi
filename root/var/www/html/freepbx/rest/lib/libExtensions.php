@@ -404,7 +404,58 @@ function setFalconieriRPS($mac, $provisioningUrl, $lk = null, $secret = null) {
     return $result;
 }
 
+function connectivitycheck($host,$scheme) {
+    $ret = array(
+        'is_reachable' => FALSE,
+        'valid_certificate' => FALSE
+    );
 
+    $ip_regexp = '/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/';
+    $fqdn_regexp = '/(?=^.{4,253}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)/';
+    if (preg_match($ip_regexp,$host) === 1 && $host !== '127.0.0.1') {
+        // provided host is a valid IP address
+        $ret['host_type'] = 'IP';
+    } elseif (preg_match($fqdn_regexp,$host) === 1 && $host !== 'localhost.localdomain') {
+        // provided host is a valid FQDN
+        $ret['host_type'] = 'FQDN';
+    } else {
+        return false;
+    }
+
+    // check provided host is reachable and is this machine
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, "{$scheme}://{$host}/provisioning/check/ping");
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 4);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        "Content-Type: application/json;charset=utf-8",
+        "Accept: application/json;charset=utf-8",
+    ));
+    $curl_result = curl_exec($ch);
+    curl_close($ch);
+
+    if ($curl_result === (string)filemtime('/etc/tancredi.conf')) {
+        $ret['is_reachable'] = TRUE;
+        if ($scheme === 'https' && $ret['host_type'] === 'FQDN') {
+            // check certificate is valid
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, "{$scheme}://{$host}/provisioning/check/ping");
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 4);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                "Content-Type: application/json;charset=utf-8",
+                "Accept: application/json;charset=utf-8",
+            ));
+            $curl_result = curl_exec($ch);
+            curl_close($ch);
+            if ($curl_result === (string)filemtime('/etc/tancredi.conf')) {
+                $ret['valid_certificate'] = TRUE;
+            }
+        }
+    }
+    return $ret;
+}
 
 
 function useExtensionAsGSWaveApp($extension,$mac,$model) {
