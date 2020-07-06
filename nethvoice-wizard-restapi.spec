@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.6.1
+Version: 14.6.2
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -39,6 +39,9 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Mon Jul 06 2020 Stefano Fancello <stefano.fancello@nethesis.it> - 14.6.2-1
+- Provisioning engine migration procedure - nethesis/dev#5832
+
 * Tue Jun 09 2020 Stefano Fancello <stefano.fancello@nethesis.it> - 14.6.1-1
 - Tancredi admin password not used when creating a physicalextension - Bug nethesis/dev#5818
 - Restart Asterisk when local NAT settings are changed - nethesis/dev#5814
