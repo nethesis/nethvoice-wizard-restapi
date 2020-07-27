@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.7.0
+Version: 14.7.1
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -39,6 +39,9 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Mon Jul 27 2020 Stefano Fancello <stefano.fancello@nethesis.it> - 14.7.1-1
+- Add new VoIP Providers: WiCity and VoipTel (#128)
+
 * Mon Jul 06 2020 Stefano Fancello <stefano.fancello@nethesis.it> - 14.7.0-1
 - Provisioning engine migration procedure - nethesis/dev#5832
 - Refactor connectivity ceck to allow to call it as function
