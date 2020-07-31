@@ -17,19 +17,19 @@ fpbxPasswordHash=$(mysql asterisk -B --silent -e "SELECT password_sha1 FROM ampu
 SecretKey=$(echo -n "${User}${fpbxPasswordHash}${secret}" | sha1sum | awk '{print $1}')
 
 # GET Tancredi defaults
-read WEBPASS SCHEME < <( echo $(curl -ks "https://$(hostname)/tancredi/api/v1/defaults" -H "User: ${User}" -H "SecretKey: ${SecretKey}" | jq -r '.adminpw, .provisioning_url_scheme'))
+read WEBPASS SCHEME <<<"$(curl -ks "https://$(hostname)/tancredi/api/v1/defaults" -H "User: ${User}" -H "SecretKey: ${SecretKey}" | jq -r '.adminpw, .provisioning_url_scheme')"
 if [[ $SCHEME == 'https' ]] ; then
     SRTP='true'
 else
     SRTP='false'
 fi
 
-for ROW in $(sed 's/ *//g' $1); do
-    MAC=$(echo $ROW | cut -d, -f1 | tr '[:lower:]' '[:upper:]' | sed 's/[^A-F0-9]//g' | sed 's/\(..\)\(..\)\(..\)\(..\)\(..\)\(..\)/\1-\2-\3-\4-\5-\6/' )
-    MAINEXTENSION=$(echo $ROW | cut -d, -f2)
+for ROW in $(sed 's/ *//g' "$1"); do
+    MAC=$(echo "$ROW" | cut -d, -f1 | tr '[:lower:]' '[:upper:]' | sed 's/[^A-F0-9]//g' | sed 's/\(..\)\(..\)\(..\)\(..\)\(..\)\(..\)/\1-\2-\3-\4-\5-\6/' )
+    MAINEXTENSION=$(echo "$ROW" | cut -d, -f2)
 
     # assign physical phone to extension
-    read EXTENSION < <( echo $(curl -ks "https://$(hostname)/freepbx/rest/physicalextensions" -H "User: ${User}" -H "SecretKey: ${SecretKey}" -H 'Accept: application/json, text/plain, */*' -H 'Content-Type: application/json;charset=utf-8' --data '{"mac":"'${MAC}'","mainextension":"'${MAINEXTENSION}'","model":"dummy","line":null,"web_user":"admin","web_password":"'${WEBPASS}'"}' | jq -r '.extension'))
+    read EXTENSION <<<"$(curl -ks "https://$(hostname)/freepbx/rest/physicalextensions" -H "User: ${User}" -H "SecretKey: ${SecretKey}" -H 'Accept: application/json, text/plain, */*' -H 'Content-Type: application/json;charset=utf-8' --data '{"mac":"'"${MAC}"'","mainextension":"'"${MAINEXTENSION}"'","model":"dummy","line":null,"web_user":"admin","web_password":"'"${WEBPASS}"'"}' | jq -r '.extension')"
     if [[ -z $EXTENSION || $EXTENSION == 'null' ]] ; then
         echo "[ERROR] Failed to add phone $MAC to extension $MAINEXTENSION"
     else
