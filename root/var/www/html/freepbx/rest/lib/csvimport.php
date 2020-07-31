@@ -23,31 +23,6 @@
 include_once('/var/www/html/freepbx/rest/lib/libUsers.php');
 include_once('/var/www/html/freepbx/rest/lib/libExtensions.php');
 include_once('/var/www/html/freepbx/rest/lib/libCTI.php');
-
-if (getProvisioningEngine() === 'tancredi' && file_exists('/usr/share/tancredi/vendor/autoload.php')) {
-    require_once '/usr/share/tancredi/vendor/autoload.php';
-    $logger = new \Monolog\Logger('migration');
-    $logger->pushProcessor(new \Monolog\Processor\PsrLogMessageProcessor());
-    if( ! empty($config['logfile'])) {
-        $handler = new \Monolog\Handler\StreamHandler($config['logfile']);
-        $formatter = new \Monolog\Formatter\LineFormatter("[%datetime%] %channel%.%level_name%: %message%\n");
-        ini_set('error_log',$config['logfile']);
-    } else {
-        $handler = new \Monolog\Handler\ErrorLogHandler();
-        // We assume the error_log already adds a time stamp to log messages:
-        $formatter = new \Monolog\Formatter\LineFormatter("%channel%.%level_name%: %message%");
-    }
-
-    $handler->setFormatter($formatter);
-    $handler->setLevel($logger::INFO);
-    $logger->pushHandler($handler);
-    $logger->pushHandler(new \Monolog\Handler\StreamHandler("php://stdout",$logger::INFO));
-
-    \Monolog\ErrorHandler::register($logger);
-
-    $storage = new \Tancredi\Entity\FileStorage($logger,$config);
-}
-
 if (file_exists('/var/www/html/freepbx/rest/lib/libMigration.php')) {
     include_once('/var/www/html/freepbx/rest/lib/libMigration.php');
 }
@@ -280,49 +255,6 @@ try {
             }
         } catch (Exception $e) {
             $error = "Error setting CTI profile to user {$row[8]}: ".$e->getMessage();
-            error_log($error);
-            $err .= $error;
-        }
-
-        # Add phones to new provisioning
-        try {
-            if (!empty($row[9])) {
-                $mac = preg_replace('/[^0-9A-F]/','', strtoupper($row[9]));
-                if (strlen($mac) !== 12) {
-                    throw new Exception("Mac address $row[9] is incorrect");
-                }
-                if (getProvisioningEngine() !== 'tancredi') {
-                    throw new Exception("Provisionin engine is not Tancredi");
-                }
-                # Add phones to tancredi
-                $phone = [];
-                $phone['mac'] = preg_replace('/(..)(..)(..)(..)(..)(..)/', '$1-$2-$3-$4-$5-$6', $mac);
-                $phone['brand'] = $macvendors[substr($mac,0,6)];
-                $scope = new \Tancredi\Entity\Scope($phone['mac'], $storage, $logger);
-                $scope->metadata['displayName'] = $phone['brand'];
-                $scope->metadata['inheritFrom'] = isset($model) ? $model : null ;
-                $scope->metadata['scopeType'] = 'phone';
-                $scope->setVariables();
-                \Tancredi\Entity\TokenManager::createToken(uniqid($prefix = rand(), $more_entropy = TRUE), $phone['mac'] , TRUE); // create first time access token
-                \Tancredi\Entity\TokenManager::createToken(uniqid($prefix = rand(), $more_entropy = TRUE), $phone['mac'] , FALSE); // create token
-                $phone_scope = \Tancredi\Entity\Scope::getPhoneScope($phone['mac'], $storage, $logger);
-                @$logger->info("Added {$phone['brand']} ({$phone['mac']}) from model {$phone['oldmodel']}.");
-                # Configure RPS with Falconieri
-                $falconieri_result = setFalconieriRPS($phone['mac'], $phone_scope['provisioning_url1']);
-                if ($falconieri_result['httpCode'] != 200) {
-                    $logger->error("Error adding {$phone['mac']} phone to RPS. See logs for details.");
-                }
-                # Create extension
-                $extension = createExtension($row[2],false);
-                if ($extension === false ) {
-                    throw new Exception("Error creating extension for {$phone['mac']}");
-                }
-                if (useExtensionAsPhysical($extension,preg_replace('/(..)(..)(..)(..)(..)(..)/', '$1:$2:$3:$4:$5:$6', $mac),'','') === false) {
-                    throw new Exception("Error associating physical extension to {$phone['mac']}");
-                }
-            }
-        } catch (Exception $e) {
-            $error = "Error adding phone {$row[9]} for {$username}: ".$e->getMessage();
             error_log($error);
             $err .= $error;
         }
