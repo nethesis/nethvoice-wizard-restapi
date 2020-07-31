@@ -1,0 +1,44 @@
+#!/bin/bash
+
+ENGINE=$(/sbin/e-smith/config getprop nethvoice ProvisioningEngine)
+
+if [[ $# != 1 ]]; then
+    echo "Usage: $0 [csv_file]"
+    exit 1
+elif [[ $ENGINE != 'tancredi' ]] ; then
+    echo "[ERROR]: provisioning engine is not Tancredi!"
+    exit 1
+fi 
+
+# Set authentication variables
+secret=$(perl -mNethServer::Password -e "print NethServer::Password::store('nethvoice')")
+User="admin"
+fpbxPasswordHash=$(mysql asterisk -B --silent -e "SELECT password_sha1 FROM ampusers WHERE username = '$User'")
+SecretKey=$(echo -n "${User}${fpbxPasswordHash}${secret}" | sha1sum | awk '{print $1}')
+
+# GET Tancredi defaults
+read WEBPASS SCHEME < <( echo $(curl -ks "https://$(hostname)/tancredi/api/v1/defaults" -H "User: ${User}" -H "SecretKey: ${SecretKey}" | jq -r '.adminpw, .provisioning_url_scheme'))
+if [[ $SCHEME == 'https' ]] ; then
+    SRTP='true'
+else
+    SRTP='false'
+fi
+
+for ROW in $(sed 's/ *//g' $1); do
+    MAC=$(echo $ROW | cut -d, -f1 | tr '[:lower:]' '[:upper:]' | sed 's/[^A-F0-9]//g' | sed 's/\(..\)\(..\)\(..\)\(..\)\(..\)\(..\)/\1-\2-\3-\4-\5-\6/' )
+    MAINEXTENSION=$(echo $ROW | cut -d, -f2)
+
+    # assign physical phone to extension
+    read EXTENSION < <( echo $(curl -ks "https://$(hostname)/freepbx/rest/physicalextensions" -H "User: ${User}" -H "SecretKey: ${SecretKey}" -H 'Accept: application/json, text/plain, */*' -H 'Content-Type: application/json;charset=utf-8' --data '{"mac":"'${MAC}'","mainextension":"'${MAINEXTENSION}'","model":"dummy","line":null,"web_user":"admin","web_password":"'${WEBPASS}'"}' | jq -r '.extension'))
+    if [[ -z $EXTENSION || $EXTENSION == 'null' ]] ; then
+        echo "[ERROR] Failed to add phone $MAC to extension $MAINEXTENSION"
+    else
+        echo "[INFO] Added phone $MAC to extension $MAINEXTENSION with real extension $EXTENSION"
+    fi
+
+    # Configure extension encryption
+    curl -ks "https://$(hostname)/freepbx/rest/extensions/${EXTENSION}/srtp/${SRTP}" -H "User: ${User}" -H "SecretKey: ${SecretKey}" -H 'Accept: application/json, text/plain, */*' -H 'Content-Type: application/json;charset=utf-8' -X POST    
+done
+
+/usr/bin/scl enable rh-php56 -- fwconsole r
+
