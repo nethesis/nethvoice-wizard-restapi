@@ -49,7 +49,7 @@ for ROW in $(sed 's/ *//g' "$1"); do
     MAINEXTENSION=$(echo "$ROW" | cut -d, -f2)
 
     # assign physical phone to extension
-    read EXTENSION <<<"$(curl -ks "https://$(hostname)/freepbx/rest/physicalextensions" -H "User: ${User}" -H "SecretKey: ${SecretKey}" -H 'Accept: application/json, text/plain, */*' -H 'Content-Type: application/json;charset=utf-8' --data '{"mac":"'"${MAC}"'","mainextension":"'"${MAINEXTENSION}"'","model":"dummy","line":null,"web_user":"admin","web_password":"'"${WEBPASS}"'"}' | jq -r '.extension')"
+    read EXTENSION <<<"$(jq -n -c --arg mac $MAC --arg mainextension $MAINEXTENSION --arg webpass $WEBPASS '{"mac":$mac,"mainextension":$mainextension,"model":"dummy","line":null,"web_user":"admin","web_password":$webpass}' | curl -ks "https://$(hostname)/freepbx/rest/physicalextensions" -H "User: ${User}" -H "SecretKey: ${SecretKey}" -H 'Accept: application/json, text/plain, */*' -H 'Content-Type: application/json;charset=utf-8' --data @- | jq -r '.extension')"
     if [[ -z $EXTENSION || $EXTENSION == 'null' ]] ; then
         echo "[ERROR] Failed to add phone $MAC to extension $MAINEXTENSION"
     else
