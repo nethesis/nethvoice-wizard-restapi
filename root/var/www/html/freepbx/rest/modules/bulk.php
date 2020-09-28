@@ -100,6 +100,7 @@ $app->get('/bulk/{mainextensions}', function (Request $request, Response $respon
 $app->get('/destinations', function (Request $request, Response $response, $args) {
     include_once('/etc/freepbx.conf');
     include_once('/var/www/html/freepbx/admin/modules/announcement/functions.inc.php');
+    include_once('/var/www/html/freepbx/admin/modules/daynight/functions.inc.php');
     include_once('/var/www/html/freepbx/admin/modules/queues/functions.inc.php');
     include_once('/var/www/html/freepbx/admin/modules/ringgroups/functions.inc.php');
     include_once('/var/www/html/freepbx/admin/modules/timeconditions/functions.inc.php');
