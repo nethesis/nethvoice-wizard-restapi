@@ -36,6 +36,7 @@ rm -rf %{buildroot}
 %attr (0774,root,root) /var/www/html/freepbx/rest/lib/scanHelper.py
 %attr (0754,root,asterisk) /var/www/html/freepbx/rest/lib/retrieveHelper.sh
 %attr (0754,root,asterisk) /var/www/html/freepbx/rest/lib/phonesRebootHelper.php
+%attr (0744,root,root) /usr/sbin/tancredi-associate-phones
 %doc
 
 %changelog

@@ -1,0 +1,64 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2020 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+ENGINE=$(/sbin/e-smith/config getprop nethvoice ProvisioningEngine)
+
+if [[ $# != 1 ]]; then
+    echo "Usage: $0 [csv_file]"
+    exit 1
+elif [[ $ENGINE != 'tancredi' ]] ; then
+    echo "[ERROR]: provisioning engine is not Tancredi!"
+    exit 1
+fi 
+
+# Set authentication variables
+secret=$(perl -mNethServer::Password -e "print NethServer::Password::store('nethvoice')")
+User="admin"
+fpbxPasswordHash=$(mysql asterisk -B --silent -e "SELECT password_sha1 FROM ampusers WHERE username = '$User'")
+SecretKey=$(echo -n "${User}${fpbxPasswordHash}${secret}" | sha1sum | awk '{print $1}')
+
+# GET Tancredi defaults
+read WEBPASS SCHEME <<<"$(curl -ks "https://$(hostname)/tancredi/api/v1/defaults" -H "User: ${User}" -H "SecretKey: ${SecretKey}" | jq -r '.adminpw, .provisioning_url_scheme')"
+if [[ $SCHEME == 'https' ]] ; then
+    SRTP='true'
+else
+    SRTP='false'
+fi
+
+for ROW in $(sed 's/ *//g' "$1"); do
+    MAC=$(echo "$ROW" | cut -d, -f1 | tr '[:lower:]' '[:upper:]' | sed 's/[^A-F0-9]//g' | sed 's/\(..\)\(..\)\(..\)\(..\)\(..\)\(..\)/\1-\2-\3-\4-\5-\6/' )
+    MAINEXTENSION=$(echo "$ROW" | cut -d, -f2)
+
+    # assign physical phone to extension
+    read EXTENSION <<<"$(jq -n -c --arg mac $MAC --arg mainextension $MAINEXTENSION --arg webpass $WEBPASS '{"mac":$mac,"mainextension":$mainextension,"model":"dummy","line":null,"web_user":"admin","web_password":$webpass}' | curl -ks "https://$(hostname)/freepbx/rest/physicalextensions" -H "User: ${User}" -H "SecretKey: ${SecretKey}" -H 'Accept: application/json, text/plain, */*' -H 'Content-Type: application/json;charset=utf-8' --data @- | jq -r '.extension')"
+    if [[ -z $EXTENSION || $EXTENSION == 'null' ]] ; then
+        echo "[ERROR] Failed to add phone $MAC to extension $MAINEXTENSION"
+    else
+        echo "[INFO] Added phone $MAC to extension $MAINEXTENSION with real extension $EXTENSION"
+    fi
+
+    # Configure extension encryption
+    curl -ks "https://$(hostname)/freepbx/rest/extensions/${EXTENSION}/srtp/${SRTP}" -H "User: ${User}" -H "SecretKey: ${SecretKey}" -H 'Accept: application/json, text/plain, */*' -H 'Content-Type: application/json;charset=utf-8' -X POST    
+done
+
+/usr/bin/scl enable rh-php56 -- fwconsole r
+
