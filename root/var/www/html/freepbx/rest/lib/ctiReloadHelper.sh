@@ -4,3 +4,4 @@ while (ps aux | grep -q [r]etrieve_conf); do
 done
 sleep 2
 /usr/bin/sudo /usr/bin/systemctl reload nethcti-server
+[ -d /opt/nethvoice-report/api/ ] && /usr/bin/sudo /usr/bin/systemctl restart nethvoice-report-api
