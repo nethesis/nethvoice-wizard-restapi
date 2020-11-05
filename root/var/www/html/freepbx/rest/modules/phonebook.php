@@ -89,8 +89,17 @@ $app->post('/phonebook/config[/{id}]', function (Request $request, Response $res
             $id = 'custom_'.$i;
             $new = true;
         }
-        // mandatory parameters
-        foreach ( array('dbtype','host','port','user','password','dbname','query','mapping') as $var) {
+        if(!isset($data['dbtype'])) {
+            return $response->withJson(array("status"=>"Missing value: dbtype"), 400);
+        } else if($data['dbtype'] == 'mysql') {
+            $mandatory_params = array('host','port','user','password','dbname','query','mapping');
+        } else if($data['dbtype'] == 'csv') {
+            $mandatory_params = array('url','mapping');
+        } else {
+            return $response->withJson(array("status"=>"Bad dbtype value"), 400);
+        }
+        // validate mandatory parameters
+        foreach ($mandatory_params as $var) {
             if (!isset($data[$var]) || empty($data[$var])) {
                 error_log("Missing value: $var");
                 return $response->withJson(array("status"=>"Missing value: $var"), 400);
@@ -176,7 +185,17 @@ $app->post('/phonebook/test', function (Request $request, Response $response, $a
         $id = uniqid('phonebook_test_');
         $file = '/tmp/'.$id.'.json';
         $newsource = array();
-        foreach ( array('type','dbtype','host','port','user','password','dbname','query') as $var) {
+        if(!isset($data['dbtype'])) {
+            return $response->withJson(array("status"=>"Missing value: dbtype"), 400);
+        } else if($data['dbtype'] == 'mysql') {
+            $mandatory_params = array('host','port','user','password','dbname','query');
+        } else if($data['dbtype'] == 'csv') {
+            $mandatory_params = array('url');
+        } else {
+            return $response->withJson(array("status"=>"Bad dbtype value"), 400);
+        }
+        // validate mandatory parameters
+        foreach ($mandatory_params as $var) {
             if (!isset($data[$var]) || empty($data[$var])) {
                 error_log("Missing value: $var");
                 return $response->withJson(array("status"=>"Missing value: $var"), 400);
