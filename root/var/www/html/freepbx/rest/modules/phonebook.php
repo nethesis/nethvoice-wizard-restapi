@@ -106,6 +106,7 @@ $app->post('/phonebook/config[/{id}]', function (Request $request, Response $res
             }
             $newsource[$var] = $data[$var];
         }
+        $newsource['dbtype'] = $data['dbtype'];
         // optional parameters
         $newsource['interval'] = empty($data['interval']) ? 1440 : $data['interval'];
         $newsource['type'] = empty($data['type']) ? $id : $data['type'];
@@ -202,6 +203,7 @@ $app->post('/phonebook/test', function (Request $request, Response $response, $a
             }
             $newsource[$id][$var] = $data[$var];
         }
+        $newsource[$id]['dbtype'] = $data['dbtype'];
         $newsource[$id]['enabled'] = true;
         $res = file_put_contents($file, json_encode($newsource));
         if ($res === false) {
