@@ -229,6 +229,16 @@ function useExtensionAsMobileApp($extension) {
         if (!$res) {
             throw new Exception("Error creating custom device");
         }
+
+        // Set qualify to 0
+        setSipData($extension,'qualifyfreq','0');
+        // Set rewrite contact = no
+        setSipData($extension,'rewrite_contact','no');
+        // Set SRTP enabled
+        setSipData($extension,'media_encryption','sdes');
+        // Set TCP transport
+        setSipData($extension,'transport','0.0.0.0-tcp');
+
         return true;
      } catch (Exception $e) {
         error_log($e->getMessage());
@@ -567,6 +577,10 @@ function deleteExtension($extension,$wipemain=false) {
             }
         }
 
+        setSipData($extension,'media_encryption','no');
+        setSipData($extension,'transport','');
+        setSipData($extension,'qualifyfreq','60');
+        setSipData($extension,'rewrite_contact','yes');
         $sql = 'UPDATE rest_devices_phones SET user_id = NULL, extension = NULL, secret = NULL WHERE extension = ?';
         $stmt = $dbh->prepare($sql);
         $stmt->execute(array($extension));
