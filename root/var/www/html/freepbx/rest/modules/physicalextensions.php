@@ -182,11 +182,11 @@ $app->post('/mobileapp', function (Request $request, Response $response, $args) 
         $extension = createExtension($mainextension,false);
 
         if ($extension === false ) {
-            $response->withJson(array("status"=>"Error creating extension"), 500);
+            return $response->withJson(array("status"=>"Error creating extension"), 500);
         }
 
         if (useExtensionAsMobileApp($extension) === false) {
-            $response->withJson(array("status"=>"Error associating mobile app extension"), 500);
+            return $response->withJson(array("status"=>"Error associating mobile app extension"), 500);
         }
 
         system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
