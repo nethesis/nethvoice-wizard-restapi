@@ -205,7 +205,7 @@ $app->post('/phonebook/test', function (Request $request, Response $response, $a
         }
         $newsource[$id]['dbtype'] = $data['dbtype'];
         $newsource[$id]['enabled'] = true;
-        $res = file_put_contents($file, json_encode($newsource));
+        $res = file_put_contents($file, json_encode($newsource, JSON_UNESCAPED_SLASHES));
         if ($res === false) {
            throw new Exception("Error writing $file");
         }
