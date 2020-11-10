@@ -238,6 +238,8 @@ function useExtensionAsMobileApp($extension) {
         setSipData($extension,'media_encryption','sdes');
         // Set TCP transport
         setSipData($extension,'transport','0.0.0.0-tcp');
+        // Set sip maximum expiration to 604800
+        setSipData($extension,'maximum_expiration','604800');
 
         return true;
      } catch (Exception $e) {
@@ -580,6 +582,7 @@ function deleteExtension($extension,$wipemain=false) {
             setSipData($extension,'transport','');
             setSipData($extension,'qualifyfreq','60');
             setSipData($extension,'rewrite_contact','yes');
+            setSipData($extension,'maximum_expiration','7200');
         }
         $sql = 'UPDATE rest_devices_phones SET user_id = NULL, extension = NULL, secret = NULL WHERE extension = ?';
         $stmt = $dbh->prepare($sql);
