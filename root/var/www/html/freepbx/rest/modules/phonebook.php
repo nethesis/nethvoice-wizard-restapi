@@ -167,6 +167,10 @@ $app->delete('/phonebook/config/{id}', function (Request $request, Response $res
             throw new Exception("Error deleting $id entries from phonebook");
         }
 
+        // Erase related local CSV file, if necessary:
+        $config = json_decode(file_get_contents($file), true);
+        unlink_local_csv($config[$id]);
+
         $res = unlink($file);
         if (!$res) {
             throw new Exception("Error deleting $file");
@@ -217,6 +221,7 @@ $app->post('/phonebook/test', function (Request $request, Response $response, $a
         unlink($file);
 
         if ($return!=0) {
+            unlink_local_csv($newsource[$id]);
             return $response->withJson(array("status"=>false),200);
         }
         $res = json_decode($output[0]);
@@ -336,6 +341,15 @@ $app->post('/phonebook/{service:ldap|ldaps}/status/{status:enabled|disabled}', f
     return $response->withStatus(500);
 });
 
+function unlink_local_csv($config)
+{
+    if(isset($config['dbtype'], $config['url'])
+        && $config['dbtype'] == 'csv'
+        && substr($config['url'], 0, 55) == 'file:///var/lib/nethserver/nethvoice/phonebook/uploads/'
+    ) {
+        unlink(substr($config['url'], 7));
+    }
+}
 
 function delete_import_from_cron($id) {
     try {
