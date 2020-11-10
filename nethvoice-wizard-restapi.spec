@@ -26,6 +26,7 @@ rm -rf %{buildroot}
 %{genfilelist} %{buildroot} \
 > %{name}-%{version}-filelist
 
+mkdir -p %{buildroot}/var/lib/nethserver/nethvoice/phonebook/uploads
 
 %clean
 rm -rf %{buildroot}
@@ -37,6 +38,7 @@ rm -rf %{buildroot}
 %attr (0754,root,asterisk) /var/www/html/freepbx/rest/lib/retrieveHelper.sh
 %attr (0754,root,asterisk) /var/www/html/freepbx/rest/lib/phonesRebootHelper.php
 %attr (0744,root,root) /usr/sbin/tancredi-associate-phones
+%attr (0770,root,asterisk) /var/lib/nethserver/nethvoice/phonebook/uploads
 %doc
 
 %changelog

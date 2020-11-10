@@ -246,6 +246,26 @@ $app->post('/phonebook/syncnow/{id}', function (Request $request, Response $resp
     }
 });
 
+/* Upload a local CSV file source */
+$app->post('/phonebook/uploadfile', function (Request $request, Response $response, $args) {
+    $upload_dest = sprintf('/var/lib/nethserver/nethvoice/phonebook/uploads/%s.csv', uniqid());
+    try {
+        $file = array_pop($request->getUploadedFiles());
+        if ($file->getError() != UPLOAD_ERR_OK) {
+            return $response->withJson(array("status"=>"File upload error"), 500);
+        }
+        $file->moveTo($upload_dest);
+        return $response->withJson(array(
+            "status" => true,
+            "uri" => "file://" . $upload_dest,
+        ), 200);
+    } catch (Exception $e) {
+        unlink($upload_dest);
+        error_log($e->getMessage());
+        return $response->withJson(array("status"=>$e->getMessage()), 500);
+    }
+});
+
 /*
 * GET /phonebook/ldap
 * Get configuration of ldap and ldaps system phonebooks
