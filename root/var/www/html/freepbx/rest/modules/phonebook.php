@@ -89,14 +89,24 @@ $app->post('/phonebook/config[/{id}]', function (Request $request, Response $res
             $id = 'custom_'.$i;
             $new = true;
         }
-        // mandatory parameters
-        foreach ( array('dbtype','host','port','user','password','dbname','query','mapping') as $var) {
+        if(!isset($data['dbtype'])) {
+            return $response->withJson(array("status"=>"Missing value: dbtype"), 400);
+        } else if($data['dbtype'] == 'mysql') {
+            $mandatory_params = array('host','port','user','password','dbname','query','mapping');
+        } else if($data['dbtype'] == 'csv') {
+            $mandatory_params = array('url','mapping');
+        } else {
+            return $response->withJson(array("status"=>"Bad dbtype value"), 400);
+        }
+        // validate mandatory parameters
+        foreach ($mandatory_params as $var) {
             if (!isset($data[$var]) || empty($data[$var])) {
                 error_log("Missing value: $var");
                 return $response->withJson(array("status"=>"Missing value: $var"), 400);
             }
             $newsource[$var] = $data[$var];
         }
+        $newsource['dbtype'] = $data['dbtype'];
         // optional parameters
         $newsource['interval'] = empty($data['interval']) ? 1440 : $data['interval'];
         $newsource['type'] = empty($data['type']) ? $id : $data['type'];
@@ -144,6 +154,7 @@ $app->delete('/phonebook/config/{id}', function (Request $request, Response $res
     try {
         $route = $request->getAttribute('route');
         $id = $route->getArgument('id');
+        $file = '/etc/phonebook/sources.d/' . $id . '.json';
         $res = delete_import_from_cron($id);
         if (!$res) {
             throw new Exception("Error deleting $file from crontab!");
@@ -156,7 +167,10 @@ $app->delete('/phonebook/config/{id}', function (Request $request, Response $res
             throw new Exception("Error deleting $id entries from phonebook");
         }
 
-        $file = '/etc/phonebook/sources.d/'.$id.'.json';
+        // Erase related local CSV file, if necessary:
+        $config = json_decode(file_get_contents($file), true);
+        unlink_local_csv($config[$id]);
+
         $res = unlink($file);
         if (!$res) {
             throw new Exception("Error deleting $file");
@@ -176,15 +190,26 @@ $app->post('/phonebook/test', function (Request $request, Response $response, $a
         $id = uniqid('phonebook_test_');
         $file = '/tmp/'.$id.'.json';
         $newsource = array();
-        foreach ( array('type','dbtype','host','port','user','password','dbname','query') as $var) {
+        if(!isset($data['dbtype'])) {
+            return $response->withJson(array("status"=>"Missing value: dbtype"), 400);
+        } else if($data['dbtype'] == 'mysql') {
+            $mandatory_params = array('host','port','user','password','dbname','query');
+        } else if($data['dbtype'] == 'csv') {
+            $mandatory_params = array('url');
+        } else {
+            return $response->withJson(array("status"=>"Bad dbtype value"), 400);
+        }
+        // validate mandatory parameters
+        foreach ($mandatory_params as $var) {
             if (!isset($data[$var]) || empty($data[$var])) {
                 error_log("Missing value: $var");
                 return $response->withJson(array("status"=>"Missing value: $var"), 400);
             }
             $newsource[$id][$var] = $data[$var];
         }
+        $newsource[$id]['dbtype'] = $data['dbtype'];
         $newsource[$id]['enabled'] = true;
-        $res = file_put_contents($file, json_encode($newsource));
+        $res = file_put_contents($file, json_encode($newsource, JSON_UNESCAPED_SLASHES));
         if ($res === false) {
            throw new Exception("Error writing $file");
         }
@@ -196,6 +221,7 @@ $app->post('/phonebook/test', function (Request $request, Response $response, $a
         unlink($file);
 
         if ($return!=0) {
+            unlink_local_csv($newsource[$id]);
             return $response->withJson(array("status"=>false),200);
         }
         $res = json_decode($output[0]);
@@ -220,6 +246,26 @@ $app->post('/phonebook/syncnow/{id}', function (Request $request, Response $resp
         }
         return $response->withJson(array("status"=>true),200);
     } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withJson(array("status"=>$e->getMessage()), 500);
+    }
+});
+
+/* Upload a local CSV file source */
+$app->post('/phonebook/uploadfile', function (Request $request, Response $response, $args) {
+    $upload_dest = sprintf('/var/lib/nethserver/nethvoice/phonebook/uploads/%s.csv', uniqid());
+    try {
+        $file = array_pop($request->getUploadedFiles());
+        if ($file->getError() != UPLOAD_ERR_OK) {
+            return $response->withJson(array("status"=>"File upload error"), 500);
+        }
+        $file->moveTo($upload_dest);
+        return $response->withJson(array(
+            "status" => true,
+            "uri" => "file://" . $upload_dest,
+        ), 200);
+    } catch (Exception $e) {
+        unlink($upload_dest);
         error_log($e->getMessage());
         return $response->withJson(array("status"=>$e->getMessage()), 500);
     }
@@ -295,6 +341,15 @@ $app->post('/phonebook/{service:ldap|ldaps}/status/{status:enabled|disabled}', f
     return $response->withStatus(500);
 });
 
+function unlink_local_csv($config)
+{
+    if(isset($config['dbtype'], $config['url'])
+        && $config['dbtype'] == 'csv'
+        && substr($config['url'], 0, 55) == 'file:///var/lib/nethserver/nethvoice/phonebook/uploads/'
+    ) {
+        unlink(substr($config['url'], 7));
+    }
+}
 
 function delete_import_from_cron($id) {
     try {
