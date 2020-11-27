@@ -2,9 +2,7 @@
 language: ruby
 services:
     - docker
-branches:
-    only:
-        - master
+
 env:
    global:
     - DEST_ID=nsent
