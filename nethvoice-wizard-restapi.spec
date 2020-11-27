@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.7.2
+Version: 14.8.0
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -42,6 +42,10 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Fri Nov 27 2020 Davide Principi <davide.principi@nethesis.it> - 14.8.0-1
+- Phonebook CSV sources - nethesis/dev#5903
+- NethVoice: new Queue report - nethesis/dev#5865
+
 * Mon Oct 26 2020 Stefano Fancello <stefano.fancello@nethesis.it> - 14.7.2-1
 - Provisioning: import phone-extension association from CSV  - nethesis/dev#5856
 - Add two new provider VoIP: Active Network and Neomedia - nethesis/dev#5882
