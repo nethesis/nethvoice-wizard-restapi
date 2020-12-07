@@ -92,6 +92,18 @@ function createExtension($mainextensionnumber,$delete=false){
             //Set cid_masquerade (CID Num Alias)
             $astman->database_put("AMPUSER",$extension."/cidnum",$mainextensionnumber);
 
+            // Inherit context, ringing time, call group, pickup group, and optional destinations from mainextension
+            include_once __DIR__.'/libBulk.php';
+            post_context([$extension],get_context($mainextensionnumber));
+            post_ringtime([$extension],get_ringtime($mainextensionnumber));
+            $sql = 'UPDATE `sip` SET `data`= (SELECT `data` FROM `sip` WHERE `id`=? AND `keyword`=?) WHERE `id`=? AND `keyword`=?';
+            $sth = $dbh->prepare($sql);
+            $sth->execute(array($mainextensionnumber,'namedcallgroup',$extension,'namedcallgroup'));
+            $sth->execute(array($mainextensionnumber,'namedpickupgroup',$extension,'namedpickupgroup'));
+            post_noanswerdest([$extension],get_noanswerdest($mainextensionnumber));
+            post_busydest([$extension],get_busydest($mainextensionnumber));
+            post_notreachabledest([$extension],get_notreachabledest($mainextensionnumber));
+
             //Add device to main extension devices
             $existingdevices = $astman->database_get("AMPUSER", $mainextensionnumber."/device");
             if (empty($existingdevices)) {
