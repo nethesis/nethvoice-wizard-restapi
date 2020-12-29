@@ -320,6 +320,46 @@ $app->get('/phonebook/ldap', function (Request $request, Response $response, $ar
 });
 
 /*
+* GET /phonebook/sources
+* Get additional sources configuration of system phonebooks
+*/
+$app->get('/phonebook/sources', function (Request $request, Response $response, $args) {
+    try {
+        $sources = array();
+        exec("/usr/bin/sudo /sbin/e-smith/config getjson phonebook", $out);
+        $tmp = json_decode($out[0]);
+        $sources['extensions'] = ($tmp->props->extensions == 'enabled') ? true : false;
+        $sources['nethcti'] = ($tmp->props->nethcti == 'enabled') ? true : false;
+        $sources['speeddial'] = ($tmp->props->speeddial == 'enabled') ? true : false;
+        unset($out);
+
+        return $response->withJson($sources, 200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
+});
+
+/*
+* POST /phonebook/sources/[speeddial|extensions|nethcti]/[enabled|disabled]
+* Set phonebook additional sources status [enabled|disabled]
+*/
+$app->post('/phonebook/sources/{prop:speeddial|extensions|nethcti}/{status:enabled|disabled}', function (Request $request, Response $response, $args) {
+    $route = $request->getAttribute('route');
+    $status = $route->getArgument('status');
+    $prop = $route->getArgument('prop');
+    exec("/usr/bin/sudo /sbin/e-smith/config setprop phonebook $prop $status", $out, $ret);
+
+    if ( $ret === 0 ) {
+        exec("/usr/bin/sudo /sbin/e-smith/signal-event nethserver-phonebook-mysql-save", $out, $ret);
+        if ( $ret === 0 ) {
+            return $response->withStatus(200);
+        }
+    }
+    return $response->withStatus(500);
+});
+
+/*
 * POST /phonebook/[ldap|ldaps]/status/[enabled|disabled]
 * Set phonebookjs(s) service status [enabled|disabled]
 */
