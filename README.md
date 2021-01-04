@@ -1003,6 +1003,41 @@ Enable or disable the centralized phonebook to LDAP with SSL
 POST /phonebook/ldaps/status/[enabled|disabled]
 ```
 
+### Phonebook sources options
+
+This API return system phonebooks sources options
+
+```
+GET /phonebook/sources
+```
+
+returns
+
+```json
+{
+    "extensions" : true,
+    "nethcti" : true,
+    "speeddial" : true
+}
+```
+
+Enable or disable extensions of PBX
+
+```
+POST /phonebook/sources/extensions/[enabled|disabled]
+```
+
+Enable or disable public contacts of NethCTI
+
+```
+POST /phonebook/sources/nethcti/[enabled|disabled]
+```
+
+Enable or disable speed dials of PBX
+
+```
+POST /phonebook/sources/speeddial/[enabled|disabled]
+```
 
 ## Configuration
 
