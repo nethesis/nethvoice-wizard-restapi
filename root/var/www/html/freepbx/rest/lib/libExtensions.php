@@ -55,6 +55,11 @@ function createExtension($mainextensionnumber,$delete=false){
         if (count($res)===0) {
            //Main extension isn't already used use mainextension as extension
            $extension = $mainextensionnumber;
+
+           //set callgroup and pickupgroup to 1
+           $sql = 'UPDATE IGNORE `sip` SET `data` = "1" WHERE `id` = ? AND (`keyword` = "namedcallgroup" OR `keyword` = "namedpickupgroup")';
+           $stmt = $dbh->prepare($sql);
+           $stmt->execute(array($extension));
         } else {
             //create new extension
             $mainextensions = $fpbx->Core->getAllUsers();
@@ -92,6 +97,29 @@ function createExtension($mainextensionnumber,$delete=false){
             //Set cid_masquerade (CID Num Alias)
             $astman->database_put("AMPUSER",$extension."/cidnum",$mainextensionnumber);
 
+            // Inherit context, ringing time, call group, pickup group, and optional destinations from mainextension
+            include_once __DIR__.'/libBulk.php';
+            post_context([$extension],get_context($mainextensionnumber));
+            post_ringtime([$extension],get_ringtime($mainextensionnumber));
+            $sql = 'SELECT `data` FROM `sip` WHERE `id`=? AND `keyword`="namedcallgroup"';
+            $sth = $dbh->prepare($sql);
+            $sth->execute([$mainextensionnumber]);
+            $maincallgroup = $sth->fetchAll()[0]['data'];
+            $sql = 'UPDATE `sip` SET `data`= ? WHERE `id`=? AND `keyword`="namedcallgroup"';
+            $sth = $dbh->prepare($sql);
+            $sth->execute([$maincallgroup,$extension]);
+            $sql = 'SELECT `data` FROM `sip` WHERE `id`=? AND `keyword`="namedpickupgroup"';
+            $sth = $dbh->prepare($sql);
+            $sth->execute([$mainextensionnumber]);
+            $mainpickupgroup = $sth->fetchAll()[0]['data'];
+            $sql = 'UPDATE `sip` SET `data`= ? WHERE `id`=? AND `keyword`="namedpickupgroup"';
+            $sth = $dbh->prepare($sql);
+            $sth->execute([$mainpickupgroup,$extension]);
+
+            post_noanswerdest([$extension],get_noanswerdest($mainextensionnumber));
+            post_busydest([$extension],get_busydest($mainextensionnumber));
+            post_notreachabledest([$extension],get_notreachabledest($mainextensionnumber));
+
             //Add device to main extension devices
             $existingdevices = $astman->database_get("AMPUSER", $mainextensionnumber."/device");
             if (empty($existingdevices)) {
@@ -110,11 +138,6 @@ function createExtension($mainextensionnumber,$delete=false){
         $sql = 'UPDATE IGNORE `sip` SET `data` = ? WHERE `id` = ? AND `keyword` = "accountcode"';
         $stmt = $dbh->prepare($sql);
         $stmt->execute(array($mainextensionnumber,$extension));
-
-        //set callgroup and pickupgroup to 1
-        $sql = 'UPDATE IGNORE `sip` SET `data` = "1" WHERE `id` = ? AND (`keyword` = "namedcallgroup" OR `keyword` = "namedpickupgroup")';
-        $stmt = $dbh->prepare($sql);
-        $stmt->execute(array($extension));
 
         // disable directmedia
         $sql = 'UPDATE IGNORE `sip` SET `data` = "no" WHERE `id` = ? AND `keyword` = "direct_media"';
