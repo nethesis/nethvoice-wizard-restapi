@@ -261,7 +261,7 @@ function useExtensionAsMobileApp($extension) {
         setSipData($extension,'media_encryption','sdes');
         // Set TCP transport
         setSipData($extension,'transport','0.0.0.0-tcp');
-        // Set sip maximum expiration to 604800
+        // Set sip maximum expiration to 1 month
         setSipData($extension,'maximum_expiration','2678400');
 
         return true;
