@@ -262,7 +262,7 @@ function useExtensionAsMobileApp($extension) {
         // Set TCP transport
         setSipData($extension,'transport','0.0.0.0-tcp');
         // Set sip maximum expiration to 604800
-        setSipData($extension,'maximum_expiration','604800');
+        setSipData($extension,'maximum_expiration','2678400');
 
         return true;
      } catch (Exception $e) {
