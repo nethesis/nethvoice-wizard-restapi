@@ -52,9 +52,11 @@ $app->post('/physicalextensions', function (Request $request, Response $response
         $web_user = $params['web_user'];
         $web_password = $params['web_password'];
         $line = $params['line'];
+        $line = $params['line'];
+        $clear_temporary = $params['clear_temporary'];
 
         $delete = false;
-        if (isset($mac) && isset($model)) {
+        if (isset($clear_temporary)) {
             $delete = true;
         }
 
