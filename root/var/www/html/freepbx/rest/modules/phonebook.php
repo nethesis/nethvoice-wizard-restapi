@@ -374,7 +374,8 @@ $app->post('/phonebook/{service:ldap|ldaps}/status/{status:enabled|disabled}', f
     }
     if ( $ret === 0 ) {
         exec("/usr/bin/sudo /sbin/e-smith/signal-event nethserver-phonebook-mysql-save", $out, $ret);
-        if ( $ret === 0 ) {
+        exec("/usr/bin/sudo /sbin/e-smith/signal-event firewall-adjust", $out, $ret2);
+        if ( $ret === 0 && $ret2 === 0) {
             return $response->withStatus(200);
         }
     }
