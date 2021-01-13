@@ -55,11 +55,11 @@ $app->post('/mainextensions', function (Request $request, Response $response, $a
         return $response->withJson(array("status"=>'ERROR: directory is locked'), 500);
     }
 
-    if ($ret !== true) {
-        return $response->withJson($ret[0],$ret[1]);
-    }
-
     system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
-    return $response->withStatus(201);
+
+    if ($ret == true) {
+        return $response->withStatus(201);
+    }
+    return $response->withJson($ret[0],$ret[1]);
 });
 
