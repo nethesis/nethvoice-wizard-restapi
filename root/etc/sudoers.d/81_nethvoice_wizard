@@ -22,4 +22,5 @@
     /sbin/e-smith/config setprop asterisk AllowExternalSIPS enabled, \
     /sbin/e-smith/config setprop asterisk AllowExternalSIPS disabled, \
     /usr/bin/cat /var/lib/nethserver/secrets/LDAPPhonebookPasswd, \
+    /sbin/e-smith/expand-template /etc/nethcti/nethcti.json \
     /usr/bin/systemctl restart asterisk
