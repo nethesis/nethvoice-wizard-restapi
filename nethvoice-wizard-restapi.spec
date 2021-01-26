@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.8.0
+Version: 14.9.0
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -42,6 +42,17 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Tue Jan 26 2021 Stefano Fancello <stefano.fancello@nethesis.it> - 14.9.0-1
+- Show devices created by migration from old version - Bug nethesis/dev#5915
+- Enabling LDAP from NethVoice wizard doesn't update firewall rules - Bug nethesis/dev#5947
+- Can't create extension from FreePBX when is deleted from wizard - Bug nethesis/dev#5906
+- Use Flexisip proxy for mobile app phone - nethesis/dev#5904
+- New device added for a user is not configured with the correct parameters - Bug nethesis/dev#5887
+- Add to Wizard the management of sources to be included in the Nethvoice Phonebook - nethesis/dev#5941
+- NethVoice wizard ui and rest SecretKey templates aren't expanded on box - Bug nethesis/dev#5932
+- Phonebook CSV sources - nethesis/dev#5903
+- NethVoice: new Queue report - nethesis/dev#5865
+
 * Fri Nov 27 2020 Davide Principi <davide.principi@nethesis.it> - 14.8.0-1
 - Phonebook CSV sources - nethesis/dev#5903
 - NethVoice: new Queue report - nethesis/dev#5865
