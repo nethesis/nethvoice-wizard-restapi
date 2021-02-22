@@ -203,7 +203,6 @@ location-service SER_LOC_03
       authenticate 1 authentication-service AUTH_SRV username TRUNKNUMBER4
 
 context sip-gateway ASTERISK_00
-  bind location-service SER_LOC_00
 
   interface IF_GW_SIP_TRAIN_00
     transport-protocol udp+tcp 5060
@@ -213,7 +212,6 @@ context sip-gateway ASTERISK_00
   no shutdown
 
 context sip-gateway ASTERISK_01
-  bind location-service SER_LOC_01
 
   interface IF_GW_SIP_TRAIN_01
     transport-protocol udp+tcp 5062
@@ -223,7 +221,6 @@ context sip-gateway ASTERISK_01
   no shutdown
 
 context sip-gateway ASTERISK_02
-  bind location-service SER_LOC_02
 
   interface IF_GW_SIP_TRAIN_02
     transport-protocol udp+tcp 5064
@@ -233,7 +230,6 @@ context sip-gateway ASTERISK_02
   no shutdown
 
 context sip-gateway ASTERISK_03
-  bind location-service SER_LOC_03
 
   interface IF_GW_SIP_TRAIN_03
     transport-protocol udp+tcp 5066
