@@ -111,7 +111,6 @@ location-service SER_LOC_00
       authenticate 1 authentication-service AUTH_SRV username TRUNKNUMBER1
 
 context sip-gateway ASTERISK_00
-  bind location-service SER_LOC_00
 
   interface IF_GW_SIP_TRAIN_00
     transport-protocol udp+tcp 5060
