@@ -196,11 +196,26 @@ $app->post('/configuration/allowexternalsips/{status:enabled|disabled}', functio
     $route = $request->getAttribute('route');
     $status = $route->getArgument('status');
     exec("/usr/bin/sudo /sbin/e-smith/config setprop asterisk AllowExternalSIPS $status", $out, $ret);
-    if ( $ret === 0 ) {
-        exec("/usr/bin/sudo /sbin/e-smith/signal-event firewall-adjust", $out, $ret);
-        if ( $ret === 0 ) {
-            return $response->withStatus(200);
-        }
+    # Get current flexisip networks
+    exec("/usr/bin/sudo /sbin/e-smith/config getprop flexisip-proxy access", $out);
+    if ($out[0] == '') {
+        $zones = array();
+    } else {
+        $zones = explode(',',$out[0]);
+    }
+    $red_index = array_search('red', $zones);
+    if ($red_index === FALSE && $status === 'enabled') {
+        # add red interface to flexisip-proxy access
+        $zones[] = 'red';
+    } elseif ($red_index !== FALSE && $status === 'disabled') {
+        # remove red interface to flexisip-proxy access
+        unset($zones[$red_index]);
+    }
+    $zones_string = !empty($zones) ? implode(',',$zones) : '""';
+    exec('/usr/bin/sudo /sbin/e-smith/config setprop flexisip-proxy access '.$zones_string, $out, $ret2);
+    exec("/usr/bin/sudo /sbin/e-smith/signal-event firewall-adjust", $out, $ret);
+    if ( $ret === 0 && $ret2 === 0 ) {
+        return $response->withStatus(200);
     }
     return $response->withStatus(500);
 });

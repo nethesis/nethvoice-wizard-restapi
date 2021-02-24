@@ -22,5 +22,7 @@
     /sbin/e-smith/config getprop asterisk AllowExternalSIPS, \
     /sbin/e-smith/config setprop asterisk AllowExternalSIPS enabled, \
     /sbin/e-smith/config setprop asterisk AllowExternalSIPS disabled, \
+    /sbin/e-smith/config getprop flexisip-proxy access, \
+    /sbin/e-smith/config setprop flexisip-proxy access *, \
     /usr/bin/cat /var/lib/nethserver/secrets/LDAPPhonebookPasswd, \
     /usr/bin/systemctl restart asterisk
