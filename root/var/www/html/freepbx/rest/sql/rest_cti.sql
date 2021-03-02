@@ -136,6 +136,7 @@ INSERT IGNORE INTO `rest_cti_permissions` VALUES (26,'ad_phone','Advanced Phone'
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (27,'ad_off_hour','Admin Off Hour','Allow to change all incoming call paths');
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (1000,'screen_sharing','Screen Sharing','Allow to share the desktop');
 INSERT IGNORE INTO `rest_cti_permissions` VALUES (2000,'phone_buttons','Phone buttons','Allow to customize physical phone buttons');
+INSERT IGNORE INTO `rest_cti_permissions` VALUES (3000,'video_conference','Video Conference','Allow to start a video conference');
 
 /*Permission inside macro permissions*/
 INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (1,2);
@@ -147,6 +148,7 @@ INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (1,8);
 INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (1,9);
 INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (1,1000);
 INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (1,2000);
+INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (1,3000);
 INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (2,12);
 INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (3,13);
 INSERT IGNORE INTO `rest_cti_macro_permissions_permissions` VALUES (5,15);
