@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.9.0
+Version: 14.9.1
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -42,6 +42,10 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Wed Mar 03 2021 Stefano Fancello <stefano.fancello@nethesis.it> - 14.9.1-1
+- Add sleep on push config for Trinity
+- Support Trinity config for firmware > 3.17.2
+
 * Tue Jan 26 2021 Stefano Fancello <stefano.fancello@nethesis.it> - 14.9.0-1
 - Show devices created by migration from old version - Bug nethesis/dev#5915
 - Enabling LDAP from NethVoice wizard doesn't update firewall rules - Bug nethesis/dev#5947
