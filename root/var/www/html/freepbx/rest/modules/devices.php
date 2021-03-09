@@ -416,6 +416,19 @@ $app->get('/devices/gateways/manufacturers', function (Request $request, Respons
     return $response->withJson($res, 200);
 });
 
+$app->post('/devices/phones/reload/{extension:[0-9]+}', function (Request $request, Response $response, $args) {
+    $route = $request->getAttribute('route');
+    $extension = $route->getArgument('extension');
+    $notify_string = 'polycom-check-cfg';
+    $cmd = "/usr/sbin/asterisk -rx 'pjsip send notify $notify_string endpoint $extension'";
+    $out = system($cmd);
+    error_log($out);
+    if (preg_match('/failed.$/', $out) || preg_match('/^Unable/', $out)) {
+        return $response->withStatus(500);
+    }
+    return $response->withStatus(202);
+});
+
 $app->post('/devices/phones/model', function (Request $request, Response $response, $args) {
     try {
         $params = $request->getParsedBody();
