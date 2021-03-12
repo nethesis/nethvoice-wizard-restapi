@@ -429,7 +429,7 @@ $app->post('/devices/phones/reload/{extension:[0-9]+}', function (Request $reque
     if (empty($vendor)) {
         return $response->withStatus(403);
     }
-    $notify_string = 'polycom-check-cfg';
+    $notify_string = 'generic-reload';
     $cmd = "/usr/sbin/asterisk -rx 'pjsip send notify $notify_string endpoint $extension'";
     $out = system($cmd);
     error_log($out);
