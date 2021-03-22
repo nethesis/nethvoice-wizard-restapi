@@ -19,9 +19,10 @@
 # along with NethServer.  If not, see COPYING.
 #
 
-include_once('/var/www/html/freepbx/rest/config.inc.php');
+include_once '/var/www/html/freepbx/rest/config.inc.php';
+include_once '/var/www/html/freepbx/admin/modules/customcontexts/functions.inc.php';
 if (file_exists('/var/www/html/freepbx/rest/lib/libQueueManager.php')) {
-    include_once('/var/www/html/freepbx/rest/lib/libQueueManager.php');
+    include_once '/var/www/html/freepbx/rest/lib/libQueueManager.php';
 }
 
 class NethCTI {
@@ -302,11 +303,10 @@ function getCTIPermissions(){
     }
 }
 
-
-
 function postCTIProfile($profile, $id=false){
     try {
         $dbh = FreePBX::Database();
+
         if (!$id){
             //Creating a new profile
             $sql = 'INSERT INTO `rest_cti_profiles` VALUES (NULL, ?)';
@@ -317,6 +317,7 @@ function postCTIProfile($profile, $id=false){
             $sql = 'SELECT LAST_INSERT_ID()';
             $id = $dbh->sql($sql,"getOne");
         }
+
         //set macro_permissions
         foreach (getAllAvailableMacroPermissions() as $macro_permission) {
             if (!$profile['macro_permissions'][$macro_permission['name']]['value']) {
@@ -374,11 +375,65 @@ function postCTIProfile($profile, $id=false){
                 }
             }
         }
+
+        setCustomContextPermissions($id);
         return $id;
     } catch (Exception $e) {
         error_log($e->getMessage());
         return false;
     }
+}
+
+function setCustomContextPermissions($profile_id){
+    // load default context permissions into $context_default_permissions and CTI permission => context permission map in $context_permission_map
+    include_once '/var/www/html/freepbx/rest/lib/context_default_permissions.php';
+
+    $profile = getCTIPermissionProfiles($profile_id);
+    /* Create custom context if needed */
+    $contexts = customcontexts_getcontextslist();
+    $context_exists = False;
+    foreach ($contexts as $context) {
+        if ($context['0'] === 'cti_profile_'.$profile_id) {
+            $context_exists = True;
+        }
+    }
+    if (!$context_exists) {
+        // Create customcontext for this profile
+        customcontexts_customcontexts_add('cti_profile_'.$profile_id, 'CTI Profile '.$profile['name'],null,null,null,null,null);
+        /* set default permission for context*/
+        $context_permissions = $context_default_permissions;
+        foreach (customcontexts_getincludes('from-internal') as $val) {
+            $context_permissions[$val[0]] = ["allow" => "yes", $val[5]];
+        }
+        // Don't allow all dialplan
+        $context_permissions['from-internal-additional']['allow'] = "no";
+    } else {
+        $context_permissions = array();
+        foreach (customcontexts_getincludes('cti_profile_'.$profile_id) as $val) {
+            $allow = ($val[4] == 'no') ? "no" : "yes";
+            $context_permissions[$val[0]] = ["allow" => $allow, "sort" => $val[5]];
+        }
+    }
+    /* Set context permissions according to CTI permissions */
+    // Prepare permissions
+    foreach ($profile['macro_permissions'] as $macro_permission) {
+        foreach ($macro_permission['permissions'] as $permission) {
+            if (isset($context_permission_map[$permission['name']])) {
+                foreach ($context_permission_map[$permission['name']] as $context_permission_name) {
+                    if ($permission['value'] == True) {
+                        $context_permissions[$context_permission_name]['allow'] = "yes";
+                    } else {
+                        $context_permissions[$context_permission_name]['allow'] = "no";
+                    }
+                }
+            }
+        }
+    }
+    // Get context data
+    $context = customcontexts_customcontexts_get('cti_profile_'.$profile_id);
+    // Set permissions
+    customcontexts_customcontexts_edit($context[0],$context[0],$context[1],$context[2],$context[3],$context[4],$context[5],$context[6],$context_permissions);
+    customcontexts_customcontexts_editincludes($context[0],$context_permissions,$context[0]);
 }
 
 function getProfileID($profilename) {
