@@ -436,6 +436,21 @@ function setCustomContextPermissions($profile_id){
     customcontexts_customcontexts_editincludes($context[0],$context_permissions,$context[0]);
 }
 
+function deleteCTIProfile($id){
+    try {
+        $dbh = FreePBX::Database();
+        $sql = 'DELETE FROM `rest_cti_profiles` WHERE `id` = ?';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array($id));
+        customcontexts_customcontexts_del('cti_profile_'.$id);
+        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
+        return True;
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return False;
+    }
+}
+
 function getProfileID($profilename) {
     $dbh = FreePBX::Database();
     $sql = 'SELECT `id` FROM `rest_cti_profiles` WHERE `name` = ?';
