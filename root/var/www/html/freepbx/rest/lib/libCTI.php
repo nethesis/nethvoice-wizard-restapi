@@ -442,6 +442,9 @@ function deleteCTIProfile($id){
         $sql = 'DELETE FROM `rest_cti_profiles` WHERE `id` = ?';
         $sth = $dbh->prepare($sql);
         $sth->execute(array($id));
+        $sql = 'UPDATE sip SET `data` = "from-internal" WHERE `data` = ?';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array('cti_profile_'.$id));
         customcontexts_customcontexts_del('cti_profile_'.$id);
         system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
         return True;
