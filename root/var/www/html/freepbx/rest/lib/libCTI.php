@@ -490,6 +490,21 @@ function setCTIUserProfile($user_id,$profile_id){
                 ' VALUES (?,"chat_notifications","true")';
         $stmt = $dbhcti->prepare($sql);
         $stmt->execute(array($username));
+
+        // Set user extensions context based on cti profile
+        $sql = 'UPDATE sip SET `data` = ? WHERE ' .
+               ' `id` IN ( '.
+               ' SELECT extension COLLATE utf8mb4_unicode_ci FROM rest_devices_phones WHERE user_id = ? ' .
+               '  UNION ALL ' .
+               ' SELECT default_extension COLLATE utf8mb4_unicode_ci FROM userman_users WHERE id = ?' .
+               ' ) AND `keyword` = "context"' .
+               ' AND (`data` LIKE "cti_profile_%" OR `data` = "from-internal")';
+        error_log("cti_profile_".$profile_id);
+        error_log($user_id);
+        error_log($sql);
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute(array("cti_profile_".$profile_id,$user_id,$user_id));
+
         return TRUE;
     } catch (Exception $e) {
         error_log($e->getMessage());
