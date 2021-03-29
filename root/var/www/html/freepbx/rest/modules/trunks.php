@@ -84,6 +84,51 @@ $app->get('/trunks/{tech}', function (Request $request, Response $response, $arg
 });
 
 /**
+ * @api {delete} /trunk Delete a trunk
+ */
+$app->delete('/trunk/{trunkid}', function (Request $request, Response $response, $args) {
+  $route = $request->getAttribute('route');
+  $trunkid = $route->getArgument('trunkid');
+  $tech = $route->getArgument('tech');
+  try {
+    // call core function to delete sip trunk
+    core_trunks_del($trunkid, $tech);
+
+    system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
+    return $response->withStatus(200);
+  } catch (Exception $e) {
+    error_log($e->getMessage());
+    return $response->withStatus(500);
+  }
+});
+
+/**
+ * @api {patch} /trunk Change trunk secret
+ */
+$app->patch('/trunk/secret', function (Request $request, Response $response, $args) {
+  $params = $request->getParsedBody();
+  try {
+    $dbh = FreePBX::Database();
+    $secret = $params["secret"];
+    $peerKeyword = 'tr-peer-'.$params["trunkid"];
+    $userKeyword = 'tr-user-'.$params["trunkid"];
+    $sql =  'UPDATE sip'.
+            ' SET data = ?'.
+            ' WHERE (id = ?'.
+            ' OR id = ?)'.
+            ' AND keyword = "secret"';
+    $stmt = $dbh->prepare($sql);
+    $stmt->execute(array($secret, $peerKeyword, $userKeyword));
+
+    system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
+    return $response->withStatus(200);
+  } catch (Exception $e) {
+    error_log($e->getMessage());
+    return $response->withStatus(500);
+  }
+});
+
+/**
  * @api {post} /trunks Create a new trunks
  */
 $app->post('/trunks', function (Request $request, Response $response, $args) {
@@ -134,8 +179,11 @@ $app->post('/trunks', function (Request $request, Response $response, $args) {
       '',
       'off',
       '',
-      array()
+      $params['provider']
     );
+
+    return $response->withJson(["trunkid" => $trunknum], 200);
+
   } catch (Exception $e) {
     error_log($e->getMessage());
 
