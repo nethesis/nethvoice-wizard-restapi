@@ -391,7 +391,7 @@ function setCustomContextPermissions($profile_id){
 
     $profile = getCTIPermissionProfiles($profile_id);
     /* Create custom context if needed */
-    $contexts = customcontexts_getcontextslist();
+    $contexts = customcontexts_getcontexts();
     $context_exists = False;
     foreach ($contexts as $context) {
         if ($context['0'] === 'cti_profile_'.$profile_id) {
