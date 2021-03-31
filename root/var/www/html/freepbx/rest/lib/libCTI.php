@@ -20,6 +20,7 @@
 #
 
 include_once '/var/www/html/freepbx/rest/config.inc.php';
+define('FREEPBX_IS_AUTH',False);
 include_once '/var/www/html/freepbx/admin/modules/customcontexts/functions.inc.php';
 if (file_exists('/var/www/html/freepbx/rest/lib/libQueueManager.php')) {
     include_once '/var/www/html/freepbx/rest/lib/libQueueManager.php';
