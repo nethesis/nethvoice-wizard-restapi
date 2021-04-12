@@ -1,4 +1,7 @@
 <?php
+/*
+*  context default permissions
+*/
 $context_default_permissions = array(
     "parkedcalls" => ["allow" => "yes"],
     "from-internal-custom" => ["allow" => "yes"],
@@ -59,33 +62,7 @@ $context_default_permissions = array(
 );
 
 /*
-dnd
-call_forward
-recording
-conference
-parkings
-chat
-privacy
-screen_sharing
-phone_buttons
-ad_phonebook
-ad_cdr
-spy
-intrude
-ad_recording
-pickup
-transfer
-ad_parking
-hangup
-trunks
-ad_phone
-grp_all
-ad_queue_agent
-lost_queue_call
-advanced_off_hour
-ad_off_hour
-qmanager_666
-in_queue_666
+*  Associative array that maps CTI permissions to the list of contexts associated
 */
 $context_permission_map = array(
     "dnd" => ["app-dnd-off","app-dnd-on","app-dnd-toggle","ext-dnd-hints","app-dnd-off","app-dnd-on","app-dnd-toggle","ext-dnd-hints"],
