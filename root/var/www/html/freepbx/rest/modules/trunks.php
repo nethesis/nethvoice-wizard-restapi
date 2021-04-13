@@ -86,7 +86,7 @@ $app->get('/trunks/{tech}', function (Request $request, Response $response, $arg
 /**
  * @api {delete} /trunk Delete a trunk
  */
-$app->delete('/trunk/{trunkid}', function (Request $request, Response $response, $args) {
+$app->delete('/trunk/{trunkid}/{teck}', function (Request $request, Response $response, $args) {
   $route = $request->getAttribute('route');
   $trunkid = $route->getArgument('trunkid');
   $tech = $route->getArgument('tech');
