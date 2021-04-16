@@ -19,10 +19,14 @@
 # along with NethServer.  If not, see COPYING.
 #
 
-include_once('/var/www/html/freepbx/rest/config.inc.php');
+include_once '/etc/freepbx.conf';
+define('FREEPBX_IS_AUTH',False);
+include_once '/var/www/html/freepbx/admin/modules/customcontexts/functions.inc.php';
+include_once '/var/www/html/freepbx/rest/config.inc.php';
 if (file_exists('/var/www/html/freepbx/rest/lib/libQueueManager.php')) {
-    include_once('/var/www/html/freepbx/rest/lib/libQueueManager.php');
+    include_once '/var/www/html/freepbx/rest/lib/libQueueManager.php';
 }
+include_once '/var/www/html/freepbx/rest/lib/context_default_permissions.php';
 
 class NethCTI {
     private static $db;
@@ -67,9 +71,9 @@ function getAllAvailablePermissions($minified=false) {
         $sth = $dbh->prepare($query);
         $sth->execute(array());
         $qpermissions = $sth->fetchAll(\PDO::FETCH_ASSOC);
+
         // Get existing queues
         $queues = FreePBX::Queues()->listQueues(false);
-
         if (!empty($queues)) {
             foreach ($queues as $queue) {
                 $add = true;
@@ -302,11 +306,10 @@ function getCTIPermissions(){
     }
 }
 
-
-
 function postCTIProfile($profile, $id=false){
     try {
         $dbh = FreePBX::Database();
+
         if (!$id){
             //Creating a new profile
             $sql = 'INSERT INTO `rest_cti_profiles` VALUES (NULL, ?)';
@@ -317,6 +320,7 @@ function postCTIProfile($profile, $id=false){
             $sql = 'SELECT LAST_INSERT_ID()';
             $id = $dbh->sql($sql,"getOne");
         }
+
         //set macro_permissions
         foreach (getAllAvailableMacroPermissions() as $macro_permission) {
             if (!$profile['macro_permissions'][$macro_permission['name']]['value']) {
@@ -374,10 +378,91 @@ function postCTIProfile($profile, $id=false){
                 }
             }
         }
+
+        setCustomContextPermissions($id);
         return $id;
     } catch (Exception $e) {
         error_log($e->getMessage());
         return false;
+    }
+}
+
+function setCustomContextPermissions($profile_id){
+    global $context_default_permissions;
+    global $context_permission_map;
+    $profile = getCTIPermissionProfiles($profile_id);
+    /* Create custom context if needed */
+    $contexts = customcontexts_getcontexts();
+    $context_exists = False;
+
+    foreach ($contexts as $context) {
+        if ($context['0'] === 'cti_profile_'.$profile_id) {
+            $context_exists = True;
+        }
+    }
+    if (!$context_exists) {
+        // Create customcontext for this profile
+        customcontexts_customcontexts_add('cti_profile_'.$profile_id, 'CTI Profile '.$profile['name'],null,null,null,null,null);
+        /* set default permission for context*/
+        $context_permissions = array();
+        foreach (customcontexts_getincludes('cti_profile_'.$profile_id) as $val) {
+            if (isset($context_default_permissions[$val[2]])) {
+                 $context_permissions[$val[2]] = array("allow" => $context_default_permissions[$val[2]]["allow"], "sort" => $val[5]);
+            } else {
+                // Set default permission to yes for not specified permissions
+                $context_permissions[$val[2]] = array("allow" => "yes", "sort" => $val[5]);
+            }
+        }
+    } else {
+        foreach (customcontexts_getincludes('cti_profile_'.$profile_id) as $val) {
+            $context_permissions[$val[2]] = array("allow" => $val[4], "sort" => $val[5]);
+        }
+    }
+
+    /* Set context permissions according to CTI permissions */
+    foreach ($profile['macro_permissions'] as $macro_permission) {
+        foreach ($macro_permission['permissions'] as $permission) {
+            if (isset($context_permission_map[$permission['name']])) {
+                foreach ($context_permission_map[$permission['name']] as $context_permission_name) {
+                    if ($permission['value'] == True) {
+                        $context_permissions[$context_permission_name]['allow'] = "yes";
+                    } else {
+                        $context_permissions[$context_permission_name]['allow'] = "no";
+                    }
+                }
+            }
+        }
+    }
+    // Get context data
+    $context = customcontexts_customcontexts_get('cti_profile_'.$profile_id);
+    // Set permissions
+    customcontexts_customcontexts_edit($context[0],$context[0],$context[1],$context[2],$context[3],$context[4],$context[5],$context[6]);
+    uasort($context_permissions,'context_permission_compare');
+    customcontexts_customcontexts_editincludes($context[0],$context_permissions,$context[0]);
+}
+
+function context_permission_compare($a,$b) {
+    if ($a['sort'] == $b['sort']) {
+        return 0;
+    }
+    return ($a['sort'] < $b['sort']) ? -1 : 1;
+}
+
+function deleteCTIProfile($id){
+    try {
+        $dbh = FreePBX::Database();
+        $sql = 'DELETE FROM `rest_cti_profiles` WHERE `id` = ?';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array($id));
+        $sql = 'UPDATE sip SET `data` = "from-internal" WHERE `data` = ?';
+        $sth = $dbh->prepare($sql);
+        $sth->execute(array('cti_profile_'.$id));
+        customcontexts_customcontexts_del('cti_profile_'.$id);
+        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
+        return True;
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return False;
     }
 }
 
@@ -420,6 +505,17 @@ function setCTIUserProfile($user_id,$profile_id){
                 ' VALUES (?,"chat_notifications","true")';
         $stmt = $dbhcti->prepare($sql);
         $stmt->execute(array($username));
+
+        // Set user extensions context based on cti profile
+        $sql = 'UPDATE sip SET `data` = ? WHERE ' .
+               ' `id` IN ( '.
+               ' SELECT extension COLLATE utf8mb4_unicode_ci FROM rest_devices_phones WHERE user_id = ? ' .
+               '  UNION ALL ' .
+               ' SELECT default_extension COLLATE utf8mb4_unicode_ci FROM userman_users WHERE id = ?' .
+               ' ) AND `keyword` = "context"' .
+               ' AND (`data` LIKE "cti_profile_%" OR `data` = "from-internal")';
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute(array("cti_profile_".$profile_id,$user_id,$user_id));
         return TRUE;
     } catch (Exception $e) {
         error_log($e->getMessage());
