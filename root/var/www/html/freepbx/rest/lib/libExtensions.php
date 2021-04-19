@@ -385,7 +385,7 @@ function setFalconieriRPS($mac, $provisioningUrl, $lk = null, $secret = null) {
         $provider = 'snom';
     } elseif($vendor == 'Gigaset') {
         $provider = 'gigaset';
-    } elseif($vendor == 'Fanvil') {
+    } elseif($vendor == 'Fanvil'|| $vendor == 'Nethesis') {
         $provider = 'fanvil';
     } elseif($vendor == 'Yealink/Dreamwave') {
         $provider = 'yealink';
