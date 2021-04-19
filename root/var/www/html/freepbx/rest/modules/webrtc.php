@@ -69,7 +69,7 @@ $app->delete('/webrtc/{mainextension}', function (Request $request, Response $re
         $mainextension = $route->getArgument('mainextension');
         $extension = getWebRTCExtension($mainextension);
         $mobile_extension = getWebRTCMobileExtension($mainextension);
-        if (deleteExtension($extension) && (empty($mobile_extension) || deleteExtension($mobile_extension))) {
+        if (deleteExtension($extension) && deleteExtension($mobile_extension)) {
             system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
             return $response->withStatus(200);
         } else {
