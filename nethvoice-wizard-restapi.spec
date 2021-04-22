@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.9.1
+Version: 14.10.0
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -42,6 +42,13 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Thu Apr 22 2021 Stefano Fancello <stefano.fancello@nethesis.it> - 14.10.0-1
+- Add Videoconference URL management - nethesis/dev#5993
+- Add NethPhone to NethVoice provisioning - nethesis/dev#5956
+- Enhace Voip Trunks management section - nethesis/dev#5982
+- Jitsi instant video conference integration - nethesis/dev#5966
+- DND and CF status not syncronized from NethCTI to phones - Bug nethesis/dev#5960
+
 * Wed Mar 03 2021 Stefano Fancello <stefano.fancello@nethesis.it> - 14.9.1-1
 - Add sleep on push config for Trinity
 - Support Trinity config for firmware > 3.17.2
