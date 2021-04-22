@@ -131,7 +131,10 @@ $app->post('/settings/conferenceurl', function (Request $request, Response $resp
 
         exec("/usr/bin/sudo /sbin/e-smith/config setprop conference JitsiUrl $url", $out, $return);
         if ($return === 0) {
-            return $response->withStatus(200);
+            exec("/usr/bin/sudo /sbin/e-smith/signal-event nethserver-conference-save", $out, $return);
+            if ($return === 0) {
+                return $response->withStatus(200);
+            }
         }
         throw new Exception("Command execution error: $return");
     } catch (Exception $e) {
