@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.10.0
+Version: 14.10.1
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -42,6 +42,9 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Fri Apr 23 2021 Stefano Fancello <stefano.fancello@nethesis.it> - 14.10.1-1
+- Add Nethesis phones to type map and Fanvil RPS provider for Nethesis vendor - nethesis/dev#5956
+
 * Thu Apr 22 2021 Stefano Fancello <stefano.fancello@nethesis.it> - 14.10.0-1
 - Add Videoconference URL management - nethesis/dev#5993
 - Add NethPhone to NethVoice provisioning - nethesis/dev#5956
