@@ -157,18 +157,11 @@ $app->post('/cti/profiles/users/{user_id}', function (Request $request, Response
 
 /* DELETE /cti/profiles/{id} */
 $app->delete('/cti/profiles/{id}', function (Request $request, Response $response, $args) {
-    try {
-        $dbh = FreePBX::Database();
-        $route = $request->getAttribute('route');
-        $id = $route->getArgument('id');
-        $sql = 'DELETE FROM `rest_cti_profiles` WHERE `id` = ?';
-        $sth = $dbh->prepare($sql);
-        $sth->execute(array($id));
-        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
-
+    $route = $request->getAttribute('route');
+    $id = $route->getArgument('id');
+    if (deleteCTIProfile($id)) {
         return $response->withJson(array('status' => true), 200);
-    } catch (Exception $e) {
-        error_log($e->getMessage());
+    } else {
         return $response->withStatus(500);
     }
 });
