@@ -61,21 +61,11 @@ $app->get('/trunks', function (Request $request, Response $response, $args) {
 });
 
 /**
- * @api {get} /trunks/{tech}  Retrieve all trunks by technology
+ * @api {get} /trunks Retrieve all trunks by technology
  */
-$app->get('/trunks/{tech}', function (Request $request, Response $response, $args) {
+$app->get('/trunks', function (Request $request, Response $response, $args) {
     try {
-        $result = array();
-        $trunks = FreePBX::Core()->listTrunks();
-        $tech = $request->getAttribute('tech');
-        $tech = strtolower($tech);
-
-        foreach($trunks as $trunk) {
-            if (strtolower($trunk['tech']) == $tech) {
-                array_push($result, $trunk);
-            }
-        }
-        return $response->withJson($result,200);
+        return $response->withJson(\FreePBX::Core()->listTrunks(),200);
     }
     catch (Exception $e) {
       error_log($e->getMessage());
@@ -86,20 +76,20 @@ $app->get('/trunks/{tech}', function (Request $request, Response $response, $arg
 /**
  * @api {delete} /trunk Delete a trunk
  */
-$app->delete('/trunk/{trunkid}/{teck}', function (Request $request, Response $response, $args) {
-  $route = $request->getAttribute('route');
-  $trunkid = $route->getArgument('trunkid');
-  $tech = $route->getArgument('tech');
-  try {
-    // call core function to delete sip trunk
-    core_trunks_del($trunkid, $tech);
-
-    system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
-    return $response->withStatus(200);
-  } catch (Exception $e) {
-    error_log($e->getMessage());
-    return $response->withStatus(500);
-  }
+$app->delete('/trunk/{trunkid}', function (Request $request, Response $response, $args) {
+    $route = $request->getAttribute('route');
+    $trunkid = $route->getArgument('trunkid');
+    try {
+        $ret = \FreePBX::Core()->deleteTrunk($trunkid);
+        if ($ret !== true) {
+            throw new Exception("Error deleting trunk: ". print_r($ret,1));
+        }
+        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
+        return $response->withStatus(200);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withStatus(500);
+    }
 });
 
 /**
