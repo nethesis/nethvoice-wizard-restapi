@@ -61,19 +61,6 @@ $app->get('/trunks', function (Request $request, Response $response, $args) {
 });
 
 /**
- * @api {get} /trunks Retrieve all trunks by technology
- */
-$app->get('/trunks', function (Request $request, Response $response, $args) {
-    try {
-        return $response->withJson(\FreePBX::Core()->listTrunks(),200);
-    }
-    catch (Exception $e) {
-      error_log($e->getMessage());
-      return $response->withJson('An error occurred', 500);
-    }
-});
-
-/**
  * @api {delete} /trunk Delete a trunk
  */
 $app->delete('/trunk/{trunkid}', function (Request $request, Response $response, $args) {
