@@ -93,32 +93,6 @@ $app->delete('/trunk/{trunkid}', function (Request $request, Response $response,
 });
 
 /**
- * @api {patch} /trunk Change trunk secret
- */
-$app->patch('/trunk/secret', function (Request $request, Response $response, $args) {
-  $params = $request->getParsedBody();
-  try {
-    $dbh = FreePBX::Database();
-    $secret = $params["secret"];
-    $peerKeyword = 'tr-peer-'.$params["trunkid"];
-    $userKeyword = 'tr-user-'.$params["trunkid"];
-    $sql =  'UPDATE sip'.
-            ' SET data = ?'.
-            ' WHERE (id = ?'.
-            ' OR id = ?)'.
-            ' AND keyword = "secret"';
-    $stmt = $dbh->prepare($sql);
-    $stmt->execute(array($secret, $peerKeyword, $userKeyword));
-
-    system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
-    return $response->withStatus(200);
-  } catch (Exception $e) {
-    error_log($e->getMessage());
-    return $response->withStatus(500);
-  }
-});
-
-/**
  * @api {post} /trunks Create a new trunks
  */
 $app->post('/trunks', function (Request $request, Response $response, $args) {
@@ -126,7 +100,6 @@ $app->post('/trunks', function (Request $request, Response $response, $args) {
         $params = $request->getParsedBody();
         $peerdetails = "host=***provider ip address***\nusername=***userid***\nsecret=***password***\ntype=peer";
         $userconfig = "secret=***password***\ntype=user\ncontext=from-trunk";
-        $tech = 'pjsip';
         $dbh = FreePBX::Database();
         $sql = 'SELECT * FROM `providers` WHERE `provider` = ? LIMIT 1';
         $sth = $dbh->prepare($sql);
@@ -157,74 +130,72 @@ $app->post('/trunks', function (Request $request, Response $response, $args) {
         $outcid = $params['phone'];
         $codecs = array_flip($params['codecs']);
 
-        if ($tech == 'pjsip') {
-            $provider_data = parse_ini_string($provider_param['dettpeer']);
-            // settings array merged with data sent to FreePBX page on POST
-            $settings = array(
-                "channelid" => $channelid,
-                "peerdetails" => $peerdetails,
-                "userconfig" => $userconfig,
-                "register" => $register,
-                "dialopts" => $dialopts,
-                "extdisplay" => "",
-                "sv_trunk_name" => "",
-                "sv_usercontext" => "",
-                "sv_channelid" => "",
-                "npanxx" => "",
-                "trunk_name" => $params['name'],
-                "hcid" => "on",
-                "dialoutopts_cb" => "",
-                "disabletrunk" => "off",
-                "failtrunk_enable" => "off",
-                "username" => $params['username'],
-                "secret" => $params['password'],
-                "authentication" => "outbound",
-                "registration" => "send",
-                "language" => "",
-                "sip_server" => $provider_data['host'],
-                "sip_server_port" => (string) $provider_data['port'],
-                "context" => "from-pstn",
-                "transport" => "0.0.0.0-udp",
-                "dtmfmode" => "auto",
-                "auth_rejection_permanent" => "on",
-                "forbidden_retry_interval" => "10",
-                "fatal_retry_interval" => "0",
-                "retry_interval" => "60",
-                "expiration" => "3600",
-                "max_retries" => "10",
-                "qualify_frequency" => "60",
-                "outbound_proxy" => "",
-                "contact_user" => "",
-                "from_domain" => "",
-                "from_user" => "",
-                "client_uri" => "",
-                "server_uri" => "",
-                "media_address" => "",
-                "aors" => "",
-                "aor_contact" => "",
-                "match" => "",
-                "support_path" => "no",
-                "t38_udptl" => "no",
-                "t38_udptl_ec" => "none",
-                "t38_udptl_nat" => "no",
-                "t38_udptl_maxdatagram" => "",
-                "fax_detect" => "no",
-                "trust_rpid" => "no",
-                "sendrpid" => "no",
-                "identify_by" => "default",
-                "inband_progress" => "no",
-                "direct_media" => "no",
-                "rewrite_contact" => "yes",
-                "rtp_symmetric" => "yes",
-                "media_encryption" => "sdes",
-                "force_rport" => "yes",
-                "message_context" => "",
-                "codec" => $codecs
-            );
-            $trunknum = \FreePBX::Core()->addTrunk($params['name'], $tech, $settings);
-            if (!is_numeric($trunknum)) {
-                throw new Exception("Error creating trunk");
-            }
+        $provider_data = parse_ini_string($provider_param['dettpeer']);
+        // settings array merged with data sent to FreePBX page on POST
+        $settings = array(
+            "channelid" => $channelid,
+            "peerdetails" => $peerdetails,
+            "userconfig" => $userconfig,
+            "register" => $register,
+            "dialopts" => $dialopts,
+            "extdisplay" => "",
+            "sv_trunk_name" => "",
+            "sv_usercontext" => "",
+            "sv_channelid" => "",
+            "npanxx" => "",
+            "trunk_name" => $params['name'],
+            "hcid" => "on",
+            "dialoutopts_cb" => "",
+            "disabletrunk" => "off",
+            "failtrunk_enable" => "off",
+            "username" => $params['username'],
+            "secret" => $params['password'],
+            "authentication" => "outbound",
+            "registration" => "send",
+            "language" => "",
+            "sip_server" => $provider_data['host'],
+            "sip_server_port" => (string) $provider_data['port'],
+            "context" => "from-pstn",
+            "transport" => "0.0.0.0-udp",
+            "dtmfmode" => "auto",
+            "auth_rejection_permanent" => "on",
+            "forbidden_retry_interval" => "10",
+            "fatal_retry_interval" => "0",
+            "retry_interval" => "60",
+            "expiration" => "3600",
+            "max_retries" => "10",
+            "qualify_frequency" => "60",
+            "outbound_proxy" => "",
+            "contact_user" => "",
+            "from_domain" => "",
+            "from_user" => "",
+            "client_uri" => "",
+            "server_uri" => "",
+            "media_address" => "",
+            "aors" => "",
+            "aor_contact" => "",
+            "match" => "",
+            "support_path" => "no",
+            "t38_udptl" => "no",
+            "t38_udptl_ec" => "none",
+            "t38_udptl_nat" => "no",
+            "t38_udptl_maxdatagram" => "",
+            "fax_detect" => "no",
+            "trust_rpid" => "no",
+            "sendrpid" => "no",
+            "identify_by" => "default",
+            "inband_progress" => "no",
+            "direct_media" => "no",
+            "rewrite_contact" => "yes",
+            "rtp_symmetric" => "yes",
+            "media_encryption" => "sdes",
+            "force_rport" => "yes",
+            "message_context" => "",
+            "codec" => $codecs
+        );
+        $trunknum = \FreePBX::Core()->addTrunk($params['name'], 'pjsip', $settings);
+        if (!is_numeric($trunknum)) {
+            throw new Exception("Error creating trunk");
         }
         system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
         return $response->withJson(["trunkid" => $trunknum], 200);
