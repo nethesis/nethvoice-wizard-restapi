@@ -63,7 +63,7 @@ $app->get('/trunks', function (Request $request, Response $response, $args) {
 /**
  * @api {delete} /trunk Delete a trunk
  */
-$app->delete('/trunk/{trunkid}', function (Request $request, Response $response, $args) {
+$app->delete('/trunks/{trunkid}', function (Request $request, Response $response, $args) {
     $route = $request->getAttribute('route');
     $trunkid = $route->getArgument('trunkid');
     try {
@@ -180,12 +180,12 @@ $app->post('/trunks', function (Request $request, Response $response, $args) {
             "message_context" => "",
             "codec" => $codecs
         );
-        $trunknum = \FreePBX::Core()->addTrunk($params['name'], 'pjsip', $settings);
-        if (!is_numeric($trunknum)) {
+        $trunkid = \FreePBX::Core()->addTrunk($params['name'], 'pjsip', $settings);
+        if (!is_numeric($trunkid)) {
             throw new Exception("Error creating trunk");
         }
         system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
-        return $response->withJson(["trunkid" => $trunknum], 200);
+        return $response->withJson(["trunkid" => $trunkid], 200);
     } catch (Exception $e) {
         error_log($e->getMessage());
         return $response->withStatus(500);
