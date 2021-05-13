@@ -943,12 +943,12 @@ function addPhone($mac, $vendor, $model)
 
 function setExtensionCustomContextProfile($extension) {
     $dbh = \FreePBX::Database();
-    $sql = 'SELECT profile_id FROM rest_devices_phones JOIN rest_users ON rest_devices_phones.user_id = rest_users.user_id JOIN sip on rest_devices_phones.extension COLLATE utf8mb4_general_ci = sip.id WHERE extension = ? AND sip.keyword = "context" AND (sip.data = "from-internal" OR sip.data LIKE "cti_profile_")';
+    $sql = 'SELECT profile_id FROM rest_devices_phones JOIN rest_users ON rest_devices_phones.user_id = rest_users.user_id JOIN sip on rest_devices_phones.extension COLLATE utf8mb4_general_ci = sip.id WHERE extension = ? AND sip.keyword = "context" AND (sip.data = "from-internal" OR sip.data LIKE "cti-profile-")';
     $stmt = $dbh->prepare($sql);
     $stmt->execute([$extension]);
     $profile_id = $stmt->fetch(\PDO::FETCH_ASSOC)[0]['profile_id'];
     if (!empty($profile_id)) {
-        setSipData($extension,'context','cti_profile_'.$profile_id);
+        setSipData($extension,'context','cti-profile-'.$profile_id);
     }
 }
 
