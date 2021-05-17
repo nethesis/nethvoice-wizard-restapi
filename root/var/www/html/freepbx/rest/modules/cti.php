@@ -79,9 +79,25 @@ $app->post('/cti/profiles/{id}', function (Request $request, Response $response,
         $route = $request->getAttribute('route');
         $id = $route->getArgument('id');
         $profile = $request->getParsedBody();
-        if (postCTIProfile($profile,$id)) {
-            system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
 
+        $sharedLock = '/var/run/nethvoice/contextLock';
+        $timeoutSeconds = 2;
+
+        // Check acpu lock
+        if (file_exists($sharedLock) && file_get_contents($sharedLock) > time()-$timeoutSeconds) {
+            throw new Exception('Can\'t acquire lock');
+        }
+
+        // Create lock
+        file_put_contents($sharedLock,time());
+
+        $res = postCTIProfile($profile,$id);
+
+        // Release lock
+	unlink($sharedLock);
+
+        if ($res) {
+            system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
             return $response->withJson(array('status' => true), 200);
         } else {
             throw new Exception('Error editing profile');
