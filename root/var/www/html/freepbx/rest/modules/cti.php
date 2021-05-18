@@ -81,24 +81,19 @@ $app->post('/cti/profiles/{id}', function (Request $request, Response $response,
         $profile = $request->getParsedBody();
 
         $sharedLock = '/var/run/nethvoice/contextLock';
-        $timeoutSeconds = 2;
+        $timeoutSeconds = 5;
 
         // Check lock file
-        if (file_exists($sharedLock) && file_get_contents($sharedLock) > time()-$timeoutSeconds) {
+        if ( !file_exists(dirname($sharedLock)) || !is_writable(dirname($sharedLock)) || (file_exists($sharedLock) && filemtime($sharedLock) > time()-$timeoutSeconds)) {
             throw new Exception('Can\'t acquire lock');
         }
 
-        // Create lock
-        if (file_exists(dirname($sharedLock)) && is_writable(dirname($sharedLock))) {
-            $lock = file_put_contents($sharedLock,time());
-        }
+        $lock = touch($sharedLock);
 
         $res = postCTIProfile($profile,$id);
 
         // Release lock
-        if (file_exists($sharedLock)) {
-            unlink($sharedLock);
-        }
+        unlink($sharedLock);
 
         if ($res) {
             system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
