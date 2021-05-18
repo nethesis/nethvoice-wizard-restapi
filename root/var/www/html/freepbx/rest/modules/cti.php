@@ -83,12 +83,14 @@ $app->post('/cti/profiles/{id}', function (Request $request, Response $response,
         $sharedLock = '/var/run/nethvoice/contextLock';
         $timeoutSeconds = 5;
 
-        // Check lock file
-        if ( !file_exists(dirname($sharedLock)) || !is_writable(dirname($sharedLock)) || (file_exists($sharedLock) && filemtime($sharedLock) > time()-$timeoutSeconds)) {
+        // Check and create lock file
+        if ( !file_exists(dirname($sharedLock))
+            || !is_writable(dirname($sharedLock))
+            || ( file_exists($sharedLock) && filemtime($sharedLock) > time()-$timeoutSeconds )
+            || !touch($sharedLock))
+        {
             throw new Exception('Can\'t acquire lock');
         }
-
-        $lock = touch($sharedLock);
 
         $res = postCTIProfile($profile,$id);
 
