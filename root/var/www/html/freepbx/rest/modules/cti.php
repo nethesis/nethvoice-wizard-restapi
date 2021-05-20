@@ -375,7 +375,7 @@ $app->post('/cti/dbconn', function (Request $request, Response $response, $args)
 });
 
 /*
- * PUT /cti/paramurl/:id { id: string, profiles: array, url: string }
+ * PUT /cti/paramurl/:id { id: string, profiles: array, url: string, only_queues: boolean }
  */
 $app->put('/cti/paramurl/{id}', function (Request $request, Response $response, $args) {
   try {
@@ -386,9 +386,9 @@ $app->put('/cti/paramurl/{id}', function (Request $request, Response $response, 
       $fields = array();
       $dbh = FreePBX::Database();
       foreach ($data["profiles"] as $p) {
-        $sql = 'INSERT INTO rest_cti_profiles_paramurl (profile_id, url) VALUES (?, ?) ON DUPLICATE KEY UPDATE profile_id=VALUES(profile_id), url=VALUES(url)';
+        $sql = 'INSERT INTO rest_cti_profiles_paramurl (profile_id, url, only_queues) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE profile_id=VALUES(profile_id), url=VALUES(url), only_queues=VALUES(only_queues)';
         $sth = $dbh->prepare($sql);
-        $res = $sth->execute(array($p, $data["url"]));
+        $res = $sth->execute(array($p, $data["url"], $data["only_queues"]));
         if ($res === FALSE) {
           throw new Exception($sth->errorInfo()[2]);
         }
@@ -442,7 +442,7 @@ $app->put('/cti/dbconn/{id}', function (Request $request, Response $response, $a
 });
 
 /*
- * POST /cti/paramurl { "url": string, "profiles": array }
+ * POST /cti/paramurl { "url": string, "profiles": array, "only_queues": boolean }
 */
 $app->post('/cti/paramurl', function (Request $request, Response $response, $args) {
   try {
@@ -450,11 +450,12 @@ $app->post('/cti/paramurl', function (Request $request, Response $response, $arg
       $data = $request->getParsedBody();
       $url = $data['url'];
       $profiles = $data['profiles'];
+      $only_queues = $data['only_queues'];
       $dbi = FreePBX::Database();
       foreach ($profiles as $profileId) {
-        $sql = 'INSERT INTO rest_cti_profiles_paramurl(profile_id, url) VALUES (?, ?)';
+        $sql = 'INSERT INTO rest_cti_profiles_paramurl(profile_id, url, only_queues) VALUES (?, ?, ?)';
         $sth = $dbi->prepare($sql);
-        $res = $sth->execute(array($profileId, $url));
+        $res = $sth->execute(array($profileId, $url, $only_queues));
         if ($res === FALSE) {
             throw new Exception($sth->errorInfo()[2]);
         }
@@ -1016,7 +1017,7 @@ $app->get('/cti/streaming', function (Request $request, Response $response, $arg
 });
 
 /*
- * GET /cti/paramurls { url: string, profiles: array }
+ * GET /cti/paramurls { url: string, profiles: array, only_queue: boolean }
  */
 $app->get('/cti/paramurls', function (Request $request, Response $response, $args) {
   try {
@@ -1028,7 +1029,7 @@ $app->get('/cti/paramurls', function (Request $request, Response $response, $arg
       if (sizeof($res) == 0) {
         return $response->withJson($res);
       }
-      $sql = 'SELECT id, url, group_concat(profile_id) AS profiles FROM rest_cti_profiles_paramurl GROUP BY url';
+      $sql = 'SELECT id, url, group_concat(profile_id) AS profiles, only_queues FROM rest_cti_profiles_paramurl GROUP BY url';
       $sth = $dbh->prepare($sql);
       $sth->execute();
       $res = $sth->fetchAll(PDO::FETCH_ASSOC);
