@@ -13,3 +13,9 @@ fi
 
 # Create custom context for CTI profiles and add extensions to them
 /usr/bin/scl enable rh-php56 -- php /var/www/html/freepbx/rest/lib/contextMigrationHelper.php
+
+# Add column if not present
+EXISTS=$(/usr/bin/mysql -uroot -p$mysql_password -se "SHOW COLUMNS FROM asterisk.rest_cti_profiles_paramurl LIKE 'only_queues'");
+if [[ $EXISTS == "" ]]; then
+    $(/usr/bin/mysql -uroot -p$mysql_password -e "ALTER TABLE asterisk.rest_cti_profiles_paramurl ADD COLUMN only_queues TINYINT(1) NOT NULL DEFAULT 0");
+fi
