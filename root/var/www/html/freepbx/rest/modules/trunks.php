@@ -61,133 +61,177 @@ $app->get('/trunks', function (Request $request, Response $response, $args) {
 });
 
 /**
+ * @api {get} /trunks/{tech}  Retrieve all trunks by technology
+ */
+$app->get('/trunks/{tech}', function (Request $request, Response $response, $args) {
+    try {
+        $result = array();
+        $trunks = FreePBX::Core()->listTrunks();
+        $tech = $request->getAttribute('tech');
+        $tech = strtolower($tech);
+
+        foreach($trunks as $trunk) {
+            if (strtolower($trunk['tech']) == $tech) {
+                array_push($result, $trunk);
+            }
+        }
+        return $response->withJson($result,200);
+    }
+    catch (Exception $e) {
+      error_log($e->getMessage());
+      return $response->withJson('An error occurred', 500);
+    }
+});
+
+/**
  * @api {delete} /trunk Delete a trunk
  */
-$app->delete('/trunks/{trunkid}', function (Request $request, Response $response, $args) {
-    $route = $request->getAttribute('route');
-    $trunkid = $route->getArgument('trunkid');
-    try {
-        $ret = \FreePBX::Core()->deleteTrunk($trunkid);
-        if ($ret !== true) {
-            throw new Exception("Error deleting trunk: ". print_r($ret,1));
-        }
-        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
-        return $response->withStatus(200);
-    } catch (Exception $e) {
-        error_log($e->getMessage());
-        return $response->withStatus(500);
-    }
+$app->delete('/trunk/{trunkid}/{tech}', function (Request $request, Response $response, $args) {
+  $route = $request->getAttribute('route');
+  $trunkid = $route->getArgument('trunkid');
+  $tech = $route->getArgument('tech');
+  try {
+    // call core function to delete sip trunk
+    core_trunks_del($trunkid, $tech);
+
+    system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
+    return $response->withStatus(200);
+  } catch (Exception $e) {
+    error_log($e->getMessage());
+    return $response->withStatus(500);
+  }
+});
+
+/**
+ * @api {patch} /trunk Change trunk secret
+ */
+$app->patch('/trunk/secret', function (Request $request, Response $response, $args) {
+  $params = $request->getParsedBody();
+  try {
+    $dbh = FreePBX::Database();
+    $secret = $params["secret"];
+    $peerKeyword = 'tr-peer-'.$params["trunkid"];
+    $userKeyword = 'tr-user-'.$params["trunkid"];
+    $sql =  'UPDATE sip'.
+            ' SET data = ?'.
+            ' WHERE (id = ?'.
+            ' OR id = ?)'.
+            ' AND keyword = "secret"';
+    $stmt = $dbh->prepare($sql);
+    $stmt->execute(array($secret, $peerKeyword, $userKeyword));
+
+    system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
+    return $response->withStatus(200);
+  } catch (Exception $e) {
+    error_log($e->getMessage());
+    return $response->withStatus(500);
+  }
 });
 
 /**
  * @api {post} /trunks Create a new trunks
  */
 $app->post('/trunks', function (Request $request, Response $response, $args) {
-    try {
-        $params = $request->getParsedBody();
-        $peerdetails = "host=***provider ip address***\nusername=***userid***\nsecret=***password***\ntype=peer";
-        $userconfig = "secret=***password***\ntype=user\ncontext=from-trunk";
-        $dbh = FreePBX::Database();
-        $sql = 'SELECT * FROM `providers` WHERE `provider` = ? LIMIT 1';
-        $sth = $dbh->prepare($sql);
-        $sth->execute(array($params['provider']));
-        $provider_param = $sth->fetchAll(\PDO::FETCH_ASSOC)[0];
+  $params = $request->getParsedBody();
+// {"provider":"vivavox","name":"nomefascccio","username":"nomeutente","password":"password","phone":"1234567890","codecs":["ulaw","g729"],"forceCodec":true}
 
-        //Make sure name is != username by adding provider name to it if necessary
-        if ($params['name'] == $params['username']){
-            $params['name'] = $params['provider'].'_'.$params['name'];
+    $params['provider'];
+    $params['name'];
+    $params['username'];
+    $params['password'];
+    $params['phone'];
+    $params['codecs'];
+
+    $dbh = FreePBX::Database();
+
+    // Get trunk id
+    $sql = 'SELECT trunkid FROM trunks';
+    $sth = $dbh->prepare($sql);
+    $sth->execute();
+    $trunkid = 1;
+    while ($res = $sth->fetchColumn()) {
+        if ($res > $trunkid) {
+            break;
         }
+        $trunkid++;
+    }
+    if ($res == $trunkid) {
+        $trunkid++;
+    }
 
-        $channelid    = $params['name'];
-        $peerdetails  = str_replace("USERNAME", $params['username'], $provider_param['dettpeer']);
-        $peerdetails  = str_replace("PASSWORD", $params['password'], $peerdetails);
-        $peerdetails  = str_replace("CODECS", implode(',',$params['codecs']), $peerdetails);
-        $peerdetails  = str_replace("NUMERO", $params['phone'], $peerdetails);
-        $usercontext  = $params['username'];
-        $userconfig   = str_replace("PASSWORD", $params['password'], $provider_param['dettuser']);
-        $userconfig   = str_replace("CODECS", implode(',',$params['codecs']), $userconfig);
-        $register     = str_replace("USERNAME", $params['username'], $provider_param['registration']);
-        $register     = str_replace("PASSWORD", $params['password'], $register);
-        $register     = str_replace("NUMERO", $params['phone'], $register);
+    // Insert data into trunks table
+    $sql = "INSERT INTO `trunks` (`trunkid`,`tech`,`channelid`,`name`,`outcid`,`keepcid`,`maxchans`,`failscript`,`dialoutprefix`,`usercontext`,`provider`,`disabled`,`continue`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    $sth = $dbh->prepare($sql);
+    $sth->execute(array(
+        $trunkid,
+        'pjsip',
+        $params['name'],
+        $params['name'],
+        $params['phone'],
+        'off',
+        '',
+        '',
+        '',
+        '',
+        '',
+        'off',
+        'off'
+    ));
 
-        if($params['forceCodec'] !== true) {
-            $peerdetails  = str_replace("disallow=all\n", '', $peerdetails);
+    // Insert data into pjsip table
+    // Get static provider data
+    $sql = 'SELECT `keyword`,`data` FROM `rest_pjsip_trunks_defaults` WHERE `provider_id` IN (SELECT `id` FROM `rest_pjsip_providers` WHERE `provider` = ?)';
+    $sth = $dbh->prepare($sql);
+    $sth->execute([$params['provider']]);
+    $pjsip_data = $sth->fetchAll(\PDO::FETCH_ASSOC);
+
+    // Add dynamic data
+    $pjsip_data[] = array( "keyword" => "contact_user", "data" => $params['phone']);
+    $pjsip_data[] = array( "keyword" => "extdisplay", "OUT_".$trunkid);
+    $pjsip_data[] = array( "keyword" => "from_user", "data" => $params['phone']);
+    $pjsip_data[] = array( "keyword" => "sv_channelid", "data" => $params['name']);
+    $pjsip_data[] = array( "keyword" => "sv_trunk_name", "data" => $params['name']);
+    $pjsip_data[] = array( "keyword" => "trunk_name", "data" => $params['name']);
+//    $pjsip_data[] = array( "keyword" => "codecs", "data" => implode(',',$params['codec']));
+
+    // Set codecs
+    if (!empty($params['codec'])) {
+        foreach ($pjsip_data as $index => $data) {
+            if ($data['keyword'] !== "codecs") {
+                continue;
+            } else {
+                $default_codecs = $data;
+                unset($pjsip_data[$index]);
+            }
         }
-
-        $outcid = $params['phone'];
-        $codecs = array_flip($params['codecs']);
-
-        $provider_data = parse_ini_string($provider_param['dettpeer']);
-        // settings array merged with data sent to FreePBX page on POST
-        $settings = array(
-            "channelid" => $channelid,
-            "peerdetails" => $peerdetails,
-            "userconfig" => $userconfig,
-            "register" => $register,
-            "dialopts" => $dialopts,
-            "extdisplay" => "",
-            "sv_trunk_name" => "",
-            "sv_usercontext" => "",
-            "sv_channelid" => "",
-            "npanxx" => "",
-            "trunk_name" => $params['name'],
-            "hcid" => "on",
-            "dialoutopts_cb" => "",
-            "disabletrunk" => "off",
-            "failtrunk_enable" => "off",
-            "username" => $params['username'],
-            "secret" => $params['password'],
-            "authentication" => "outbound",
-            "registration" => "send",
-            "language" => "",
-            "sip_server" => $provider_data['host'],
-            "sip_server_port" => (string) $provider_data['port'],
-            "context" => "from-pstn",
-            "transport" => "0.0.0.0-udp",
-            "dtmfmode" => "auto",
-            "auth_rejection_permanent" => "on",
-            "forbidden_retry_interval" => "10",
-            "fatal_retry_interval" => "0",
-            "retry_interval" => "60",
-            "expiration" => "3600",
-            "max_retries" => "10",
-            "qualify_frequency" => "60",
-            "outbound_proxy" => "",
-            "contact_user" => "",
-            "from_domain" => "",
-            "from_user" => "",
-            "client_uri" => "",
-            "server_uri" => "",
-            "media_address" => "",
-            "aors" => "",
-            "aor_contact" => "",
-            "match" => "",
-            "support_path" => "no",
-            "t38_udptl" => "no",
-            "t38_udptl_ec" => "none",
-            "t38_udptl_nat" => "no",
-            "t38_udptl_maxdatagram" => "",
-            "fax_detect" => "no",
-            "trust_rpid" => "no",
-            "sendrpid" => "no",
-            "identify_by" => "default",
-            "inband_progress" => "no",
-            "direct_media" => "no",
-            "rewrite_contact" => "yes",
-            "rtp_symmetric" => "yes",
-            "media_encryption" => "sdes",
-            "force_rport" => "yes",
-            "message_context" => "",
-            "codec" => $codecs
-        );
-        $trunkid = \FreePBX::Core()->addTrunk($params['name'], 'pjsip', $settings);
-        if (!is_numeric($trunkid)) {
-            throw new Exception("Error creating trunk");
+        if ($params['forceCodec']) {
+            $pjsip_data[] = array( "keyword" => "codecs", "data" => implode(',',$params['codec']));
+        } else {
+            $pjsip_data[] = array( "keyword" => "codecs", "data" => implode(',',array_unique(array_merge($params['codec'],explode(',',$default_codecs)))));
         }
-        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
-        return $response->withJson(["trunkid" => $trunkid], 200);
-    } catch (Exception $e) {
-        error_log($e->getMessage());
+    }
+
+    if ($params['provider'] === 'OpenSolution_GNR') {
+        $pjsip_data[] = array( "keyword" => "username", "data" => "");
+        $pjsip_data[] = array( "keyword" => "secret", "data" => "");
+    } else {
+        $pjsip_data[] = array( "keyword" => "username", "data" => $params['username']);
+        $pjsip_data[] = array( "keyword" => "secret", "data" => $params['password']);
+    }
+
+    $insert_data = array();
+    $insert_qm = array();
+    foreach ($pjsip_data as $data) {
+        $insert_data = array_merge($insert_data,[$trunkid,$data['keyword'],$data['data'],0]);
+        $insert_qm[] = '(?,?,?,?)';
+    }
+    //return $response->withJson($insert_data,200);
+    $sql = 'INSERT INTO `pjsip` (`id`,`keyword`,`data`,`flags`) VALUES '.implode(',',$insert_qm);
+    $sth = $dbh->prepare($sql);
+    $res = $sth->execute($insert_data);
+    if (!$res) {
         return $response->withStatus(500);
     }
+    return $response->withStatus(200);
+    system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
 });
