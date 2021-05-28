@@ -84,16 +84,13 @@ $app->get('/trunks/{tech}', function (Request $request, Response $response, $arg
 });
 
 /**
- * @api {delete} /trunk Delete a trunk
+ * @api {delete} /trunks/{trunkid} Delete a trunk
  */
-$app->delete('/trunk/{trunkid}/{tech}', function (Request $request, Response $response, $args) {
+$app->delete('/trunks/{trunkid}', function (Request $request, Response $response, $args) {
   $route = $request->getAttribute('route');
   $trunkid = $route->getArgument('trunkid');
-  $tech = $route->getArgument('tech');
   try {
-    // call core function to delete sip trunk
-    core_trunks_del($trunkid, $tech);
-
+    FreePBX::Core()->deleteTrunk($trunkid);
     system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
     return $response->withStatus(200);
   } catch (Exception $e) {
@@ -103,44 +100,131 @@ $app->delete('/trunk/{trunkid}/{tech}', function (Request $request, Response $re
 });
 
 /**
- * @api {patch} /trunk Change trunk secret
+ * @api {patch} /trunks/{trunkid} Change trunk parameters
+ * parameters:
+ * {
+ *    "username":"foobar",		# Trunk username
+ *    "password":"53cr37",		# Trunk secret
+ *    "phone":"0123456789",		# Phone number
+ *    "codecs":["ulaw","g729"],		# Favourite codecs
+ *    "forceCodec":true			# Boolean, if true allows only favourite codecs
+ * }
  */
-$app->patch('/trunk/secret', function (Request $request, Response $response, $args) {
-  $params = $request->getParsedBody();
-  try {
-    $dbh = FreePBX::Database();
-    $secret = $params["secret"];
-    $peerKeyword = 'tr-peer-'.$params["trunkid"];
-    $userKeyword = 'tr-user-'.$params["trunkid"];
-    $sql =  'UPDATE sip'.
-            ' SET data = ?'.
-            ' WHERE (id = ?'.
-            ' OR id = ?)'.
-            ' AND keyword = "secret"';
-    $stmt = $dbh->prepare($sql);
-    $stmt->execute(array($secret, $peerKeyword, $userKeyword));
+$app->patch('/trunks/{trunkid}', function (Request $request, Response $response, $args) {
+    try {
+        $params = $request->getParsedBody();
+        $route = $request->getAttribute('route');
+        $trunkid = $route->getArgument('trunkid');
 
-    system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
-    return $response->withStatus(200);
-  } catch (Exception $e) {
-    error_log($e->getMessage());
-    return $response->withStatus(500);
-  }
+        if (empty($trunkid)) {
+            error_log("missing argument $trunkid");
+            return $response->withJson(['error'=>"missing argument $trunkid"],400);
+        }
+
+        // Make sure that trunk to patch is a pjsip trunk
+        $dbh = FreePBX::Database();
+        $sql = 'SELECT COUNT(*) AS n FROM `trunks` WHERE `trunkid` = ? AND `tech` = "pjsip"';
+        $sth = $dbh->prepare($sql);
+        $res = $sth->execute([$trunkid]);
+        $n = $sth->fetchAll(\PDO::FETCH_ASSOC)[0]['n'];
+        if (!$res || $n != 1) {
+            throw new Exception("Can't patch trunk $trunkid");
+        }
+
+        // Change username
+        if (isset($params['username'])) {
+            $sql = 'UPDATE `pjsip` SET `data` = ? WHERE `id` = ? AND `keyword` = ?';
+            $sth = $dbh->prepare($sql);
+            $res = $sth->execute([$params['username'],$trunkid,'username']);
+            if (!$res) {
+                throw new Exception("Error updating username for $trunkid");
+            }
+        }
+
+        // Change seccret
+        if (isset($params['password'])) {
+            $sql = 'UPDATE `pjsip` SET `data` = ? WHERE `id` = ? AND `keyword` = ?';
+            $sth = $dbh->prepare($sql);
+            $res = $sth->execute([$params['password'],$trunkid,'secret']);
+            if (!$res) {
+                throw new Exception("Error updating secret for $trunkid");
+            }
+        }
+
+        // Set Outbound CallerID
+        if (isset($params['phone'])) {
+            $sql = 'UPDATE `pjsip` SET `data` = ? WHERE `id` = ? AND ( `keyword` = ? OR `keyword` = ? )';
+            $sth = $dbh->prepare($sql);
+            $res = $sth->execute([$params['phone'],$trunkid,'contact_user','from_user']);
+            if (!$res) {
+                throw new Exception("Error updating contact_user and from_user for $trunkid");
+            }
+            $sql = 'UPDATE `trunks` SET `outcid` = ? WHERE `trunkid` = ?';
+            $sth = $dbh->prepare($sql);
+            $res = $sth->execute([$params['phone'],$trunkid]);
+            if (!$res) {
+                throw new Exception("Error updating outcid for trunk $trunkid");
+            }
+        }
+
+        // Set codecs
+        if (!isset($params['forceCodec']) && !$params['forceCodec'] && isset($params['codec'])) {
+            // Get default codecs
+            $sql = 'SELECT `data` FROM `rest_pjsip_trunks_defaults` WHERE `keyword` = "codecs" AND `provider_id` IN ( SELECT `provider_id` FROM `rest_pjsip_trunks_defaults` WHERE `keyword` = "sip_server" AND `data` IN ( SELECT `data` FROM `pjsip` WHERE `keyword` = "sip_server" AND `id` = 2))';
+            $sth = $dbh->prepare($sql);
+            $res = $sth->execute([$trunkid]);
+            if (!$res) {
+                throw new Exception('Error getting default codecs for privider');
+            }
+            $default_codecs = $sth->fetchAll(\PDO::FETCH_ASSOC)[0]['data'];
+            $newcodecs = implode(',',array_unique(array_merge($params['codec'],explode(',',$default_codecs))));
+        } elseif (isset($params['forceCodec']) && $params['forceCodec'] && isset($params['codec'])) {
+            $newcodecs = implode(',',$params['codec']);
+        }
+        if (!empty($newcodecs)) {
+            $sql = 'UPDATE `pjsip` SET `data` = ? WHERE `id` = ? AND `keyword` = "codecs"';
+            $sth = $dbh->prepare($sql);
+            $res = $sth->execute([$newcodecs,$trunkid]);
+            if (!$res) {
+                throw new Exception('Error updating codecs');
+            }
+        }
+        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
+        return $response->withStatus(204);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return $response->withJson(['error'=>$e->getMessage()],500);
+    }
 });
 
 /**
  * @api {post} /trunks Create a new trunks
+ * parameters:
+ * {
+ *    "provider":"vivavox",		# provider name
+ *    "name":"trunk name",		# User defined trunk name
+ *    "username":"foobar",		# Trunk username
+ *    "password":"53cr37",		# Trunk secret
+ *    "phone":"0123456789",		# Phone number
+ *    "codecs":["ulaw","g729"],		# Favourite codecs
+ *    "forceCodec":true			# Boolean, if true allows only favourite codecs
+ * }
  */
 $app->post('/trunks', function (Request $request, Response $response, $args) {
   $params = $request->getParsedBody();
-// {"provider":"vivavox","name":"nomefascccio","username":"nomeutente","password":"password","phone":"1234567890","codecs":["ulaw","g729"],"forceCodec":true}
-
     $params['provider'];
     $params['name'];
     $params['username'];
     $params['password'];
     $params['phone'];
     $params['codecs'];
+
+    foreach (['provider','username','password','phone','codecs','forceCodec'] as $p) {
+        if (!isset($params[$p])) {
+            error_log("missing parameter $p");
+            return $response->withStatus(400);
+        }
+    }
 
     $dbh = FreePBX::Database();
 
@@ -160,6 +244,7 @@ $app->post('/trunks', function (Request $request, Response $response, $args) {
     }
 
     // Insert data into trunks table
+    $params['name'] = (empty($params['name'])) ? $params['provider'] : $params['name'];
     $sql = "INSERT INTO `trunks` (`trunkid`,`tech`,`channelid`,`name`,`outcid`,`keepcid`,`maxchans`,`failscript`,`dialoutprefix`,`usercontext`,`provider`,`disabled`,`continue`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
     $sth = $dbh->prepare($sql);
     $sth->execute(array(
@@ -192,7 +277,6 @@ $app->post('/trunks', function (Request $request, Response $response, $args) {
     $pjsip_data[] = array( "keyword" => "sv_channelid", "data" => $params['name']);
     $pjsip_data[] = array( "keyword" => "sv_trunk_name", "data" => $params['name']);
     $pjsip_data[] = array( "keyword" => "trunk_name", "data" => $params['name']);
-//    $pjsip_data[] = array( "keyword" => "codecs", "data" => implode(',',$params['codec']));
 
     // Set codecs
     if (!empty($params['codec'])) {
@@ -232,6 +316,6 @@ $app->post('/trunks', function (Request $request, Response $response, $args) {
     if (!$res) {
         return $response->withStatus(500);
     }
-    return $response->withStatus(200);
     system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
+    return $response->withStatus(200);
 });
