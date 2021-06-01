@@ -395,17 +395,23 @@ function setCustomContextPermissions($profile_id){
     $contexts = customcontexts_getcontexts();
     $context_exists = False;
 
+    if ($profile['name'] === 'Hotel') {
+        $context_name = 'hotel';
+    } else {
+        $context_name = 'cti-profile-'.$profile_id;
+    }
+
     foreach ($contexts as $context) {
-        if ($context['0'] === 'cti-profile-'.$profile_id) {
+        if ($context['0'] === $context_name ) {
             $context_exists = True;
         }
     }
     if (!$context_exists) {
         // Create customcontext for this profile
-        customcontexts_customcontexts_add('cti-profile-'.$profile_id, 'CTI Profile '.$profile['name'],null,null,null,null,null);
+        customcontexts_customcontexts_add($context_name, 'CTI Profile '.$profile['name'],null,null,null,null,null);
         /* set default permission for context*/
         $context_permissions = array();
-        foreach (customcontexts_getincludes('cti-profile-'.$profile_id) as $val) {
+        foreach (customcontexts_getincludes($context_name) as $val) {
             if (isset($context_default_permissions[$val[2]])) {
                  $context_permissions[$val[2]] = array("allow" => $context_default_permissions[$val[2]]["allow"], "sort" => $val[5]);
             } else {
@@ -414,7 +420,7 @@ function setCustomContextPermissions($profile_id){
             }
         }
     } else {
-        foreach (customcontexts_getincludes('cti-profile-'.$profile_id) as $val) {
+        foreach (customcontexts_getincludes($context_name) as $val) {
             $context_permissions[$val[2]] = array("allow" => $val[4], "sort" => $val[5]);
         }
     }
@@ -434,7 +440,7 @@ function setCustomContextPermissions($profile_id){
         }
     }
     // Get context data
-    $context = customcontexts_customcontexts_get('cti-profile-'.$profile_id);
+    $context = customcontexts_customcontexts_get($context_name);
     // Set permissions
     customcontexts_customcontexts_edit($context[0],$context[0],$context[1],$context[2],$context[3],$context[4],$context[5],$context[6]);
     uasort($context_permissions,'context_permission_compare');
@@ -450,14 +456,17 @@ function context_permission_compare($a,$b) {
 
 function deleteCTIProfile($id){
     try {
+        $profile = getCTIPermissionProfiles($profile_id);
         $dbh = FreePBX::Database();
         $sql = 'DELETE FROM `rest_cti_profiles` WHERE `id` = ?';
         $sth = $dbh->prepare($sql);
         $sth->execute(array($id));
-        $sql = 'UPDATE sip SET `data` = "from-internal" WHERE `data` = ?';
-        $sth = $dbh->prepare($sql);
-        $sth->execute(array('cti-profile-'.$id));
-        customcontexts_customcontexts_del('cti-profile-'.$id);
+        if ($profile['name'] !== 'Hotel') {
+            $sql = 'UPDATE sip SET `data` = "from-internal" WHERE `data` = ?';
+            $sth = $dbh->prepare($sql);
+            $sth->execute(array('cti-profile-'.$id));
+            customcontexts_customcontexts_del('cti-profile-'.$id);
+        }
         system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
         return True;
     } catch (Exception $e) {
@@ -507,15 +516,21 @@ function setCTIUserProfile($user_id,$profile_id){
         $stmt->execute(array($username));
 
         // Set user extensions context based on cti profile
+        $profile = getCTIPermissionProfiles($profile_id);
+        if ($profile['name'] === 'Hotel') {
+            $context_name = 'hotel';
+        } else {
+            $context_name = 'cti-profile-'.$profile_id;
+        }
         $sql = 'UPDATE sip SET `data` = ? WHERE ' .
                ' `id` IN ( '.
                ' SELECT extension COLLATE utf8mb4_unicode_ci FROM rest_devices_phones WHERE user_id = ? ' .
                '  UNION ALL ' .
                ' SELECT default_extension COLLATE utf8mb4_unicode_ci FROM userman_users WHERE id = ?' .
                ' ) AND `keyword` = "context"' .
-               ' AND (`data` LIKE "cti-profile-%" OR `data` = "from-internal")';
+               ' AND (`data` LIKE "cti-profile-%" OR `data` = "from-internal" OR `data` = "hotel")';
         $stmt = $dbh->prepare($sql);
-        $stmt->execute(array("cti-profile-".$profile_id,$user_id,$user_id));
+        $stmt->execute(array($context_name,$user_id,$user_id));
         return TRUE;
     } catch (Exception $e) {
         error_log($e->getMessage());
