@@ -1,4 +1,5 @@
 USE asterisk;
+DROP TABLE IF EXISTS providers;
 DROP TABLE IF EXISTS `rest_pjsip_providers`;
 DROP TABLE IF EXISTS `rest_pjsip_trunks_defaults`;
 
