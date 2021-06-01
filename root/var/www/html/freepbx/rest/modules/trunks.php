@@ -168,7 +168,7 @@ $app->patch('/trunks/{trunkid}', function (Request $request, Response $response,
         }
 
         // Set codecs
-        if (!isset($params['forceCodec']) && !$params['forceCodec'] && isset($params['codec'])) {
+        if (!isset($params['forceCodec']) && !$params['forceCodec'] && isset($params['codecs'])) {
             // Get default codecs
             $sql = 'SELECT `data` FROM `rest_pjsip_trunks_defaults` WHERE `keyword` = "codecs" AND `provider_id` IN ( SELECT `provider_id` FROM `rest_pjsip_trunks_defaults` WHERE `keyword` = "sip_server" AND `data` IN ( SELECT `data` FROM `pjsip` WHERE `keyword` = "sip_server" AND `id` = 2))';
             $sth = $dbh->prepare($sql);
@@ -177,9 +177,9 @@ $app->patch('/trunks/{trunkid}', function (Request $request, Response $response,
                 throw new Exception('Error getting default codecs for privider');
             }
             $default_codecs = $sth->fetchAll(\PDO::FETCH_ASSOC)[0]['data'];
-            $newcodecs = implode(',',array_unique(array_merge($params['codec'],explode(',',$default_codecs))));
-        } elseif (isset($params['forceCodec']) && $params['forceCodec'] && isset($params['codec'])) {
-            $newcodecs = implode(',',$params['codec']);
+            $newcodecs = implode(',',array_unique(array_merge($params['codecs'],explode(',',$default_codecs))));
+        } elseif (isset($params['forceCodec']) && $params['forceCodec'] && isset($params['codecs'])) {
+            $newcodecs = implode(',',$params['codecs']);
         }
         if (!empty($newcodecs)) {
             $sql = 'UPDATE `pjsip` SET `data` = ? WHERE `id` = ? AND `keyword` = "codecs"';
@@ -277,9 +277,11 @@ $app->post('/trunks', function (Request $request, Response $response, $args) {
     $pjsip_data[] = array( "keyword" => "sv_channelid", "data" => $params['name']);
     $pjsip_data[] = array( "keyword" => "sv_trunk_name", "data" => $params['name']);
     $pjsip_data[] = array( "keyword" => "trunk_name", "data" => $params['name']);
+    $pjsip_data[] = array( "keyword" => "username", "data" => $params['username']);
+    $pjsip_data[] = array( "keyword" => "secret", "data" => $params['password']);
 
     // Set codecs
-    if (!empty($params['codec'])) {
+    if (!empty($params['codecs'])) {
         foreach ($pjsip_data as $index => $data) {
             if ($data['keyword'] !== "codecs") {
                 continue;
@@ -289,18 +291,29 @@ $app->post('/trunks', function (Request $request, Response $response, $args) {
             }
         }
         if ($params['forceCodec']) {
-            $pjsip_data[] = array( "keyword" => "codecs", "data" => implode(',',$params['codec']));
+            $pjsip_data[] = array( "keyword" => "codecs", "data" => implode(',',$params['codecs']));
         } else {
-            $pjsip_data[] = array( "keyword" => "codecs", "data" => implode(',',array_unique(array_merge($params['codec'],explode(',',$default_codecs)))));
+            $pjsip_data[] = array( "keyword" => "codecs", "data" => implode(',',array_unique(array_merge($params['codecs'],explode(',',$default_codecs)))));
         }
     }
 
-    if ($params['provider'] === 'OpenSolution_GNR') {
-        $pjsip_data[] = array( "keyword" => "username", "data" => "");
-        $pjsip_data[] = array( "keyword" => "secret", "data" => "");
-    } else {
-        $pjsip_data[] = array( "keyword" => "username", "data" => $params['username']);
-        $pjsip_data[] = array( "keyword" => "secret", "data" => $params['password']);
+    // Add special pjsip options
+    $sql = 'SELECT `keyword`,`data` FROM `rest_pjsip_trunks_specialopts` WHERE `provider_id` IN (SELECT `id` FROM `rest_pjsip_providers` WHERE `provider` = ?)';
+    $sth = $dbh->prepare($sql);
+    $sth->execute([$params['provider']]);
+    $dynamic_data = $sth->fetchAll(\PDO::FETCH_ASSOC);
+    foreach ($dynamic_data as $d) {
+        // delete parameter in $pjsip_data
+        foreach ($pjsip_data as $index => $s) {
+            if ($s["keyword"] === $d["keyword"]) {
+                unset($pjsip_data[$index]);
+            }
+        }
+        // use replaced string as data
+        $data = $d["data"];
+        $data = str_replace('$PHONE',$params['phone'],$data);
+        $data = str_replace('$USERNAME',$params['username'],$data);
+        $pjsip_data[] = array( "keyword" => $d["keyword"], "data" => $data);
     }
 
     $insert_data = array();
