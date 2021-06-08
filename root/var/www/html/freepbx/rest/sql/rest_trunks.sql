@@ -1,6 +1,7 @@
 USE asterisk;
 DROP TABLE IF EXISTS `rest_pjsip_providers`;
 DROP TABLE IF EXISTS `rest_pjsip_trunks_defaults`;
+DROP TABLE IF EXISTS `rest_pjsip_trunks_specialopts`;
 
 CREATE TABLE `rest_pjsip_providers` (
     `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -10,6 +11,13 @@ CREATE TABLE `rest_pjsip_providers` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `rest_pjsip_trunks_defaults` (
+  `provider_id` bigint(20) NOT NULL,
+  `keyword` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `data` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`provider_id`,`keyword`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `rest_pjsip_trunks_specialopts` (
   `provider_id` bigint(20) NOT NULL,
   `keyword` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
   `data` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -414,7 +422,7 @@ INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`)
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (8,"aors","");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (8,"auth_rejection_permanent","off");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (8,"authentication","outbound");
-INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (8,"client_uri","sip:77771653:J4HU2E5J@voce.planetel.it:5060");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (8,"client_uri","");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (8,"codecs","ulaw,alaw,gsm,g726,g722,g729");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (8,"context","from-pstn");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (8,"dialopts","");
@@ -728,7 +736,7 @@ INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`)
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (14,"aors","");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (14,"auth_rejection_permanent","on");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (14,"authentication","outbound");
-INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (14,"client_uri","sip:67ab1f9862faa637@nethesistest.site");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (14,"client_uri","");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (14,"codecs","ulaw,alaw,gsm,g726,g722,g729");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (14,"context","from-pstn-toheader");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (14,"dialopts","");
@@ -1147,3 +1155,12 @@ INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`)
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (21,"trust_rpid","no");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (21,"userconfig","");
 
+/*Empty username / secret for Opensolution GNR*/
+INSERT IGNORE INTO `rest_pjsip_trunks_specialopts` (`provider_id`,`keyword`,`data`) VALUES (5,'username','');
+INSERT IGNORE INTO `rest_pjsip_trunks_specialopts` (`provider_id`,`keyword`,`data`) VALUES (5,'secret','');
+
+/* Special client_uri for PlanetetPJ*/
+INSERT IGNORE INTO `rest_pjsip_trunks_specialopts` (`provider_id`,`keyword`,`data`) VALUES (8,'client_uri','sip:$PHONE:$USERNAME@voce.planetel.it:5060');
+
+/* Special client_uri for VIATEK*/
+INSERT IGNORE INTO `rest_pjsip_trunks_specialopts` (`provider_id`,`keyword`,`data`) VALUES (14,'client_uri','sip:$USERNAME@CHANGE_ME');
