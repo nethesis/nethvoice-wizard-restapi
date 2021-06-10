@@ -43,7 +43,7 @@ $app->get('/contexts', function (Request $request, Response $response, $args) {
 });
 
 $blkfunc = array('displayname',
-    'context',
+    'profile',
     'callwaiting',
     'ringtime',
     'callgroup',

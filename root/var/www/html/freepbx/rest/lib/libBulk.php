@@ -19,6 +19,8 @@
 # along with NethServer.  If not, see COPYING.
 #
 
+include_once 'var/www/html/freepbx/rest/lib/libCTI.php';
+
 function getExtension($extension) {
     $extensions = FreePBX::create()->Core->getAllUsers();
     foreach ($extensions as $e) {
@@ -73,8 +75,17 @@ function get_displayname($mainextension) {
     return $displayname;
 }
 
-function get_context($mainextension) {
-    return getSipTableData($mainextension,'context');
+function get_profile($mainextension) {
+    $dbh = FreePBX::Database();
+    // Get CTI Profile id
+    $sql = 'SELECT rest_users.profile_id FROM rest_users JOIN userman_users ON rest_users.user_id = userman_users.id WHERE userman_users.default_extension = ?';
+    $sth = $dbh->prepare($sql);
+    $sth->execute([$mainextension]);
+    $profile_id = $sth->fetchAll()[0][0];
+    if (empty($profile_id)) {
+        return -1;
+    }
+    return $profile_id;
 }
 
 function get_callwaiting($mainextension) {
@@ -174,16 +185,24 @@ function post_displayname($mainextensions,$data) {
     return true;
 }
 
-function post_context($mainextensions,$data) {
+function post_profile($mainextensions,$data) {
     if (is_null($data)) {
         return true;
     }
+    $dbh = FreePBX::Database();
     foreach ($mainextensions as $mainextension) {
-        foreach (getExtension($mainextension) as $extension) {
-            $res = writeSipTableData($extension,'context',$data);
-            if ($res !== true) {
-                $err .= __FUNCTION__." ".$res."\n";
-            }
+        // Get user_id for mainextension
+        $sql = "SELECT id FROM userman_users WHERE default_extension = ?";
+        $sth = $dbh->prepare($sql);
+        $sth->execute([$mainextension]);
+        $user_id = $sth->fetchAll()[0][0];
+        if (empty($user_id)) {
+            $err .= __FUNCTION__." Can't retrieve user_id for extension $data\n";
+        }
+        // Set CTI Profile
+        $res = setCTIUserProfile($user_id,$data);
+        if ($res !== True) {
+            $err .= __FUNCTION__." ".$res['error']."\n";
         }
     }
     if (isset($err)) {
