@@ -191,7 +191,7 @@ INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`)
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (3,"sendrpid","no");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (3,"server_uri","");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (3,"sip_server","voip.sixcommgroup.it");
-INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (3,"sip_server_port","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (3,"sip_server_port","5060");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (3,"support_path","no");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (3,"sv_usercontext","");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (3,"t38_udptl","no");
@@ -558,7 +558,7 @@ INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`)
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (10,"sendrpid","no");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (10,"server_uri","");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (10,"sip_server","voip.sixcomm.net");
-INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (10,"sip_server_port","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (10,"sip_server_port","5060");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (10,"support_path","no");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (10,"sv_usercontext","");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (10,"t38_udptl","no");
