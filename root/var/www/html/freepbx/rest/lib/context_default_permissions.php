@@ -3,6 +3,9 @@
 *  context default permissions
 */
 $context_default_permissions = array(
+    "camere" => ["allow" => "no"],
+    "hotel_bad-number" => ["allow" => "no"],
+    "bad-number" => ["allow" => "no"],
     "parkedcalls" => ["allow" => "yes"],
     "from-internal-custom" => ["allow" => "yes"],
     "from-internal-additional" => ["allow" => "no"],

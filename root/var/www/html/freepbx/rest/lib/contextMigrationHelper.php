@@ -32,6 +32,22 @@ try {
     }
     $users = getAllUsers();
     foreach ($users as $user) {
+        // Skip users with hotel context
+        $sql = "SELECT `data` FROM `sip` WHERE `keyword`='context' AND `id` IN (SELECT extension FROM rest_devices_phones WHERE user_id = ?)";
+        $sth = $db->prepare($sql);
+        $sth->execute($user['id']);
+        $res = $sth->fetchAll();
+        $skip = false;
+        foreach ($res as $row) {
+            if ($row['data'] === 'hotel') {
+                $skip = True;
+                break;
+            }
+        }
+        if ($skip) {
+            continue;
+        }
+
         // Assign context to extension for each CTI profile
         setCTIUserProfile($user['id'],$user['profile']);
     }
