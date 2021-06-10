@@ -271,9 +271,9 @@ $app->post('/trunks', function (Request $request, Response $response, $args) {
     $pjsip_data = $sth->fetchAll(\PDO::FETCH_ASSOC);
 
     // Add dynamic data
-    $pjsip_data[] = array( "keyword" => "contact_user", "data" => $params['phone']);
+    $pjsip_data[] = array( "keyword" => "contact_user", "data" => $params['username']);
     $pjsip_data[] = array( "keyword" => "extdisplay", "OUT_".$trunkid);
-    $pjsip_data[] = array( "keyword" => "from_user", "data" => $params['phone']);
+    $pjsip_data[] = array( "keyword" => "from_user", "data" => $params['username']);
     $pjsip_data[] = array( "keyword" => "sv_channelid", "data" => $params['name']);
     $pjsip_data[] = array( "keyword" => "sv_trunk_name", "data" => $params['name']);
     $pjsip_data[] = array( "keyword" => "trunk_name", "data" => $params['name']);
