@@ -57,7 +57,7 @@ INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`)
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (1,"dialopts","");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (1,"dialoutopts_cb","sys");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (1,"direct_media","no");
-INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (1,"disabletrunk","on");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (1,"disabletrunk","off");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (1,"dtmfmode","auto");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (1,"expiration","300");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (1,"failtrunk_enable","0");
@@ -110,7 +110,7 @@ INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`)
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (2,"dialopts","");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (2,"dialoutopts_cb","sys");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (2,"direct_media","no");
-INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (2,"disabletrunk","on");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (2,"disabletrunk","off");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (2,"dtmfmode","auto");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (2,"expiration","300");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (2,"failtrunk_enable","0");
@@ -212,7 +212,7 @@ INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`)
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (4,"dialopts","");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (4,"dialoutopts_cb","sys");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (4,"direct_media","no");
-INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (4,"disabletrunk","on");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (4,"disabletrunk","off");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (4,"dtmfmode","auto");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (4,"expiration","300");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (4,"failtrunk_enable","1");
@@ -265,7 +265,7 @@ INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`)
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (5,"dialopts","");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (5,"dialoutopts_cb","sys");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (5,"direct_media","no");
-INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (5,"disabletrunk","on");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (5,"disabletrunk","off");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (5,"dtmfmode","auto");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (5,"expiration","300");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (5,"failtrunk_enable","0");
@@ -318,7 +318,7 @@ INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`)
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (6,"dialopts","");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (6,"dialoutopts_cb","sys");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (6,"direct_media","no");
-INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (6,"disabletrunk","on");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (6,"disabletrunk","off");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (6,"dtmfmode","auto");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (6,"expiration","300");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (6,"failtrunk_enable","0");
@@ -371,7 +371,7 @@ INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`)
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (7,"dialopts","");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (7,"dialoutopts_cb","sys");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (7,"direct_media","no");
-INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (7,"disabletrunk","on");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (7,"disabletrunk","off");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (7,"dtmfmode","auto");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (7,"expiration","300");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (7,"failtrunk_enable","0");
@@ -424,7 +424,7 @@ INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`)
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (8,"dialopts","");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (8,"dialoutopts_cb","sys");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (8,"direct_media","no");
-INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (8,"disabletrunk","on");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (8,"disabletrunk","off");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (8,"dtmfmode","auto");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (8,"expiration","300");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (8,"failtrunk_enable","0");
@@ -477,7 +477,7 @@ INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`)
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (9,"dialopts","");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (9,"dialoutopts_cb","sys");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (9,"direct_media","no");
-INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (9,"disabletrunk","on");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (9,"disabletrunk","off");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (9,"dtmfmode","auto");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (9,"expiration","300");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (9,"failtrunk_enable","0");
@@ -579,7 +579,7 @@ INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`)
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (11,"dialopts","");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (11,"dialoutopts_cb","sys");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (11,"direct_media","no");
-INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (11,"disabletrunk","on");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (11,"disabletrunk","off");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (11,"dtmfmode","auto");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (11,"expiration","300");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (11,"failtrunk_enable","0");
@@ -632,7 +632,7 @@ INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`)
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (12,"dialopts","");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (12,"dialoutopts_cb","sys");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (12,"direct_media","no");
-INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (12,"disabletrunk","on");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (12,"disabletrunk","off");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (12,"dtmfmode","auto");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (12,"expiration","300");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (12,"failtrunk_enable","0");
@@ -685,7 +685,7 @@ INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`)
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (13,"dialopts","");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (13,"dialoutopts_cb","sys");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (13,"direct_media","no");
-INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (13,"disabletrunk","on");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (13,"disabletrunk","off");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (13,"dtmfmode","auto");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (13,"expiration","300");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (13,"failtrunk_enable","0");
@@ -791,7 +791,7 @@ INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`)
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (15,"dialopts","");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (15,"dialoutopts_cb","sys");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (15,"direct_media","no");
-INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (15,"disabletrunk","on");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (15,"disabletrunk","off");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (15,"dtmfmode","auto");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (15,"expiration","300");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (15,"failtrunk_enable","0");
@@ -844,7 +844,7 @@ INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`)
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (16,"dialopts","");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (16,"dialoutopts_cb","or");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (16,"direct_media","no");
-INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (16,"disabletrunk","on");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (16,"disabletrunk","off");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (16,"dtmfmode","auto");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (16,"expiration","300");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (16,"failtrunk_enable","0");
@@ -897,7 +897,7 @@ INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`)
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (17,"dialopts","");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (17,"dialoutopts_cb","sys");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (17,"direct_media","no");
-INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (17,"disabletrunk","on");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (17,"disabletrunk","off");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (17,"dtmfmode","auto");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (17,"expiration","300");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (17,"failtrunk_enable","0");
@@ -950,7 +950,7 @@ INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`)
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (18,"dialopts","");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (18,"dialoutopts_cb","or");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (18,"direct_media","no");
-INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (18,"disabletrunk","on");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (18,"disabletrunk","off");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (18,"dtmfmode","auto");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (18,"expiration","300");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (18,"failtrunk_enable","0");
@@ -1003,7 +1003,7 @@ INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`)
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (19,"dialopts","");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (19,"dialoutopts_cb","sys");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (19,"direct_media","no");
-INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (19,"disabletrunk","on");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (19,"disabletrunk","off");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (19,"dtmfmode","auto");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (19,"expiration","300");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (19,"failtrunk_enable","0");
@@ -1056,7 +1056,7 @@ INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`)
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (20,"dialopts","");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (20,"dialoutopts_cb","sys");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (20,"direct_media","no");
-INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (20,"disabletrunk","on");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (20,"disabletrunk","off");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (20,"dtmfmode","auto");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (20,"expiration","300");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (20,"failtrunk_enable","0");
@@ -1109,7 +1109,7 @@ INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`)
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (21,"dialopts","");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (21,"dialoutopts_cb","sys");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (21,"direct_media","no");
-INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (21,"disabletrunk","on");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (21,"disabletrunk","off");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (21,"dtmfmode","auto");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (21,"expiration","300");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (21,"failtrunk_enable","0");
