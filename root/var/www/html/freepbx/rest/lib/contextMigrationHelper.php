@@ -35,7 +35,7 @@ try {
         // Skip users with hotel context
         $sql = "SELECT `data` FROM `sip` WHERE `keyword`='context' AND `id` IN (SELECT extension FROM rest_devices_phones WHERE user_id = ?)";
         $sth = $db->prepare($sql);
-        $sth->execute($user['id']);
+        $sth->execute([$user['id']]);
         $res = $sth->fetchAll();
         $skip = false;
         foreach ($res as $row) {
