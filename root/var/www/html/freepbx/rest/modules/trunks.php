@@ -50,6 +50,9 @@ $app->get('/trunks', function (Request $request, Response $response, $args) {
         $result = array();
         $trunks = FreePBX::Core()->listTrunks();
         foreach($trunks as $trunk) {
+            // Get trunk username
+            $details = FreePBX::Core()->getTrunkDetails($trunk['trunkid']);
+            $trunk['username'] = $details['username'];
             array_push($result, $trunk);
         }
         return $response->withJson($result,200);
@@ -72,6 +75,9 @@ $app->get('/trunks/{tech}', function (Request $request, Response $response, $arg
 
         foreach($trunks as $trunk) {
             if (strtolower($trunk['tech']) == $tech) {
+                // Get trunk username
+                $details = FreePBX::Core()->getTrunkDetails($trunk['trunkid']);
+                $trunk['username'] = $details['username'];
                 array_push($result, $trunk);
             }
         }
