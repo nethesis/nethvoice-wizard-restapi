@@ -516,21 +516,23 @@ function setCTIUserProfile($user_id,$profile_id){
         $stmt->execute(array($username));
 
         // Set user extensions context based on cti profile
-        $profile = getCTIPermissionProfiles($profile_id);
-        if ($profile['name'] === 'Hotel') {
-            $context_name = 'hotel';
-        } else {
-            $context_name = 'cti-profile-'.$profile_id;
+        if (!empty($profile_id)) {
+            $profile = getCTIPermissionProfiles($profile_id);
+            if ($profile['name'] === 'Hotel') {
+                $context_name = 'hotel';
+            } else {
+                $context_name = 'cti-profile-'.$profile_id;
+            }
+            $sql = 'UPDATE sip SET `data` = ? WHERE ' .
+                   ' `id` IN ( '.
+                   ' SELECT extension COLLATE utf8mb4_unicode_ci FROM rest_devices_phones WHERE user_id = ? ' .
+                   '  UNION ALL ' .
+                   ' SELECT default_extension COLLATE utf8mb4_unicode_ci FROM userman_users WHERE id = ?' .
+                   ' ) AND `keyword` = "context"' .
+                   ' AND (`data` LIKE "cti-profile-%" OR `data` = "from-internal" OR `data` = "hotel")';
+            $stmt = $dbh->prepare($sql);
+            $stmt->execute(array($context_name,$user_id,$user_id));
         }
-        $sql = 'UPDATE sip SET `data` = ? WHERE ' .
-               ' `id` IN ( '.
-               ' SELECT extension COLLATE utf8mb4_unicode_ci FROM rest_devices_phones WHERE user_id = ? ' .
-               '  UNION ALL ' .
-               ' SELECT default_extension COLLATE utf8mb4_unicode_ci FROM userman_users WHERE id = ?' .
-               ' ) AND `keyword` = "context"' .
-               ' AND (`data` LIKE "cti-profile-%" OR `data` = "from-internal" OR `data` = "hotel")';
-        $stmt = $dbh->prepare($sql);
-        $stmt->execute(array($context_name,$user_id,$user_id));
         return TRUE;
     } catch (Exception $e) {
         error_log($e->getMessage());
