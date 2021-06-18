@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.10.1
+Version: 14.12.0
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -42,6 +42,14 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Fri Jun 18 2021 Stefano Fancello <stefano.fancello@nethesis.it> - 14.12.0-1
+- custom context for extensions based on CTI permission profile - nethesis/dev#5979
+- Create VoIP trunks using pjsip instead of chan_sip - nethesis/dev#6002
+- Wizard: add an option to open parameterized URL only for incoming calls through queues - nethesis/dev#5928
+- Add CDR admin and group CDR permissions to reports - nethesis/dev#5991
+- Add WiC VoIP provider (#177)
+- param url cti: manage also opt for only queues (#170)
+
 * Fri Apr 23 2021 Stefano Fancello <stefano.fancello@nethesis.it> - 14.10.1-1
 - Add Nethesis phones to type map and Fanvil RPS provider for Nethesis vendor - nethesis/dev#5956
 
