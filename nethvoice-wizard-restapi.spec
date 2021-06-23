@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.12.0
+Version: 14.12.1
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -42,6 +42,9 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Wed Jun 23 2021 Stefano Fancello <stefano.fancello@nethesis.it> - 14.12.1-1
+- custom context for extensions based on CTI permission profile - nethesis/dev#5979
+
 * Fri Jun 18 2021 Stefano Fancello <stefano.fancello@nethesis.it> - 14.12.0-1
 - custom context for extensions based on CTI permission profile - nethesis/dev#5979
 - Create VoIP trunks using pjsip instead of chan_sip - nethesis/dev#6002
