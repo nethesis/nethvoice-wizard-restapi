@@ -408,7 +408,7 @@ function setCustomContextPermissions($profile_id){
     }
     if (!$context_exists) {
         // Create customcontext for this profile
-        customcontexts_customcontexts_add($context_name, 'CTI Profile '.$profile['name'],null,null,null,null,null);
+        customcontexts_customcontexts_add($context_name, 'CTI Profile '.addslashes($profile['name']),null,null,null,null,null);
         /* set default permission for context*/
         $context_permissions = array();
         foreach (customcontexts_getincludes($context_name) as $val) {

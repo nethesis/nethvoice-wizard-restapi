@@ -51,6 +51,7 @@ try {
         // Assign context to extension for each CTI profile
         setCTIUserProfile($user['id'],$user['profile']);
     }
+    system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
 } catch (Exception $e) {
     error_log($e->getMessage());
     exit (1);
