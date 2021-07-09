@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.12.1
+Version: 14.12.2
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -42,6 +42,9 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Fri Jul 09 2021 Stefano Fancello <stefano.fancello@nethesis.it> - 14.12.2-1
+- Add missing applications from custom contexts - Bug nethesis/dev#6042
+
 * Wed Jun 23 2021 Stefano Fancello <stefano.fancello@nethesis.it> - 14.12.1-1
 - custom context for extensions based on CTI permission profile - nethesis/dev#5979
 
