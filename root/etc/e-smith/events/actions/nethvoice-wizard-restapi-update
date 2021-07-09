@@ -11,9 +11,6 @@ if [[ $(/usr/bin/mysql -B -N -uroot -p$mysql_password asterisk -e "SELECT COUNT(
     /usr/bin/mysql -uroot -p$mysql_password asterisk < /var/www/html/freepbx/rest/sql/cti_default_permissions/cti_permissions.sql
 fi
 
-# Create custom context for CTI profiles and add extensions to them
-/usr/bin/scl enable rh-php56 -- php /var/www/html/freepbx/rest/lib/contextMigrationHelper.php
-
 # Add column if not present
 EXISTS=$(/usr/bin/mysql -uroot -p$mysql_password -se "SHOW COLUMNS FROM asterisk.rest_cti_profiles_paramurl LIKE 'only_queues'");
 if [[ $EXISTS == "" ]]; then
