@@ -75,6 +75,10 @@ function get_displayname($mainextension) {
     return $displayname;
 }
 
+function get_context($mainextension) {
+    return getSipTableData($mainextension,'context');
+}
+
 function get_profile($mainextension) {
     $dbh = FreePBX::Database();
     // Get CTI Profile id
@@ -176,6 +180,24 @@ function post_displayname($mainextensions,$data) {
             $res = $sth->execute(array($displayname,$extension));
             if ($res === FALSE) {
                 $err .= __FUNCTION__." ".$sth->errorInfo()[2];
+            }
+        }
+    }
+    if (isset($err)) {
+        return $err;
+    }
+    return true;
+}
+
+function post_context($mainextensions,$data) {
+    if (is_null($data)) {
+        return true;
+    }
+    foreach ($mainextensions as $mainextension) {
+        foreach (getExtension($mainextension) as $extension) {
+            $res = writeSipTableData($extension,'context',$data);
+            if ($res !== true) {
+                $err .= __FUNCTION__." ".$res."\n";
             }
         }
     }
