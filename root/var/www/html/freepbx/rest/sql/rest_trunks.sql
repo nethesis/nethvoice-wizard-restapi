@@ -46,6 +46,7 @@ INSERT IGNORE INTO `rest_pjsip_providers` (`id`,`provider`,`description`) VALUES
 INSERT IGNORE INTO `rest_pjsip_providers` (`id`,`provider`,`description`) VALUES (20,'voipvoice-user','VoipVoice (user.voipvoice.it)');
 INSERT IGNORE INTO `rest_pjsip_providers` (`id`,`provider`,`description`) VALUES (21,'wicity','WiCity');
 INSERT IGNORE INTO `rest_pjsip_providers` (`id`,`provider`,`description`) VALUES (22,'wic','WiC');
+INSERT IGNORE INTO `rest_pjsip_providers` (`id`,`provider`,`description`) VALUES (23,'xstream','XStream');
 
 /*Active Network*/
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (1,"aor_contact","");
@@ -1205,6 +1206,58 @@ INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`)
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (22,"trust_rpid","no");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (22,"userconfig","");
 
+/* XStream */
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"aor_contact","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"aors","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"auth_rejection_permanent","off");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"authentication","outbound");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"client_uri","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"codecs","ulaw,alaw,g729");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"context","from-pstn-toheader");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"dialopts","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"dialoutopts_cb","sys");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"direct_media","no");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"disabletrunk","off");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"dtmfmode","auto");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"expiration","300");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"failtrunk_enable","0");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"fatal_retry_interval","0");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"fax_detect","no");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"forbidden_retry_interval","10");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"force_rport","yes");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"from_domain","nomecliente.site");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"hcid","on");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"identify_by","default");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"inband_progress","no");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"language","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"match","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"max_retries","10");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"maxchans","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"media_address","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"media_encryption","no");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"message_context","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"npanxx","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"outbound_proxy","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"peerdetails","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"qualify_frequency","60");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"register","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"registration","send");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"retry_interval","60");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"rewrite_contact","yes");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"rtp_symmetric","yes");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"sendrpid","no");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"server_uri","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"sip_server","128.65.200.18");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"sip_server_port","5083");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"support_path","no");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"sv_usercontext","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"t38_udptl","no");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"t38_udptl_ec","none");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"t38_udptl_maxdatagram","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"t38_udptl_nat","no");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"transport","0.0.0.0-udp");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"trust_rpid","no");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (23,"userconfig","");
 /* secret for Opensolution GNR*/
 INSERT IGNORE INTO `rest_pjsip_trunks_specialopts` (`provider_id`,`keyword`,`data`) VALUES (6,'username','');
 
@@ -1214,3 +1267,6 @@ INSERT IGNORE INTO `rest_pjsip_trunks_specialopts` (`provider_id`,`keyword`,`dat
 
 /* Special client_uri for Viatek*/
 INSERT IGNORE INTO `rest_pjsip_trunks_specialopts` (`provider_id`,`keyword`,`data`) VALUES (14,'client_uri','sip:$USERNAME@CHANGE_ME');
+
+/* Special client_uri for XStream*/
+INSERT IGNORE INTO `rest_pjsip_trunks_specialopts` (`provider_id`,`keyword`,`data`) VALUES (23,'client_uri','sip:$USERNAME@nomecliente.site:5083');
