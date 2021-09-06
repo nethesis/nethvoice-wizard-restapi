@@ -17,16 +17,6 @@ profile r2 default
 
 profile ppp default
 
-profile call-progress-tone defaultDialtone
-  play 1 200 425 0
-  pause 2 200
-  play 3 600 425 0
-  pause 4 1000
-
-profile call-progress-tone defaultBusytone
-  play 1 200 425 -7
-  pause 2 200
-
 profile tone-set default
 
 profile voip default

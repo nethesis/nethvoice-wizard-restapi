@@ -35,7 +35,7 @@ profile call-progress-tone IT_Busytone
 
 profile call-progress-tone IT_Congestion
   play 1 200 425 -12
-  pause 2 200
+  pause 2 250
 
 profile tone-set default
   map call-progress-tone dial-tone IT_Dialtone
