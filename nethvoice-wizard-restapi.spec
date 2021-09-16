@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.12.2
+Version: 14.13.0
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -42,6 +42,11 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Thu Sep 16 2021 Stefano Fancello <stefano.fancello@nethesis.it> - 14.13.0-1
+- Add 00:A8:59 Mac to Tancredi as Fanvil phones  - nethesis/dev#6043
+- Change CTI profile instead of context into bulk extensions - nethesis/dev#6032
+- Add XStream VoIP trunks provider
+
 * Fri Jul 09 2021 Stefano Fancello <stefano.fancello@nethesis.it> - 14.12.2-1
 - Add missing applications from custom contexts - Bug nethesis/dev#6042
 
