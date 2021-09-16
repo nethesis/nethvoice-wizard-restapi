@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.13.0
+Version: 14.13.1
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -42,6 +42,9 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Thu Sep 16 2021 Stefano Fancello <stefano.fancello@nethesis.it> - 14.13.1-1
+- Fix congestion tone for Patton (#183)
+
 * Thu Sep 16 2021 Stefano Fancello <stefano.fancello@nethesis.it> - 14.13.0-1
 - Add 00:A8:59 Mac to Tancredi as Fanvil phones  - nethesis/dev#6043
 - Change CTI profile instead of context into bulk extensions - nethesis/dev#6032
