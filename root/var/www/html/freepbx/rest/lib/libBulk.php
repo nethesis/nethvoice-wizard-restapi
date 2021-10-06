@@ -19,7 +19,7 @@
 # along with NethServer.  If not, see COPYING.
 #
 
-include_once 'var/www/html/freepbx/rest/lib/libCTI.php';
+include_once '/var/www/html/freepbx/rest/lib/libCTI.php';
 
 function getExtension($extension) {
     $extensions = FreePBX::create()->Core->getAllUsers();
