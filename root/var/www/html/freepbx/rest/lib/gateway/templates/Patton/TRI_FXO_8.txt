@@ -125,14 +125,14 @@ context cs SWITCH
 	map TRUNKNUMBER8(.%) to \1
 
   routing-table called-e164 to_fxo
-    route TRUNKNUMBER1.% dest-interface IF_FXO_0 cutpref
-    route TRUNKNUMBER2.% dest-interface IF_FXO_1 cutpref
-    route TRUNKNUMBER3.% dest-interface IF_FXO_2 cutpref
-    route TRUNKNUMBER4.% dest-interface IF_FXO_3 cutpref
-	route TRUNKNUMBER5.% dest-interface IF_FXO_4 cutpref
-	route TRUNKNUMBER6.% dest-interface IF_FXO_5 cutpref
-	route TRUNKNUMBER7.% dest-interface IF_FXO_6 cutpref
-	route TRUNKNUMBER8.% dest-interface IF_FXO_7 cutpref
+    route TRUNKNUMBER1.% dest-service OUTSERV0 cutpref
+    route TRUNKNUMBER2.% dest-service OUTSERV1 cutpref
+    route TRUNKNUMBER3.% dest-service OUTSERV2 cutpref
+    route TRUNKNUMBER4.% dest-service OUTSERV3 cutpref
+	route TRUNKNUMBER5.% dest-service OUTSERV4 cutpref
+	route TRUNKNUMBER6.% dest-service OUTSERV5 cutpref
+	route TRUNKNUMBER7.% dest-service OUTSERV6 cutpref
+	route TRUNKNUMBER8.% dest-service OUTSERV7 cutpref
 
   interface fxo IF_FXO_0
     dial after 1 seconds
@@ -221,6 +221,102 @@ context cs SWITCH
     remote ASTERISKIP 5060
     early-disconnect
     trust remote
+
+  service hunt-group OUTSERV0
+    drop-cause normal-unspecified
+    drop-cause no-circuit-channel-available
+    drop-cause network-out-of-order
+    drop-cause temporary-failure
+    drop-cause switching-equipment-congestion
+    drop-cause access-info-discarded
+    drop-cause circuit-channel-not-available
+    drop-cause resources-unavailable
+    drop-cause user-busy
+    route call 1 dest-interface IF_FXO_0
+
+   service hunt-group OUTSERV1
+    drop-cause normal-unspecified
+    drop-cause no-circuit-channel-available
+    drop-cause network-out-of-order
+    drop-cause temporary-failure
+    drop-cause switching-equipment-congestion
+    drop-cause access-info-discarded
+    drop-cause circuit-channel-not-available
+    drop-cause resources-unavailable
+    drop-cause user-busy
+    route call 1 dest-interface IF_FXO_1
+
+   service hunt-group OUTSERV2
+    drop-cause normal-unspecified
+    drop-cause no-circuit-channel-available
+    drop-cause network-out-of-order
+    drop-cause temporary-failure
+    drop-cause switching-equipment-congestion
+    drop-cause access-info-discarded
+    drop-cause circuit-channel-not-available
+    drop-cause resources-unavailable
+    drop-cause user-busy
+    route call 1 dest-interface IF_FXO_2
+
+   service hunt-group OUTSERV3
+    drop-cause normal-unspecified
+    drop-cause no-circuit-channel-available
+    drop-cause network-out-of-order
+    drop-cause temporary-failure
+    drop-cause switching-equipment-congestion
+    drop-cause access-info-discarded
+    drop-cause circuit-channel-not-available
+    drop-cause resources-unavailable
+    drop-cause user-busy
+    route call 1 dest-interface IF_FXO_3
+
+  service hunt-group OUTSERV4
+    drop-cause normal-unspecified
+    drop-cause no-circuit-channel-available
+    drop-cause network-out-of-order
+    drop-cause temporary-failure
+    drop-cause switching-equipment-congestion
+    drop-cause access-info-discarded
+    drop-cause circuit-channel-not-available
+    drop-cause resources-unavailable
+    drop-cause user-busy
+    route call 1 dest-interface IF_FXO_4
+
+   service hunt-group OUTSERV5
+    drop-cause normal-unspecified
+    drop-cause no-circuit-channel-available
+    drop-cause network-out-of-order
+    drop-cause temporary-failure
+    drop-cause switching-equipment-congestion
+    drop-cause access-info-discarded
+    drop-cause circuit-channel-not-available
+    drop-cause resources-unavailable
+    drop-cause user-busy
+    route call 1 dest-interface IF_FXO_5
+
+   service hunt-group OUTSERV6
+    drop-cause normal-unspecified
+    drop-cause no-circuit-channel-available
+    drop-cause network-out-of-order
+    drop-cause temporary-failure
+    drop-cause switching-equipment-congestion
+    drop-cause access-info-discarded
+    drop-cause circuit-channel-not-available
+    drop-cause resources-unavailable
+    drop-cause user-busy
+    route call 1 dest-interface IF_FXO_6
+
+   service hunt-group OUTSERV7
+    drop-cause normal-unspecified
+    drop-cause no-circuit-channel-available
+    drop-cause network-out-of-order
+    drop-cause temporary-failure
+    drop-cause switching-equipment-congestion
+    drop-cause access-info-discarded
+    drop-cause circuit-channel-not-available
+    drop-cause resources-unavailable
+    drop-cause user-busy
+    route call 1 dest-interface IF_FXO_7
 
 context cs SWITCH
   no shutdown
