@@ -119,8 +119,8 @@ context cs SWITCH
     map TRUNKNUMBER2(.%) to \1
 
   routing-table called-e164 to_fxo
-    route TRUNKNUMBER1.% dest-interface IF_FXO_0 cutpref
-    route TRUNKNUMBER2.% dest-interface IF_FXO_1 cutpref
+    route TRUNKNUMBER1.% dest-service OUTSERV0 cutpref
+    route TRUNKNUMBER2.% dest-service OUTSERV1 cutpref
 
   interface fxo IF_FXO_0
     dial after 1 seconds
@@ -143,6 +143,30 @@ context cs SWITCH
     remote ASTERISKIP 5060
     early-disconnect
     trust remote
+
+  service hunt-group OUTSERV0
+    drop-cause normal-unspecified
+    drop-cause no-circuit-channel-available
+    drop-cause network-out-of-order
+    drop-cause temporary-failure
+    drop-cause switching-equipment-congestion
+    drop-cause access-info-discarded
+    drop-cause circuit-channel-not-available
+    drop-cause resources-unavailable
+    drop-cause user-busy
+    route call 1 dest-interface IF_FXO_0
+
+   service hunt-group OUTSERV1
+    drop-cause normal-unspecified
+    drop-cause no-circuit-channel-available
+    drop-cause network-out-of-order
+    drop-cause temporary-failure
+    drop-cause switching-equipment-congestion
+    drop-cause access-info-discarded
+    drop-cause circuit-channel-not-available
+    drop-cause resources-unavailable
+    drop-cause user-busy
+    route call 1 dest-interface IF_FXO_1
 
 context cs SWITCH
   no shutdown
