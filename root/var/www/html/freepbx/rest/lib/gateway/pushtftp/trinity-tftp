@@ -38,9 +38,9 @@ send "enable\r"
 expect "#"
 send "copy tftp://$tftpip/$filename config:tmp-config\r"
 expect "#"
+sleep 5
 send "copy config:tmp-config startup-config\r"
 expect "#"
-sleep 5
 send "reload\r"
 expect "#"
 send "yes\r"
