@@ -16,3 +16,6 @@ EXISTS=$(/usr/bin/mysql -uroot -p$mysql_password -se "SHOW COLUMNS FROM asterisk
 if [[ $EXISTS == "" ]]; then
     $(/usr/bin/mysql -uroot -p$mysql_password -e "ALTER TABLE asterisk.rest_cti_profiles_paramurl ADD COLUMN only_queues TINYINT(1) NOT NULL DEFAULT 0");
 fi
+
+# Update astdb accountcode if it is needed #6086
+/usr/bin/scl enable rh-php56 -- php /var/www/html/freepbx/rest/lib/AccountcodeFixer.php
