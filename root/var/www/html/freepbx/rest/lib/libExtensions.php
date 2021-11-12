@@ -138,6 +138,8 @@ function createExtension($mainextensionnumber,$delete=false){
         $sql = 'UPDATE IGNORE `sip` SET `data` = ? WHERE `id` = ? AND `keyword` = "accountcode"';
         $stmt = $dbh->prepare($sql);
         $stmt->execute(array($mainextensionnumber,$extension));
+        // Set accountcode also in astdb
+        $astman->database_put("AMPUSER",$extension."/accountcode",$mainextensionnumber);
 
         // disable directmedia
         $sql = 'UPDATE IGNORE `sip` SET `data` = "no" WHERE `id` = ? AND `keyword` = "direct_media"';
