@@ -29,7 +29,7 @@ require_once(__DIR__. '/../../admin/modules/core/functions.inc.php');
 $app->get('/providers', function (Request $request, Response $response, $args) {
     try {
         global $db;
-        $sql = 'SELECT * FROM `rest_pjsip_providers`';
+        $sql = 'SELECT * FROM `rest_pjsip_providers` ORDER BY `description`';
         $results = $db->getAll($sql, DB_FETCHMODE_ASSOC);
         if(DB::IsError($results)) {
             throw new Exception($results->getMessage());
