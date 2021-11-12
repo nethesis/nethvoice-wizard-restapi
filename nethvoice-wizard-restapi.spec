@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.13.1
+Version: 14.13.2
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -42,6 +42,14 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Fri Nov 12 2021 Stefano Fancello <stefano.fancello@nethesis.it> - 14.13.2-1
+- Accountcode not properly setted by NethVoice - Bug nethesis/dev#6086
+- NethVoice14: add Digitalia ICT as VoIP Provider - nethesis/dev#6087
+- Patton Trinity - configuration not autoloaded first time - Bug nethesis/dev#6077
+- Patton Trinity FXO incorrect handle of outbound busy line - Bug nethesis/dev#6076
+- Trunks: raised the max retries value to 10k for long connectivity issue (#185)
+- Add Trinity analog Patton 2,4,8 ports (#184)
+
 * Thu Sep 16 2021 Stefano Fancello <stefano.fancello@nethesis.it> - 14.13.1-1
 - Fix congestion tone for Patton (#183)
 
