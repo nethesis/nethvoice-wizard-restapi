@@ -322,6 +322,12 @@ function getCTIPermissions(){
                 }
             }
         }
+
+        $results['outbound_routes'] = array();
+        foreach ($dbh->sql('SELECT route_id,name FROM outbound_routes',"getAll",\PDO::FETCH_ASSOC) as $outbound_route) {
+            $results['outbound_routes'][] = array('route_id' => $outbound_route['route_id'], 'name' => $outbound_route['name']);
+        }
+
         return $results;
     } catch (Exception $e) {
         error_log($e->getMessage());
