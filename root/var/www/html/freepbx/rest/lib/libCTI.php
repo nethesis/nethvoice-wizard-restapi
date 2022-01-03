@@ -194,6 +194,9 @@ function getCTIPermissionProfiles($profileId=false, $minified=false, $printnull=
             deleteQueuePermissionsForDeletedQueue($permissions);
         }
 
+        // Get all available outbound routes
+        $outbound_routes = $dbh->sql('SELECT * FROM outbound_routes',"getAll",\PDO::FETCH_ASSOC);
+
         foreach ($profiles as $profile) {
             $id = $profile['id'];
             // Get profile macro permissions
@@ -242,6 +245,26 @@ function getCTIPermissionProfiles($profileId=false, $minified=false, $printnull=
                 }
             } else {
                 unset($results[$id]['macro_permissions']['qmanager']);
+            }
+
+            // Add profile outbound routes
+            $results[$id]['outbound_routes_permissions'] = array();
+            $sql = 'SELECT outbound_routes.route_id AS route_id,outbound_routes.name AS name,rest_cti_profiles_routes_permission.permission AS permission FROM outbound_routes JOIN rest_cti_profiles_routes_permission ON rest_cti_profiles_routes_permission.route_id = outbound_routes.route_id WHERE profile_id = ?';
+            $sth = $dbh->prepare($sql);
+            $sth->execute(array($id));
+            foreach ($sth->fetchAll(\PDO::FETCH_ASSOC) as $outbound_routes_permission) {
+                $results[$id]['outbound_routes_permissions'][$outbound_routes_permission['route_id']] = array(
+                    'name' => $outbound_routes_permission['name'],
+                    'permission' => $outbound_routes_permission['permission']
+                );
+            }
+            // Add profile outbound routes defaults
+            $DEFAULT_OUTBOUND_PERMISSION = true;
+            foreach ($outbound_routes as $outbound_route) {
+                if (!isset($results[$id]['outbound_routes_permissions'][$outbound_route['route_id']]) || is_null($results[$id]['outbound_routes_permissions'][$outbound_routes_permission['route_id']]['permission']) ) {
+                    $results[$id]['outbound_routes_permissions'][$outbound_route['route_id']]['name'] = $outbound_route['name'];
+                    $results[$id]['outbound_routes_permissions'][$outbound_route['route_id']]['permission'] = $DEFAULT_OUTBOUND_PERMISSION;
+                }
             }
         }
         if (!$profileId) {
