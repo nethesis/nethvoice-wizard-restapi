@@ -253,7 +253,8 @@ function getCTIPermissionProfiles($profileId=false, $minified=false, $printnull=
             $sth = $dbh->prepare($sql);
             $sth->execute(array($id));
             foreach ($sth->fetchAll(\PDO::FETCH_ASSOC) as $outbound_routes_permission) {
-                $results[$id]['outbound_routes_permissions'][$outbound_routes_permission['route_id']] = array(
+                $results[$id]['outbound_routes_permissions'][] = array(
+                    'route_id' => $outbound_routes_permission['route_id'],
                     'name' => $outbound_routes_permission['name'],
                     'permission' => $outbound_routes_permission['permission']
                 );
@@ -261,9 +262,17 @@ function getCTIPermissionProfiles($profileId=false, $minified=false, $printnull=
             // Add profile outbound routes defaults
             $DEFAULT_OUTBOUND_PERMISSION = true;
             foreach ($outbound_routes as $outbound_route) {
-                if (!isset($results[$id]['outbound_routes_permissions'][$outbound_route['route_id']]) || is_null($results[$id]['outbound_routes_permissions'][$outbound_routes_permission['route_id']]['permission']) ) {
-                    $results[$id]['outbound_routes_permissions'][$outbound_route['route_id']]['name'] = $outbound_route['name'];
-                    $results[$id]['outbound_routes_permissions'][$outbound_route['route_id']]['permission'] = $DEFAULT_OUTBOUND_PERMISSION;
+                $index = array_search($outbound_route['route_id'], array_column($results[$id]['outbound_routes_permissions'],'route_id'));
+                if ($index !== false && is_null($results[$id]['outbound_routes_permissions'][$index]['permission'])) {
+                    unset($results[$id]['outbound_routes_permissions'][$index]);
+                    $index = false;
+                }
+                if ($index === false) {
+                    $results[$id]['outbound_routes_permissions'][] = array(
+                        'route_id' => $outbound_route['route_id'],
+                        'name' => $outbound_route['name'],
+                        'permission' => $DEFAULT_OUTBOUND_PERMISSION
+                    );
                 }
             }
         }
@@ -405,6 +414,22 @@ function postCTIProfile($profile, $id=false){
                         }
                     }
                 }
+            }
+            // Add outbound routes permissions
+            $sql = 'DELETE FROM rest_cti_profiles_routes_permission WHERE profile_id = ?';
+            $sth = $dbh->prepare($sql);
+            $sth->execute([$id]);
+            if (!empty($profile['outbound_routes_permissions'])) {
+                $sql = 'INSERT INTO rest_cti_profiles_routes_permission (profile_id,route_id,permission) VALUES ';
+                $qm = [];
+                $values = [];
+                foreach ($profile['outbound_routes_permissions'] as $outbound_route) {
+                    $qm[] = '(?,?,?)';
+                    $values = array_merge($values,[$id,$outbound_route['route_id'],$outbound_route['permission']]);
+                }
+                $sql .= implode(',',$qm);
+                $sth = $dbh->prepare($sql);
+                $sth->execute($values);
             }
         }
 
