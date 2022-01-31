@@ -256,7 +256,7 @@ function getCTIPermissionProfiles($profileId=false, $minified=false, $printnull=
                 $results[$id]['outbound_routes_permissions'][] = array(
                     'route_id' => $outbound_routes_permission['route_id'],
                     'name' => $outbound_routes_permission['name'],
-                    'permission' => $outbound_routes_permission['permission']
+                    'permission' => (boolean) $outbound_routes_permission['permission']
                 );
             }
             // Add profile outbound routes defaults
@@ -271,7 +271,7 @@ function getCTIPermissionProfiles($profileId=false, $minified=false, $printnull=
                     $results[$id]['outbound_routes_permissions'][] = array(
                         'route_id' => $outbound_route['route_id'],
                         'name' => $outbound_route['name'],
-                        'permission' => $DEFAULT_OUTBOUND_PERMISSION
+                        'permission' => (boolean) $DEFAULT_OUTBOUND_PERMISSION
                     );
                 }
             }
