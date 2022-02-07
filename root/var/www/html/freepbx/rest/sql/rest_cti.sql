@@ -99,6 +99,20 @@ CREATE TABLE IF NOT EXISTS `rest_cti_streaming` (
   PRIMARY KEY (`descr`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+/*Create Profiles-routes permissions table*/
+CREATE TABLE IF NOT EXISTS `rest_cti_profiles_routes_permission`(
+  `profile_id` INT UNSIGNED NOT NULL,
+  `route_id` INT(11) NOT NULL,
+  `permission` TINYINT(1),
+  FOREIGN KEY (`profile_id`) REFERENCES `rest_cti_profiles`(`id`)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+  FOREIGN KEY (`route_id`) REFERENCES `outbound_routes`(`route_id`)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+  UNIQUE KEY `line` (`profile_id`,`route_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 /*Macro permissions*/
 INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (1,'settings','Settings','General and notifications settings');
 INSERT IGNORE INTO `rest_cti_macro_permissions` VALUES (2,'phonebook','Phonebook','View Phonebook, add contacts, modify and delete own contacts');

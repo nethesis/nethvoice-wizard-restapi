@@ -194,6 +194,9 @@ function getCTIPermissionProfiles($profileId=false, $minified=false, $printnull=
             deleteQueuePermissionsForDeletedQueue($permissions);
         }
 
+        // Get all available outbound routes
+        $outbound_routes = $dbh->sql('SELECT * FROM outbound_routes',"getAll",\PDO::FETCH_ASSOC);
+
         foreach ($profiles as $profile) {
             $id = $profile['id'];
             // Get profile macro permissions
@@ -242,6 +245,35 @@ function getCTIPermissionProfiles($profileId=false, $minified=false, $printnull=
                 }
             } else {
                 unset($results[$id]['macro_permissions']['qmanager']);
+            }
+
+            // Add profile outbound routes
+            $results[$id]['outbound_routes_permissions'] = array();
+            $sql = 'SELECT outbound_routes.route_id AS route_id,outbound_routes.name AS name,rest_cti_profiles_routes_permission.permission AS permission FROM outbound_routes JOIN rest_cti_profiles_routes_permission ON rest_cti_profiles_routes_permission.route_id = outbound_routes.route_id WHERE profile_id = ?';
+            $sth = $dbh->prepare($sql);
+            $sth->execute(array($id));
+            foreach ($sth->fetchAll(\PDO::FETCH_ASSOC) as $outbound_routes_permission) {
+                $results[$id]['outbound_routes_permissions'][] = array(
+                    'route_id' => $outbound_routes_permission['route_id'],
+                    'name' => $outbound_routes_permission['name'],
+                    'permission' => (boolean) $outbound_routes_permission['permission']
+                );
+            }
+            // Add profile outbound routes defaults
+            $DEFAULT_OUTBOUND_PERMISSION = true;
+            foreach ($outbound_routes as $outbound_route) {
+                $index = array_search($outbound_route['route_id'], array_column($results[$id]['outbound_routes_permissions'],'route_id'));
+                if ($index !== false && is_null($results[$id]['outbound_routes_permissions'][$index]['permission'])) {
+                    unset($results[$id]['outbound_routes_permissions'][$index]);
+                    $index = false;
+                }
+                if ($index === false) {
+                    $results[$id]['outbound_routes_permissions'][] = array(
+                        'route_id' => $outbound_route['route_id'],
+                        'name' => $outbound_route['name'],
+                        'permission' => (boolean) $DEFAULT_OUTBOUND_PERMISSION
+                    );
+                }
             }
         }
         if (!$profileId) {
@@ -299,6 +331,12 @@ function getCTIPermissions(){
                 }
             }
         }
+
+        $results['outbound_routes'] = array();
+        foreach ($dbh->sql('SELECT route_id,name FROM outbound_routes',"getAll",\PDO::FETCH_ASSOC) as $outbound_route) {
+            $results['outbound_routes'][] = array('route_id' => $outbound_route['route_id'], 'name' => $outbound_route['name']);
+        }
+
         return $results;
     } catch (Exception $e) {
         error_log($e->getMessage());
@@ -377,6 +415,22 @@ function postCTIProfile($profile, $id=false){
                     }
                 }
             }
+            // Add outbound routes permissions
+            $sql = 'DELETE FROM rest_cti_profiles_routes_permission WHERE profile_id = ?';
+            $sth = $dbh->prepare($sql);
+            $sth->execute([$id]);
+            if (!empty($profile['outbound_routes_permissions'])) {
+                $sql = 'INSERT INTO rest_cti_profiles_routes_permission (profile_id,route_id,permission) VALUES ';
+                $qm = [];
+                $values = [];
+                foreach ($profile['outbound_routes_permissions'] as $outbound_route) {
+                    $qm[] = '(?,?,?)';
+                    $values = array_merge($values,[$id,$outbound_route['route_id'],$outbound_route['permission']]);
+                }
+                $sql .= implode(',',$qm);
+                $sth = $dbh->prepare($sql);
+                $sth->execute($values);
+            }
         }
 
         setCustomContextPermissions($id);
@@ -439,6 +493,29 @@ function setCustomContextPermissions($profile_id){
             }
         }
     }
+
+    /* Set outbound routes permissions */
+    if (!isset($profile['outbound_routes_permissions'])) {
+        // Enable "all outbound routes" permission for profiles backward compatibility
+        $context_permissions['outbound-allroutes']['allow'] = "yes";
+    } else {
+        // Disable "all outbound routes" permission
+        $context_permissions['outbound-allroutes']['allow'] = "no";
+
+        // Add permissions for each route
+        // Get all available outbound routes
+        $dbh = FreePBX::Database();
+        $outbound_routes = $dbh->sql('SELECT * FROM outbound_routes',"getAll",\PDO::FETCH_ASSOC);
+        foreach ($outbound_routes as $outbound_route) {
+            $index = array_search($outbound_route['route_id'], array_column($profile['outbound_routes_permissions'],'route_id'));
+            if ($index !== false && $profile['outbound_routes_permissions'][$index]['permission'] == false) {
+                $context_permissions['outrt-'.$outbound_route['route_id']]['allow'] = "no";
+            } else {
+                $context_permissions['outrt-'.$outbound_route['route_id']]['allow'] = "yes";
+            }
+        }
+    }
+
     // Get context data
     $context = customcontexts_customcontexts_get($context_name);
     // Set permissions
