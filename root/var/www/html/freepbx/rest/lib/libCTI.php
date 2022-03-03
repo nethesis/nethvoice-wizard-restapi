@@ -495,7 +495,9 @@ function setCustomContextPermissions($profile_id){
     }
 
     /* Set outbound routes permissions */
-    if (!isset($profile['outbound_routes_permissions'])) {
+    $dbh = FreePBX::Database();
+    $outbound_routes = $dbh->sql('SELECT * FROM outbound_routes',"getAll",\PDO::FETCH_ASSOC);
+    if (!isset($profile['outbound_routes_permissions']) || empty($outbound_routes)) {
         // Enable "all outbound routes" permission for profiles backward compatibility
         $context_permissions['outbound-allroutes']['allow'] = "yes";
     } else {
@@ -504,8 +506,6 @@ function setCustomContextPermissions($profile_id){
 
         // Add permissions for each route
         // Get all available outbound routes
-        $dbh = FreePBX::Database();
-        $outbound_routes = $dbh->sql('SELECT * FROM outbound_routes',"getAll",\PDO::FETCH_ASSOC);
         foreach ($outbound_routes as $outbound_route) {
             $index = array_search($outbound_route['route_id'], array_column($profile['outbound_routes_permissions'],'route_id'));
             if ($index !== false && $profile['outbound_routes_permissions'][$index]['permission'] == false) {
