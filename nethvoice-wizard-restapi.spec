@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.15.0
+Version: 14.15.1
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -42,6 +42,9 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Thu Mar 03 2022 Stefano Fancello <stefano.fancello@nethesis.it> - 14.15.1-1
+- Allow all outbound routes in contexts if there aren't any configured (#194)
+
 * Wed Feb 16 2022 Stefano Fancello <stefano.fancello@nethesis.it> - 14.15.0-1
 - Add outbound routes permisisons in CTI profiles - nethesis/dev#6103
 
