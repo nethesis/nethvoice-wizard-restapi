@@ -260,7 +260,6 @@ $app->post('/configuration/googleauth', function (Request $request, Response $re
             return $response->withStatus(200);
         }
     } catch (Exception $e) {
-        //error_log($e->getMessage());
         $response->write('Error:' . $e->getMessage());
         return $response->withStatus(500);
     }
