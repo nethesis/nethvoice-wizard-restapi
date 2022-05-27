@@ -228,3 +228,40 @@ $app->post('/configuration/localnetworks', function (Request $request, Response 
     return $response->withStatus(500);
 });
 
+#
+# POST /configuration/googlestt/<enabled|disabled>
+#
+# enable or disable google speech STT for voicemail attachment
+#
+$app->post('/configuration/googlestt', function (Request $request, Response $response, $args) {
+    $params = $request->getParsedBody();
+    $status = $params['status'];
+
+    if ($status == 'enabled' || $status == 'disabled') {
+        if (\FreePBX::Voicemail()->setConfig('googlestt',$status)) {
+            return $response->withStatus(200);
+        }
+    }
+    return $response->withStatus(500);
+});
+
+#
+# POST /configuration/googleauth
+#
+# upload the google's auth json file into a specific directory
+#
+$app->post('/configuration/googleauth', function (Request $request, Response $response, $args) {
+    try {
+        $uploadedFiles = $request->getUploadedFiles();
+        $uploadedFile = $uploadedFiles['file'];
+        if ($uploadedFile->getError() === UPLOAD_ERR_OK) {
+            //$uploadedFile->moveTo(__DIR__ . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . $uploadedFile->getClientFilename());
+            $uploadedFile->moveTo("/usr/src/google_speech_php/" . $uploadedFile->getClientFilename());
+            return $response->withStatus(200);
+        }
+    } catch (Exception $e) {
+        //error_log($e->getMessage());
+        $response->write('Error:' . $e->getMessage());
+        return $response->withStatus(500);
+    }
+});
