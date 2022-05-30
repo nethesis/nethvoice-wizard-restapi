@@ -229,20 +229,29 @@ $app->post('/configuration/localnetworks', function (Request $request, Response 
 });
 
 #
-# POST /configuration/googlestt/<enabled|disabled>
+# POST /configuration/voicemailgooglestt/<enabled|disabled>
 #
 # enable or disable google speech STT for voicemail attachment
 #
-$app->post('/configuration/googlestt', function (Request $request, Response $response, $args) {
-    $params = $request->getParsedBody();
-    $status = $params['status'];
-
+$app->post('/configuration/voicemailgooglestt/{status:enabled|disabled}', function (Request $request, Response $response, $args) {
+    $route = $request->getAttribute('route');
+    $status = $route->getArgument('status');
     if ($status == 'enabled' || $status == 'disabled') {
         if (\FreePBX::Voicemail()->setConfig('googlestt',$status)) {
             return $response->withStatus(200);
         }
     }
     return $response->withStatus(500);
+});
+
+#
+# GET /configuration/voicemailgooglestt
+#
+# return google speech STT for voicemail attachment status
+#
+$app->get('/configuration/voicemailgooglestt', function (Request $request, Response $response, $args) {
+    $status = \FreePBX::Voicemail()->getConfig('googlestt');
+    return $response->withJson($status,200);
 });
 
 #
@@ -254,13 +263,16 @@ $app->post('/configuration/googleauth', function (Request $request, Response $re
     try {
         $uploadedFiles = $request->getUploadedFiles();
         $uploadedFile = $uploadedFiles['file'];
-        if ($uploadedFile->getError() === UPLOAD_ERR_OK) {
-            //$uploadedFile->moveTo(__DIR__ . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . $uploadedFile->getClientFilename());
-            $uploadedFile->moveTo("/usr/src/google_speech_php/" . $uploadedFile->getClientFilename());
-            return $response->withStatus(200);
+        $base64csv = preg_replace('/^data:[a-z\.\-\/]*;base64,/','',$uploadedFile->getStream());
+        $currentfile = '/home/asterisk/' . $uploadedFile->getClientFilename();
+        if (file_exists($currentfile)) {
+            unlink($currentfile);
         }
+        $str = base64_decode($base64csv);
+        file_put_contents($currentfile, $str);
+        return $response->withStatus(200);
     } catch (Exception $e) {
-        $response->write('Error:' . $e->getMessage());
+        error_log($e->getMessage());
         return $response->withStatus(500);
     }
 });

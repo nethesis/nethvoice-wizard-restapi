@@ -902,10 +902,16 @@ enable or disable access to SIPS from red interfaces (and to RTP ports)
 ### enable or disable google speech STT for voicemail attachment
 
 ```
-POST /configuration/googlestt/<enabled|disabled>
+POST /configuration/voicemailgooglestt/<enabled|disabled>
 ```
 
 "enabled" or "disabled" google speech recognition feature for voicemail attachment
+
+```
+GET /configuration/voicemailgooglestt
+```
+
+return google speech STT for voicemail attachment status. Valid values "enabled" or "disabled"
 
 ```
 POST /configuration/googleauth
