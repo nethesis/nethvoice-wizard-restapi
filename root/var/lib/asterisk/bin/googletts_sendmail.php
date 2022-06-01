@@ -1,7 +1,6 @@
 #!/usr/bin/env php
 
 <?php
-//error_reporting(E_ALL);
 include "/etc/freepbx.conf";
 // Include Speech To Text Google libraries
 require_once '/usr/src/google_speech_php/vendor/autoload.php';
