@@ -236,10 +236,17 @@ $app->post('/configuration/localnetworks', function (Request $request, Response 
 $app->post('/configuration/voicemailgooglestt/{status:enabled|disabled}', function (Request $request, Response $response, $args) {
     $route = $request->getAttribute('route');
     $status = $route->getArgument('status');
-    if ($status == 'enabled' || $status == 'disabled') {
-        if (\FreePBX::Voicemail()->setConfig('googlestt',$status)) {
-            return $response->withStatus(200);
-        }
+    if ($status == 'enabled') {
+        $vm = \FreePBX::Voicemail()->getVoicemail(false);
+        $vm['general']['mailcmd'] = '/var/lib/asterisk/bin/googletts_sendmail.php';
+        \FreePBX::Voicemail()->saveVoicemail($vm);
+        return $response->withStatus(200);
+
+    } else if ($status == 'disabled') {
+        $vm = \FreePBX::Voicemail()->getVoicemail(false);
+        unset($vm['general']['mailcmd']);
+        \FreePBX::Voicemail()->saveVoicemail($vm);
+        return $response->withStatus(200);
     }
     return $response->withStatus(500);
 });
@@ -250,7 +257,11 @@ $app->post('/configuration/voicemailgooglestt/{status:enabled|disabled}', functi
 # return google speech STT for voicemail attachment status
 #
 $app->get('/configuration/voicemailgooglestt', function (Request $request, Response $response, $args) {
-    $status = \FreePBX::Voicemail()->getConfig('googlestt');
+    $status = "disabled";
+    $vm = \FreePBX::Voicemail()->getVoicemail(false);
+    if ($vm['general']['mailcmd'] == "/var/lib/asterisk/bin/googletts_sendmail.php") {
+        $status = "enabled";
+    }
     return $response->withJson($status,200);
 });
 
