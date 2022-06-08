@@ -241,7 +241,7 @@ $app->post('/configuration/voicemailgooglestt/{status:enabled|disabled}', functi
         if ( !file_exists('/home/asterisk/google-auth.json')) {
             return $response->withJson('Missing authentication file',412);
         }
-        $vm['general']['mailcmd'] = '/var/lib/asterisk/bin/googletts_sendmail.php';
+        $vm['general']['mailcmd'] = '/var/lib/asterisk/bin/googlestt_sendmail.php';
         \FreePBX::Voicemail()->saveVoicemail($vm);
         return $response->withStatus(200);
 
