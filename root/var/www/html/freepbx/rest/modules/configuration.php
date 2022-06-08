@@ -274,7 +274,7 @@ $app->post('/configuration/googleauth', function (Request $request, Response $re
         $uploadedFiles = $request->getUploadedFiles();
         $uploadedFile = $uploadedFiles['file'];
         $base64csv = preg_replace('/^data:[a-z\.\-\/]*;base64,/','',$uploadedFile->getStream());
-        $currentfile = '/home/asterisk/' . $uploadedFile->getClientFilename();
+        $currentfile = '/home/asterisk/google-auth.json';
         if (file_exists($currentfile)) {
             unlink($currentfile);
         }
