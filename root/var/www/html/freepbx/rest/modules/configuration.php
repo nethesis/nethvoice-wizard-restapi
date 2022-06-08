@@ -279,7 +279,7 @@ $app->post('/configuration/googleauth', function (Request $request, Response $re
         if (file_exists($currentfile)) {
             unlink($currentfile);
         }
-        $str = base64_decode($base64csv);
+        $str = base64_decode($base64file);
         file_put_contents($currentfile, $str);
         return $response->withStatus(200);
     } catch (Exception $e) {
