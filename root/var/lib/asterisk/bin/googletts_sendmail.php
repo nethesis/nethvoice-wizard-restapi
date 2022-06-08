@@ -198,4 +198,3 @@ $cmdReturn = trim(shell_exec($shellCmd));
 # remove all temporary files and temporary directory
 $shellCmd = "rm -rf " . $tempDir;
 $cmdReturn = trim(shell_exec($shellCmd));
-#END
