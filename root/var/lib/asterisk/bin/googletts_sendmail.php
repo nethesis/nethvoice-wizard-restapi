@@ -95,7 +95,7 @@ if ($plainText == "") {
     $vm = \FreePBX::Voicemail()->getVoicemail(false);
 
     # only runs speech recognition if the mailcmd is it
-    if (!empty($vm['general']['mailcmd']) && $vm['general']['mailcmd'] == '/var/lib/asterisk/bin/googletts_sendmail.php') {
+    if (!empty($vm['general']['mailcmd']) && $vm['general']['mailcmd'] == '/var/lib/asterisk/bin/googlestt_sendmail.php') {
         // get file into a string
         $content = file_get_contents($tempDir . "/audio.flac");
 
