@@ -261,7 +261,7 @@ $app->post('/configuration/voicemailgooglestt/{status:enabled|disabled}', functi
 $app->get('/configuration/voicemailgooglestt', function (Request $request, Response $response, $args) {
     $status = "disabled";
     $vm = \FreePBX::Voicemail()->getVoicemail(false);
-    if ($vm['general']['mailcmd'] == "/var/lib/asterisk/bin/googletts_sendmail.php") {
+    if ($vm['general']['mailcmd'] == "/var/lib/asterisk/bin/googlestt_sendmail.php") {
         $status = "enabled";
     }
     return $response->withJson($status,200);
