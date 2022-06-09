@@ -274,7 +274,6 @@ $app->get('/configuration/voicemailgooglestt', function (Request $request, Respo
 #
 $app->post('/configuration/googleauth', function (Request $request, Response $response, $args) {
     try {
-        $uploadedFiles = $request->getUploadedFiles();
         $params = $request->getParsedBody();
         $base64file = preg_replace('/^data:[a-z\.\-\/]*;base64,/','',$params['file']);
         $currentfile = '/home/asterisk/google-auth.json';
