@@ -8,6 +8,8 @@ Source0: %{name}-%{version}.tar.gz
 BuildRequires: nethserver-devtools
 Buildarch: noarch
 Requires: nethserver-freepbx
+Requires: rh-php56-php-bcmath
+Requires: lame
 
 %description
 Rest API for FreePBX
