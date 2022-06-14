@@ -6,9 +6,10 @@ Group: Network
 License: GPLv2
 Source0: %{name}-%{version}.tar.gz
 BuildRequires: nethserver-devtools
+BuildRequires: rh-php56-php-cli, composer
 Buildarch: noarch
 Requires: nethserver-freepbx
-Requires: rh-php56-php-bcmath
+Requires: rh-php56-php-bcmath,rh-php56-php-mbstring
 Requires: lame
 
 %description
@@ -20,6 +21,11 @@ Rest API for FreePBX
 
 %build
 perl createlinks
+(
+    cd root/usr/src/google_speech_php
+    scl enable rh-php56 -- /usr/bin/composer diagnose || :
+    scl enable rh-php56 -- /usr/bin/composer install --no-dev
+)
 
 %install
 rm -rf %{buildroot}
