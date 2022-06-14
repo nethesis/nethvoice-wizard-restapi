@@ -93,43 +93,43 @@ if ($plainText == "") {
 	# [START speech_transcribe_sync]
 	$transcript = "";
 	$confidence = "";
-    $vm = \FreePBX::Voicemail()->getVoicemail(false);
-    # only runs speech recognition if the mailcmd is it
-	if (!empty($vm['general']['mailcmd']) && $vm['general']['mailcmd'] == '/var/lib/asterisk/bin/googlestt_sendmail.php') {
-        // get file into a string
-        $content = file_get_contents($tempDir . "/audio.flac");
+	try {
+            // get file into a string
+            $content = file_get_contents($tempDir . "/audio.flac");
 
-        // set string as audio content
-        $audio = (new RecognitionAudio())
-            ->setContent($content);
+            // set string as audio content
+            $audio = (new RecognitionAudio())
+                ->setContent($content);
 
-        // set config
-        $config = (new RecognitionConfig())
-            ->setEncoding(AudioEncoding::FLAC)
-            ->setSampleRateHertz(SAMPLE_RATE_HTZ)
-            ->setLanguageCode($language);
+            // set config
+            $config = (new RecognitionConfig())
+                ->setEncoding(AudioEncoding::FLAC)
+                ->setSampleRateHertz(SAMPLE_RATE_HTZ)
+                ->setLanguageCode($language);
 
-        // create the speech client
-        $client = new SpeechClient(['credentials' => '/home/asterisk/google-auth.json']);
+            // create the speech client
+            $client = new SpeechClient(['credentials' => '/home/asterisk/google-auth.json']);
 
-        // create the asyncronous recognize operation
-        $operation = $client->longRunningRecognize($config, $audio);
-        $operation->pollUntilComplete();
+            // create the asyncronous recognize operation
+            $operation = $client->longRunningRecognize($config, $audio);
+            $operation->pollUntilComplete();
 
-        $transcript = "no transcript";
-        $confidence = "0% confidence";
+            $transcript = "no transcript";
+            $confidence = "0% confidence";
 
-        if ($operation->operationSucceeded()) {
-            $response = $operation->getResult();
-            foreach ($response->getResults() as $resp) {
-                foreach ($resp->getAlternatives() as $alternative) {
-                    $transcript = $alternative->getTranscript();
-                    $confidence = $alternative->getConfidence();
+            if ($operation->operationSucceeded()) {
+                $response = $operation->getResult();
+                foreach ($response->getResults() as $resp) {
+                    foreach ($resp->getAlternatives() as $alternative) {
+                        $transcript = $alternative->getTranscript();
+                        $confidence = $alternative->getConfidence();
+                    }
                 }
+                $client->close();
             }
-            $client->close();
+        } catch (Exception $e) {
+            error_log($e->getMessage());
         }
-    }
 	# [END speech_transcribe_sync]
 
 	# generate first part of mail body, converting it to LF only
