@@ -31,6 +31,8 @@ perl createlinks
 rm -rf %{buildroot}
 (cd root; find . -depth -print | cpio -dump %{buildroot})
 
+mv %{buildroot}/usr/src/google_speech_php/vendor/google/cloud-speech/owlbot.py %{buildroot}/usr/src/google_speech_php/vendor/google/cloud-speech/owlbot.py3
+
 %{genfilelist} %{buildroot} \
 > %{name}-%{version}-filelist
 
