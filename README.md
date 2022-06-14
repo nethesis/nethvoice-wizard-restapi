@@ -900,6 +900,12 @@ return google speech STT for voicemail attachment status. Valid values "enabled"
 POST /configuration/googleauth
 ```
 
+```
+{
+  "file": [Base 64 encoded google authentication JSON file]
+}
+```
+
 upload the google's auth json file into /home/asterisk/google-auth.json
 
 
