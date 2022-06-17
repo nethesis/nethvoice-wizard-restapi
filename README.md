@@ -882,6 +882,31 @@ Accept a JSON array of local networks and CIDR mask in body:
     }
 ]
 ```
+### enable or disable google speech STT for voicemail attachment
+
+```
+POST /configuration/voicemailgooglestt/<enabled|disabled>
+```
+
+"enabled" or "disabled" google speech recognition feature for voicemail attachment
+
+```
+GET /configuration/voicemailgooglestt
+```
+
+return google speech STT for voicemail attachment status. Valid values "enabled" or "disabled"
+
+```
+POST /configuration/googleauth
+```
+
+```
+{
+  "file": [Base 64 encoded google authentication JSON file]
+}
+```
+
+upload the google's auth json file into /home/asterisk/google-auth.json
 
 
 ### Allow or deny access to SIPS from red interfaces
@@ -897,6 +922,7 @@ POST /configuration/allowexternalsips/<enabled|disabled>
 ```
 
 enable or disable access to SIPS from red interfaces (and to RTP ports)
+
 
 ### SRTP
 
