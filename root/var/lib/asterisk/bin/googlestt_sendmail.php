@@ -149,7 +149,7 @@ if ($plainText == "") {
 	$shellCmd = "echo \" . $transcript . \" >> " . $tempDir . "/stream.new";
 	$cmdReturn = trim(shell_exec($shellCmd));
 	//
-	$shellCmd = "echo \"( " . round($confidence, 2, PHP_ROUND_HALF_UP) . "% confidence )\" >> " . $tempDir . "/stream.new";
+	$shellCmd = "echo \"( " . round($confidence, 2, PHP_ROUND_HALF_UP)*100 . "% confidence )\" >> " . $tempDir . "/stream.new";
 	$cmdReturn = trim(shell_exec($shellCmd));
 	#get two blank lines
 	$shellCmd = "tail -2 " . $tempDir . "/stream.part2 >> " . $tempDir . "/stream.new";
