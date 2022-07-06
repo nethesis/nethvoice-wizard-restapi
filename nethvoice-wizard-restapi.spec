@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.15.1
+Version: 14.16.0
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -52,6 +52,11 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Wed Jul 06 2022 Stefano Fancello <stefano.fancello@nethesis.it> - 14.16.0-1
+- NethVoice: wizard doesn't reboot NethPhone - Bug nethesis/dev#6168
+- Error managing video sources with multiple names - Bug nethesis/dev#6170
+- Add Google Speech to text to voicemail - nethesis/dev#6165
+
 * Thu Mar 03 2022 Stefano Fancello <stefano.fancello@nethesis.it> - 14.15.1-1
 - Allow all outbound routes in contexts if there aren't any configured (#194)
 
