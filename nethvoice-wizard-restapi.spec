@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.16.0
+Version: 14.16.1
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -52,6 +52,9 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Mon Aug 01 2022 Stefano Fancello <stefano.fancello@nethesis.it> - 14.16.1-1
+- Mywic Trunks needs to send RPID/PAI - Bug nethesis/dev#6176
+
 * Wed Jul 06 2022 Stefano Fancello <stefano.fancello@nethesis.it> - 14.16.0-1
 - NethVoice: wizard doesn't reboot NethPhone - Bug nethesis/dev#6168
 - Error managing video sources with multiple names - Bug nethesis/dev#6170
