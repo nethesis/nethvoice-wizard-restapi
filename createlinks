@@ -11,3 +11,12 @@ event_actions($event, qw(
 event_templates($event, qw(
     /var/www/html/freepbx/rest/config.inc.php
 ));
+
+#
+# post-restore-data event
+#
+
+$event = "post-restore-data";
+event_actions($event, 
+   'nethvoice-wizard-restapi-fix-rsync-perms' => '10',
+);
