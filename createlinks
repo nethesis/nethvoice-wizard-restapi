@@ -15,7 +15,6 @@ event_templates($event, qw(
 #
 # post-restore-data event
 #
-
 $event = "post-restore-data";
 event_actions($event, 
    'nethvoice-wizard-restapi-fix-rsync-perms' => '10',
