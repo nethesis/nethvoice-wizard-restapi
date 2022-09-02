@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.16.1
+Version: 14.16.2
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -52,6 +52,9 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Fri Sep 02 2022 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 14.16.2-1
+- rsync disaster recovery introduces permissions issue - Bug NethServer/dev#6691
+
 * Mon Aug 01 2022 Stefano Fancello <stefano.fancello@nethesis.it> - 14.16.1-1
 - Mywic Trunks needs to send RPID/PAI - Bug nethesis/dev#6176
 
