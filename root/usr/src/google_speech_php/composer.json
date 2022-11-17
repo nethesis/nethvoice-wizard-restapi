@@ -1,5 +1,0 @@
-{
-    "require": {
-        "google/cloud-speech": "^1.4"
-    }
-}
