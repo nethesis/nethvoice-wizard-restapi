@@ -955,6 +955,5 @@ function setExtensionCustomContextProfile($extension) {
 }
 
 function getProvisioningEngine() {
-    exec("/usr/bin/sudo /sbin/e-smith/config getprop nethvoice ProvisioningEngine", $out);
-    return $out[0];
+    return 'tancredi';
 }
