@@ -133,7 +133,7 @@ $app->post('/users/{username}/password', function (Request $request, Response $r
             $tmp = tempnam("/tmp","ASTPWD");
             file_put_contents($tmp, $password);
 
-            exec("/usr/bin/sudo /sbin/e-smith/signal-event password-modify '".getUser($username)."' $tmp", $out, $ret);
+            exec("/usr/bin/sudo /sbin/e-smith/signal-event password-modify '".$username."' $tmp", $out, $ret);
             if ($ret === 0) {
                 setPassword($username, $password);
                 return $response->withStatus(201);

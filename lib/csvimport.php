@@ -105,7 +105,7 @@ try {
         if ( isset($row[3]) && ! empty($row[3]) ){
             $tmp = tempnam("/tmp","ASTPWD");
             file_put_contents($tmp, $row[3]);
-            exec("/usr/bin/sudo /sbin/e-smith/signal-event password-modify '".getUser($row[0])."' $tmp", $out, $ret);
+            exec("/usr/bin/sudo /sbin/e-smith/signal-event password-modify '".$row[0]."' $tmp", $out, $ret);
             $result += $ret;
             if ($ret > 0 ) {
                 $err .= "Error setting password for user ".$row[0].": ".$out['message']."\n";

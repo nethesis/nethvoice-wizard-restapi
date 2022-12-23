@@ -24,21 +24,10 @@ require_once('/etc/freepbx.conf');
 require_once(__DIR__. '/../lib/SystemTasks.php');
 require_once(__DIR__. '/../lib/freepbxFwConsole.php');
 
-function getUser($username) {
-    # add domain part if needed
-    if (strpos($username, '@') === false) {
-        exec('/usr/bin/hostname -d', $out, $ret);
-        $domain = $out[0];
-        return "$username@$domain";
-    }
-    return $username;
-}
-
 function userExists($username) {
-    $needle = getUser($username);
     $users = shell_exec("/usr/bin/sudo /usr/libexec/nethserver/list-users");
     foreach (json_decode($users) as $user => $props) {
-        if ($user == $needle) {
+        if ($user == $username) {
             return true;
         }
     }
@@ -46,12 +35,10 @@ function userExists($username) {
 }
 
 function getPassword($username) {
-    return sql(
-      'SELECT rest_users.password'.
-      ' FROM rest_users'.
-      ' JOIN userman_users ON rest_users.user_id = userman_users.id'.
-      ' WHERE userman_users.username = \''. getUser($username). '\'', 'getOne'
-    );
+    $dbh = FreePBX::Database();
+    $sql = 'SELECT rest_users.password FROM rest_users JOIN userman_users ON rest_users.user_id = userman_users.id WHERE userman_users.username = ?';
+    $stmt = $dbh->prepare($sql);
+    return $stmt->fetchAll()[0][0];
 }
 
 function setPassword($username, $password) {
@@ -147,7 +134,7 @@ function getAllUsers() {
             if($all == "false" && $users[$i]['default_extension'] == 'none') {
                 unset($users[$i]);
             } else {
-                $users[$i]['password'] = getPassword(getUser($users[$i]['username']));
+                $users[$i]['password'] = getPassword($users[$i]['username']);
                 $sql = 'SELECT rest_devices_phones.*'.
                   ' FROM rest_devices_phones'.
                   ' JOIN userman_users ON rest_devices_phones.user_id = userman_users.id'.
