@@ -124,6 +124,17 @@ function getAllAvailablePermissions($minified=false) {
             }
         }
 
+        // Rename queues if it's needed
+        foreach ($queues as $queue) {
+            $sql = 'UPDATE rest_cti_permissions SET displayname = ? WHERE name = ? AND displayname != ?';
+            $sth = $dbh->prepare($sql);
+            $sth->execute(['Queue '.$queue[1].' ('.$queue[0].')','in_queue_'.$queue[0],'Queue '.$queue[1].' ('.$queue[0].')']);
+
+            $sql = 'UPDATE rest_cti_permissions SET displayname = ?, description = ? WHERE name = ? AND displayname != ?';
+            $sth = $dbh->prepare($sql);
+            $sth->execute([$queue[1].' ('.$queue[0].')','Manage Queue "'.$queue[1].'" ('.$queue[0].')','qmanager_'.$queue[0],$queue[1].' ('.$queue[0].')']);
+        }
+
         if ($minified) {
             $sql = 'SELECT `id`,`name` FROM `rest_cti_permissions`';
         } else {
