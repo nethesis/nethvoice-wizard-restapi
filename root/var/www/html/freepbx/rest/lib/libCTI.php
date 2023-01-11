@@ -251,7 +251,7 @@ function getCTIPermissionProfiles($profileId=false, $minified=false, $printnull=
 
             // Sort operator panel queues
             usort($results[$id]['macro_permissions']['operator_panel']['permissions'], function($a, $b) {
-                return strcmp($a['name'], $b['name']);
+                return strcmp($a['displayname'], $b['displayname']);
             });
 
             // add Queue manager disabled queue
@@ -261,7 +261,7 @@ function getCTIPermissionProfiles($profileId=false, $minified=false, $printnull=
 
                     // Sort Queue manager queues
                     usort($results[$id]['macro_permissions']['qmanager']['permissions'], function($a, $b) {
-                        return strcmp($a['name'], $b['name']);
+                        return strcmp($a['displayname'], $b['displayname']);
                     });
                 }
             } else {
