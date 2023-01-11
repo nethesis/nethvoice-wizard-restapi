@@ -249,10 +249,20 @@ function getCTIPermissionProfiles($profileId=false, $minified=false, $printnull=
                 }
             }
 
+            // Sort operator panel queues
+            usort($results[$id]['macro_permissions']['operator_panel']['permissions'], function($a, $b) {
+                return strcmp($a['name'], $b['name']);
+            });
+
             // add Queue manager disabled queue
             if (function_exists('addQueueManagerDisabledQueues')) {
                 if ($printnull) {
                     $results[$id] = addQueueManagerDisabledQueues($results[$id]);
+
+                    // Sort Queue manager queues
+                    usort($results[$id]['macro_permissions']['qmanager']['permissions'], function($a, $b) {
+                        return strcmp($a['name'], $b['name']);
+                    });
                 }
             } else {
                 unset($results[$id]['macro_permissions']['qmanager']);
