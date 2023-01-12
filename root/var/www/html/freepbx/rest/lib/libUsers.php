@@ -46,12 +46,11 @@ function userExists($username) {
 }
 
 function getPassword($username) {
-    return sql(
-      'SELECT rest_users.password'.
-      ' FROM rest_users'.
-      ' JOIN userman_users ON rest_users.user_id = userman_users.id'.
-      ' WHERE userman_users.username = \''. getUser($username). '\'', 'getOne'
-    );
+    $dbh = FreePBX::Database();
+    $sql = 'SELECT rest_users.password FROM rest_users JOIN userman_users ON rest_users.user_id = userman_users.id WHERE userman_users.username = ?';
+    $stmt = $dbh->prepare($sql);
+    $stmt->execute([getUser($username)]);
+    return $stmt->fetchAll()[0][0];
 }
 
 function setPassword($username, $password) {
