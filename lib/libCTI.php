@@ -124,6 +124,17 @@ function getAllAvailablePermissions($minified=false) {
             }
         }
 
+        // Rename queues if it's needed
+        foreach ($queues as $queue) {
+            $sql = 'UPDATE rest_cti_permissions SET displayname = ? WHERE name = ? AND displayname != ?';
+            $sth = $dbh->prepare($sql);
+            $sth->execute(['Queue '.$queue[1].' ('.$queue[0].')','in_queue_'.$queue[0],'Queue '.$queue[1].' ('.$queue[0].')']);
+
+            $sql = 'UPDATE rest_cti_permissions SET displayname = ?, description = ? WHERE name = ? AND displayname != ?';
+            $sth = $dbh->prepare($sql);
+            $sth->execute([$queue[1].' ('.$queue[0].')','Manage Queue "'.$queue[1].'" ('.$queue[0].')','qmanager_'.$queue[0],$queue[1].' ('.$queue[0].')']);
+        }
+
         if ($minified) {
             $sql = 'SELECT `id`,`name` FROM `rest_cti_permissions`';
         } else {
@@ -238,44 +249,99 @@ function getCTIPermissionProfiles($profileId=false, $minified=false, $printnull=
                 }
             }
 
+            // Sort operator panel queues
+            usort($results[$id]['macro_permissions']['operator_panel']['permissions'], function($a, $b) {
+                return strcmp($a['displayname'], $b['displayname']);
+            });
+
             // add Queue manager disabled queue
             if (function_exists('addQueueManagerDisabledQueues')) {
                 if ($printnull) {
                     $results[$id] = addQueueManagerDisabledQueues($results[$id]);
+
+                    // Sort Queue manager queues
+                    usort($results[$id]['macro_permissions']['qmanager']['permissions'], function($a, $b) {
+                        return strcmp($a['displayname'], $b['displayname']);
+                    });
                 }
             } else {
                 unset($results[$id]['macro_permissions']['qmanager']);
             }
 
-            // Add profile outbound routes
-            $results[$id]['outbound_routes_permissions'] = array();
-            $sql = 'SELECT outbound_routes.route_id AS route_id,outbound_routes.name AS name,rest_cti_profiles_routes_permission.permission AS permission FROM outbound_routes JOIN rest_cti_profiles_routes_permission ON rest_cti_profiles_routes_permission.route_id = outbound_routes.route_id WHERE profile_id = ?';
+            // Get all outbound routes with profile permission
+            $sql = 'SELECT outbound_routes.route_id AS route_id,outbound_routes.name AS name FROM outbound_routes';
             $sth = $dbh->prepare($sql);
             $sth->execute(array($id));
-            foreach ($sth->fetchAll(\PDO::FETCH_ASSOC) as $outbound_routes_permission) {
+            $all_outbound_routes = $sth->fetchAll(\PDO::FETCH_ASSOC);
+
+            // Get context name for this profile
+            if ($profile['name'] === 'Hotel') {
+                $context_name = 'hotel';
+            } else {
+                $context_name = 'cti-profile-'.$id;
+            }
+
+            // make sure context exists
+            if (in_array($context_name, array_column(customcontexts_getcontexts(),0))){
+
+                // get all context permissions
+                $context_permissions = customcontexts_getincludes($context_name);
+
+                // get context id for the "all route" permission
+                $outbound_allroutes_id = array_search('outbound-allroutes', array_column($context_permissions,2));
+
+                // get the context "all route" permission
+                $context_all_route_permission = null;
+                if (isset($outbound_allroutes_id) && isset($context_permissions[$outbound_allroutes_id])) {
+                    if ($context_permissions[$outbound_allroutes_id][4] === 'no') {
+                        $context_all_route_permission = false;
+                    } else {
+                        $context_all_route_permission = true;
+                    }
+                }
+            }
+
+            // Get routes context permissions
+            $context_route_permissions = array();
+            foreach ($all_outbound_routes as $outbound_route) {
+                // get context id foreach route
+                $outbound_route_context_id = array_search('outrt-'.$outbound_route['route_id'],array_column($context_permissions,2));
+                // get the context permission for the route
+                $context_route_permissions[$outbound_route['route_id']] = null;
+                if (isset($outbound_route_context_id) && $outbound_route_context_id !== false && isset($context_permissions[$outbound_route_context_id])) {
+                    if ($context_permissions[$outbound_route_context_id][4] === 'no') {
+                        $context_route_permissions[$outbound_route['route_id']] = false;
+                    } else {
+                        $context_route_permissions[$outbound_route['route_id']] = true;
+                    }
+                }
+
+                if ($context_all_route_permission === true) {
+                    // Enable route if context has "allroute" permission enabled
+                    $route_permission = true;
+                } else if ($context_route_permissions[$outbound_route['route_id']] === true) {
+                    // Enable route if context has it explicitly enabled
+                    $route_permission = true;
+                } else if ($context_route_permissions[$outbound_route['route_id']] === false) {
+                    // Disable route if context has it explicitly disabled
+                    $route_permission = false;
+                } else if ($context_all_route_permission === false) {
+                    // Disable route if context has "allroute" permission disabled
+                    $route_permission = false;
+                } else {
+                    // Enable route if none of previous conditions are meet
+                    $route_permission = true;
+                }
+
+                // Add the route to permissions
                 $results[$id]['outbound_routes_permissions'][] = array(
-                    'route_id' => $outbound_routes_permission['route_id'],
-                    'name' => $outbound_routes_permission['name'],
-                    'permission' => (boolean) $outbound_routes_permission['permission']
+                    'route_id' => $outbound_route['route_id'],
+                    'name' => $outbound_route['name'],
+                    'permission' => (boolean) $route_permission
                 );
             }
-            // Add profile outbound routes defaults
-            $DEFAULT_OUTBOUND_PERMISSION = true;
-            foreach ($outbound_routes as $outbound_route) {
-                $index = array_search($outbound_route['route_id'], array_column($results[$id]['outbound_routes_permissions'],'route_id'));
-                if ($index !== false && is_null($results[$id]['outbound_routes_permissions'][$index]['permission'])) {
-                    unset($results[$id]['outbound_routes_permissions'][$index]);
-                    $index = false;
-                }
-                if ($index === false) {
-                    $results[$id]['outbound_routes_permissions'][] = array(
-                        'route_id' => $outbound_route['route_id'],
-                        'name' => $outbound_route['name'],
-                        'permission' => (boolean) $DEFAULT_OUTBOUND_PERMISSION
-                    );
-                }
-            }
         }
+
         if (!$profileId) {
             return array_values($results);
         } else {
@@ -336,7 +402,6 @@ function getCTIPermissions(){
         foreach ($dbh->sql('SELECT route_id,name FROM outbound_routes',"getAll",\PDO::FETCH_ASSOC) as $outbound_route) {
             $results['outbound_routes'][] = array('route_id' => $outbound_route['route_id'], 'name' => $outbound_route['name']);
         }
-
         return $results;
     } catch (Exception $e) {
         error_log($e->getMessage());
