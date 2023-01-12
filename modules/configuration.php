@@ -77,32 +77,13 @@ $app->post('/configuration/mode', function (Request $request, Response $response
 # GET /configuration/networks return green ip address and netmasks
 #
 $app->get('/configuration/networks', function (Request $request, Response $response, $args) {
-    exec('/bin/sudo /sbin/e-smith/db networks getjson', $out, $ret);
-    if ($ret!==0)    {
-        return $response->withJson($out,500);
-    }
-    $networkDB = json_decode($out[0],true);
-    $networks = array();
-    $isRed = false;
-    // searching red interfaces
-    foreach ($networkDB as $key) {
-        if($key['props']['role'] === 'red' && $key['type'] != 'xdsl-disabled') {
-            $isRed = true;
-        }
-    }
-    // create network obj
-    foreach ($networkDB as $key){
-        if($key['props']['role'] === 'green')
-        {
-            $networks[$key['name']] = array(
-                "network"=>long2ip(ip2long($key['props']['ipaddr']) & ip2long($key['props']['netmask'])),
-                "ip"=>$key['props']['ipaddr'],
-                "netmask"=>$key['props']['netmask'],
-                "gateway"=>$isRed ? $key['props']['ipaddr'] : $key['props']['gateway']
-            );
-        }
-    }
-    return $response->withJson($networks,200);
+	if (isset($ENV['NETHVOICE_HOST_LOCAL_NETWORKS'])) {
+		// Here a json object like this is expected {["network":"192.168.5.0","ip":"192.168.5.14","netmask":"255.255.255.0","gateway":"192.168.5.1"],...}
+		$networks = json_decode($ENV['NETHVOICE_HOST_LOCAL_NETWORKS']);
+	} else {
+		$networks = [];
+	}
+	return $response->withJson($networks,200);
 });
 
 $app->get('/configuration/wizard', function (Request $request, Response $response, $args) {

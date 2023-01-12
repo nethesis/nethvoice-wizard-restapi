@@ -1103,3 +1103,33 @@ $config = [
 ];
 
 ```
+
+
+## Environment variables
+
+NethServer 8 version expect some configuration to be passed as environment variables
+
+### Local networks
+Local networks are required to properly do NAT with extensions in local networks. It is possible to configure it with the environment variable `NETHVOICE_HOST_LOCAL_NETWORKS` that contains a JSON with an array of local networks, for instance:
+```
+{
+    [
+        "network":"192.168.5.0",
+        "ip":"192.168.5.14",
+        "netmask":"255.255.255.0",
+        "gateway":"192.168.5.1"
+    ],
+    [
+        "network":"10.0.1.0",
+        "ip":"10.0.1.12",
+        "netmask":"255.255.0.0",
+        "gateway":"10.0.0.1"
+    ],
+}
+```
+
+
+
+
+
+
