@@ -78,21 +78,14 @@ $app->post('/settings/defaultlanguage', function (Request $request, Response $re
 */
 $app->get('/settings/languages', function (Request $request, Response $response, $args) {
     try {
-        exec('/usr/bin/rpm -qa | grep "nethvoice-lang"', $out, $ret);
         $defaultLanguage = FreePBX::create()->Soundlang->getLanguage();
         $res = array();
-        foreach ($out as $package) {
-            $lang = preg_replace('/^nethvoice-lang-([a-z]*)-.*\.noarch$/', '${1}${2}',$package);
+        foreach (['it','en'] as $lang) {
             if ($lang == $defaultLanguage) {
                 $res[$lang] = array('default' => true);
             } else {
                 $res[$lang] = array('default' => false);
             }
-            # Set lang as installed in soundlang module
-            $dbh = FreePBX::Database();
-            $sql="REPLACE INTO soundlang_packages set type='asterisk',module='extra-sounds',language=?,license='',author='www.nethesis.it',authorlink='www.nethesis.it',format='sln',version='1.9.0',installed='1.9.0'";
-            $stmt = $dbh->prepare($sql);
-            $stmt->execute(array($lang));
         }
         return $response->withJson($res,200);
     } catch (Exception $e) {
