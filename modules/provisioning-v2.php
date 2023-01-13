@@ -39,23 +39,18 @@ $container['cron'] = function ($container) {
 };
 
 $app->post('/phones/reboot', function (Request $request, Response $response, $args) {
-    $body = $request->getParsedBody();
-    $cron_response = $this->cron->write($body);
-    return $response->withJson((object) $cron_response, 200, JSON_FLAGS);
+	// DUMMY just return 200 since Cron is broken and will be probably removed
+	return $response->withStatus(200);
 });
 
 $app->get('/phones/reboot[/{mac}]', function (Request $request, Response $response, $args) {
-    if (array_key_exists('mac',$args)) {
-        return $response->withJson((object) $this->cron->read($args['mac']), 200, JSON_FLAGS);
-    } else {
-        return $response->withJson((object) $this->cron->read(), 200, JSON_FLAGS);
-    }
+	// DUMMY just return 200 since Cron is broken and will be probably removed
+	return $response->withStatus(200);
 });
 
 $app->delete('/phones/reboot', function (Request $request, Response $response, $args) {
-    $body = $request->getParsedBody();
-    $cron_response = $this->cron->delete($body);
-    return $response->withJson((object) $cron_response, 200, JSON_FLAGS);
+	// DUMMY just return 200 since Cron is broken and will be probably removed
+	return $response->withStatus(200);
 });
 
 $app->post('/phones/rps/{mac}', function (Request $request, Response $response, $args) {
