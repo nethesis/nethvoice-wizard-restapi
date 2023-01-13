@@ -24,6 +24,14 @@ require_once('/etc/freepbx.conf');
 require_once(__DIR__. '/../lib/SystemTasks.php');
 require_once(__DIR__. '/../lib/freepbxFwConsole.php');
 
+function getUser($username) {
+    # add domain part if needed
+    if (strpos($username, '@') === false && !empty($ENV['NETHVOICE_LDAP_HOST'])) {
+        return "$username@{$ENV['NETHVOICE_LDAP_HOST']}";
+    }
+    return $username;
+}
+
 function userExists($username) {
     $users = shell_exec("/usr/bin/sudo /usr/libexec/nethserver/list-users");
     foreach (json_decode($users) as $user => $props) {
