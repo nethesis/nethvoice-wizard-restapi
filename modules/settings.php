@@ -73,36 +73,6 @@ $app->get('/settings/languages', function (Request $request, Response $response,
  * GET /settings/conferenceurl return the conference JitsiUrl
  */
 $app->get('/settings/conferenceurl', function (Request $request, Response $response, $args) {
-    try {
-        exec("/usr/bin/sudo /sbin/e-smith/config getprop conference JitsiUrl", $out, $return);
-        if ($return === 0) {
-            return $response->withJson($out[0] ? $out[0] : $out, 200);
-        }
-        throw new Exception("Command execution error: $return");
-    } catch (Exception $e) {
-        error_log($e->getMessage());
-        return $response->withStatus(500);
-    }
+    return $response->withJson($ENV['NETHVOICE_CONFERENCEURL'], 200);
 });
 
-/**
- * POST /settings/conferenceurl set the conference JitsiUrl
- */
-$app->post('/settings/conferenceurl', function (Request $request, Response $response, $args) {
-    try {
-        $params = $request->getParsedBody();
-        $url = escapeshellarg($params["url"]);
-
-        exec("/usr/bin/sudo /sbin/e-smith/config setprop conference JitsiUrl $url", $out, $return);
-        if ($return === 0) {
-            exec("/usr/bin/sudo /sbin/e-smith/signal-event nethserver-conference-save", $out, $return);
-            if ($return === 0) {
-                return $response->withStatus(200);
-            }
-        }
-        throw new Exception("Command execution error: $return");
-    } catch (Exception $e) {
-        error_log($e->getMessage());
-        return $response->withStatus(500);
-    }
-});

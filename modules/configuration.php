@@ -141,27 +141,16 @@ $app->get('/configuration/suggestedip', function (Request $request, Response $re
 * GET /configuration/allowexternalsips
 */
 $app->get('/configuration/allowexternalsips', function (Request $request, Response $response, $args) {
-    exec("/usr/bin/sudo /sbin/e-smith/config getprop asterisk AllowExternalSIPS", $out, $return);
-    if ($return === 0) {
-        return $response->withJson($out[0],200);
-    }
-    return $response->withStatus(500);
+    //TODO remove this API
+    return $response->withJson('enabled',200);
 });
 
 /*
 * POST /configuration/allowexternalsips/<enabled|disabled>
 */
 $app->post('/configuration/allowexternalsips/{status:enabled|disabled}', function (Request $request, Response $response, $args) {
-    $route = $request->getAttribute('route');
-    $status = $route->getArgument('status');
-    exec("/usr/bin/sudo /sbin/e-smith/config setprop asterisk AllowExternalSIPS $status", $out, $ret);
-    if ( $ret === 0 ) {
-        exec("/usr/bin/sudo /sbin/e-smith/signal-event firewall-adjust", $out, $ret);
-        if ( $ret === 0 ) {
-            return $response->withStatus(200);
-        }
-    }
-    return $response->withStatus(500);
+    //TODO remove this API
+    return $response->withStatus(200);
 });
 
 /*

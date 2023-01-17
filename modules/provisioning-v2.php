@@ -110,20 +110,8 @@ $app->post('/extensions/{extension}/srtp/{enabled}', function (Request $request,
 });
 
 $app->post('/provisioning/connectivitycheck', function (Request $request, Response $response, $args) {
-    $body = $request->getParsedBody();
-    if (!$body['host']) {
-        return $response->withJson(array('message' => 'missing host parameter'),400);
-    } elseif (!$body['scheme']) {
-        return $response->withJson(array('message' => 'missing scheme parameter'),400);
-    } elseif ($body['scheme'] !== 'http' && $body['scheme'] !== 'https') {
-         return $response->withJson(array('message' => 'Invalid scheme provided'),400);
-    }
-
-    $ret = connectivitycheck($body['host'],$body['scheme']);
-    if ($ret === false) {
-        return $response->withJson(array('message' => 'provided host isn\'t a valid IP address or FQDN'),400);
-    }
-    return $response->withJson($ret,200);
+    // TODO remove
+    return $response->withJson(["valid_certificate"=>TRUE,"host_type"=>"FQDN","is_reachable"=>TRUE],200);
 });
 
 function getFeaturcodes(){
