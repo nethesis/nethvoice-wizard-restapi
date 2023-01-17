@@ -66,36 +66,6 @@ $app->get('/magic/list', function (Request $request, Response $response, $args) 
 });
 ```
 
-## Long running processes
-
-You can spawn a long running process using ptrack command.
-
-How it works:
-
-- the library invokes ptrack along with the command to be executed
-- ptrack creates a new socket, forks in background and executes the command
-- the command must write its own status inside ptrack socket (many NethServer commands already support it)
-- a client can read from ptrack socket the status of the running task
-
-Start a new task:
-
-```
-require_once("lib/SystemTasks.php");
-
-$st = new SystemTasks();
-$taskId = $st->startTask("/usr/bin/sudo /usr/libexec/nethserver/pkgaction --install nethserver-directory");
-```
-
-Read the status of a task:
-
-```
-require_once("lib/SystemTasks.php");
-
-$st = new SystemTasks();
-$task = $st->getTaskStatus($taskId);
-print_r($task);
-```
-
 ## API
 
 ### Authentication

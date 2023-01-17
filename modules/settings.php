@@ -22,28 +22,10 @@
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
-require_once(__DIR__. '/../lib/SystemTasks.php');
-
 /*
 * POST /settings/language {"lang":"it"}
 */
 $app->post('/settings/language', function (Request $request, Response $response, $args) {
-    try {
-        $data = $request->getParsedBody();
-        $lang = $data['lang'];
-        $st = new SystemTasks();
-        $task = $st->startTask("/usr/bin/sudo /usr/libexec/nethserver/pkgaction --install nethvoice-lang-$lang");
-        return $response->withJson(['result' => $task], 200);
-    } catch (Exception $e) {
-        error_log($e->getMessage());
-        return $response->withStatus(500);
-    }
-});
-
-/*
-* POST /settings/defaultlanguage {"lang":"it"}
-*/
-$app->post('/settings/defaultlanguage', function (Request $request, Response $response, $args) {
     try {
         global $amp_conf;
         $data = $request->getParsedBody();
@@ -59,13 +41,6 @@ $app->post('/settings/defaultlanguage', function (Request $request, Response $re
             break;
         }
         FreePBX::create()->Core->config->set_conf_values(array('TONEZONE'=>$tonescheme),true,$amp_conf['AS_OVERRIDE_READONLY']);
-
-        # Set lang as installed in soundlang module
-        $dbh = FreePBX::Database();
-        $sql="REPLACE INTO soundlang_packages set type='asterisk',module='extra-sounds',language=?,license='',author='www.asterisksounds.org',authorlink='www.asterisksounds.org',format='',version='1.9.0',installed='1.9.0'";
-        $stmt = $dbh->prepare($sql);
-        $stmt->execute(array($lang));
-
         system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
     } catch (Exception $e) {
         error_log($e->getMessage());

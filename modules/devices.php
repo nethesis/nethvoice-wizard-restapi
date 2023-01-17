@@ -22,7 +22,6 @@
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
-require_once(__DIR__. '/../lib/SystemTasks.php');
 require_once(__DIR__. '/../lib/modelRetrieve.php');
 require_once(__DIR__. '/../../admin/modules/core/functions.inc.php');
 include_once(__DIR__. '/../lib/gateway/functions.inc.php');
@@ -36,13 +35,8 @@ include_once(__DIR__. '/../lib/libExtensions.php');
 */
 
 $app->post('/devices/scan', function (Request $request, Response $response, $args) {
-    $params = $request->getParsedBody();
-    $network = $params['network'];
-
-    //launch long running process
-    $st = new SystemTasks();
-    $taskId = $st->startTask("/usr/bin/sudo /var/www/html/freepbx/rest/lib/scanHelper.py ".escapeshellarg($network));
-    return $response->withJson(['result' => $taskId], 200);
+	// TODO
+	return $response->withStatus(500);
 });
 
 $app->get('/devices/{mac}/brand', function (Request $request, Response $response, $args) {

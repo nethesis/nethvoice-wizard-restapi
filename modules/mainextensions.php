@@ -26,7 +26,6 @@ use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
 $app->get('/mainextensions', function (Request $request, Response $response, $args) {
-    fwconsole('userman sync');
     $mainextensions = FreePBX::create()->Core->getAllUsersByDeviceType('virtual');
     return $response->withJson($mainextensions, 200);
 });

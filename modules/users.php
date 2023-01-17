@@ -73,7 +73,7 @@ $app->get('/users/count', function (Request $request, Response $response, $args)
 $app->get('/users/{all}', function (Request $request, Response $response, $args) {
     $all = $request->getAttribute('all');
     if($all == "true") {
-        fwconsole('userman --syncall --force'); // force FreePBX user sync
+        system('fwconsole userman --syncall --force'); // force FreePBX user sync
     }
     return $response->withJson(array_values(getAllUsers()),200);
 });
@@ -101,7 +101,7 @@ $app->post('/users', function (Request $request, Response $response, $args) {
         exec("/usr/bin/sudo /sbin/e-smith/signal-event user-create ".escapeshellarg($username)." ".escapeshellarg($fullname)." '/bin/false'", $out, $ret);
     }
     if ( $ret === 0 ) {
-        system("/usr/bin/scl enable rh-php56 '/usr/sbin/fwconsole userman --syncall --force'");
+        system('fwconsole userman --syncall --force');
         return $response->withStatus(201);
     } else {
         return $response->withStatus(422);
@@ -165,7 +165,7 @@ $app->get('/users/{username}/password', function (Request $request, Response $re
 #
 
 $app->post('/users/sync', function (Request $request, Response $response, $args) {
-    fwconsole('userman --syncall --force');
+    system('fwconsole userman --syncall --force');
     return $response->withStatus(200);
 });
 

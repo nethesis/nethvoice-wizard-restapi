@@ -21,8 +21,6 @@
 #
 
 require_once('/etc/freepbx.conf');
-require_once(__DIR__. '/../lib/SystemTasks.php');
-require_once(__DIR__. '/../lib/freepbxFwConsole.php');
 
 function getUser($username) {
     # add domain part if needed
@@ -59,7 +57,7 @@ function setPassword($username, $password) {
     $stmt->execute(array($username));
     $id = $stmt->fetchAll()[0][0];
     if (empty($id)) {
-        fwconsole('userman --syncall --force');
+        system('fwconsole userman --syncall --force > /dev/null &');
     }
 
     $sql =  'INSERT INTO rest_users (user_id,password)'.
