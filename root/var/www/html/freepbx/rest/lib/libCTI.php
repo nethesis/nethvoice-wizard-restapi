@@ -424,6 +424,8 @@ function postCTIProfile($profile, $id=false){
             $id = $dbh->sql($sql,"getOne");
         }
 
+        $profile['id'] = $id;
+
         //set macro_permissions
         foreach (getAllAvailableMacroPermissions() as $macro_permission) {
             if (!$profile['macro_permissions'][$macro_permission['name']]['value']) {
@@ -498,7 +500,7 @@ function postCTIProfile($profile, $id=false){
             }
         }
 
-        setCustomContextPermissions($id);
+        setCustomContextPermissions($profile);
         return $id;
     } catch (Exception $e) {
         error_log($e->getMessage());
@@ -506,10 +508,9 @@ function postCTIProfile($profile, $id=false){
     }
 }
 
-function setCustomContextPermissions($profile_id){
+function setCustomContextPermissions($profile){
     global $context_default_permissions;
     global $context_permission_map;
-    $profile = getCTIPermissionProfiles($profile_id);
     /* Create custom context if needed */
     $contexts = customcontexts_getcontexts();
     $context_exists = False;
@@ -517,7 +518,7 @@ function setCustomContextPermissions($profile_id){
     if ($profile['name'] === 'Hotel') {
         $context_name = 'hotel';
     } else {
-        $context_name = 'cti-profile-'.$profile_id;
+        $context_name = 'cti-profile-'.$profile['id'];
     }
 
     foreach ($contexts as $context) {
