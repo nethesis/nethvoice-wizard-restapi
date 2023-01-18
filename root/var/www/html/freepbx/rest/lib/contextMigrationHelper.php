@@ -28,7 +28,7 @@ try {
     // Create or edit contexts for each CTI profile
     $profiles = getCTIPermissionProfiles(false,false,false);
     foreach ($profiles as $profile) {
-        setCustomContextPermissions($profile['id']);
+        setCustomContextPermissions($profile);
     }
     $users = getAllUsers();
     foreach ($users as $user) {
