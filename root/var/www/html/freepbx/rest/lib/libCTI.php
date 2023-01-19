@@ -288,7 +288,9 @@ function getCTIPermissionProfiles($profileId=false, $minified=false, $printnull=
                 $context_permissions = customcontexts_getincludes($context_name);
 
                 // get context id for the "all route" permission
-                $outbound_allroutes_id = array_search('outbound-allroutes', array_column($context_permissions,2));
+                if (!empty($context_permissions)) {
+                    $outbound_allroutes_id = array_search('outbound-allroutes', array_column($context_permissions,2));
+                }
 
                 // get the context "all route" permission
                 $context_all_route_permission = null;
@@ -305,7 +307,9 @@ function getCTIPermissionProfiles($profileId=false, $minified=false, $printnull=
             $context_route_permissions = array();
             foreach ($all_outbound_routes as $outbound_route) {
                 // get context id foreach route
-                $outbound_route_context_id = array_search('outrt-'.$outbound_route['route_id'],array_column($context_permissions,2));
+                if (!empty($context_permissions)) {
+                    $outbound_route_context_id = array_search('outrt-'.$outbound_route['route_id'],array_column($context_permissions,2));
+                }
                 // get the context permission for the route
                 $context_route_permissions[$outbound_route['route_id']] = null;
                 if (isset($outbound_route_context_id) && $outbound_route_context_id !== false && isset($context_permissions[$outbound_route_context_id])) {
