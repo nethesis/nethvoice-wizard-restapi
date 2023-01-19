@@ -282,7 +282,8 @@ function getCTIPermissionProfiles($profileId=false, $minified=false, $printnull=
             }
 
             // make sure context exists
-            if (in_array($context_name, array_column(customcontexts_getcontexts(),0))){
+            $customcontexts_contexts = customcontexts_getcontexts();
+            if (!empty($customcontexts_contexts) && in_array($context_name, array_column($customcontexts_contexts,0))){
 
                 // get all context permissions
                 $context_permissions = customcontexts_getincludes($context_name);
