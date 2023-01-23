@@ -164,16 +164,8 @@ $app->get('/configuration/localnetworks', function (Request $request, Response $
 * POST /configuration/localnetworks
 */
 $app->post('/configuration/localnetworks', function (Request $request, Response $response, $args) {
-    $body = $request->getParsedBody();
-    if (\FreePBX::create()->Sipsettings->setConfig('localnets',$body)) {
-        // Reload FreePBX synchronously
-        do_reload();
-        exec("/usr/bin/sudo /usr/bin/systemctl restart asterisk", $out, $ret);
-        if ( $ret === 0 ) {
-            return $response->withStatus(200);
-        }
-    }
-    return $response->withStatus(500);
+    //TODO remove this API
+    return $response->withStatus(200);
 });
 
 #
