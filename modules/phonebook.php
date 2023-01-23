@@ -364,21 +364,8 @@ $app->post('/phonebook/sources/{prop:speeddial|extensions|nethcti}/{status:enabl
 * Set phonebookjs(s) service status [enabled|disabled]
 */
 $app->post('/phonebook/{service:ldap|ldaps}/status/{status:enabled|disabled}', function (Request $request, Response $response, $args) {
-    $route = $request->getAttribute('route');
-    $service = $route->getArgument('service');
-    $status = $route->getArgument('status');
-    if ($service === 'ldap') {
-        exec("/usr/bin/sudo /sbin/e-smith/config setprop phonebookjs status $status", $out, $ret);
-    } elseif ($service === 'ldaps') {
-        exec("/usr/bin/sudo /sbin/e-smith/config setprop phonebookjss status $status", $out, $ret);
-    }
-    if ( $ret === 0 ) {
-        exec("/usr/bin/sudo /sbin/e-smith/signal-event nethserver-phonebook-mysql-fwsave", $out, $ret);
-        if ( $ret === 0 ) {
-            return $response->withStatus(200);
-        }
-    }
-    return $response->withStatus(500);
+    // TODO remove
+    return $response->withStatus(200);
 });
 
 function unlink_local_csv($config)
