@@ -399,17 +399,10 @@ function setFalconieriRPS($mac, $provisioningUrl, $lk = null, $secret = null) {
     }
 
     //get LK
-    if (empty($lk)) {
-        exec("/usr/bin/sudo /sbin/e-smith/config getprop subscription SystemId", $tmp);
-        $lk = $tmp[0];
-        unset($tmp);
-        //get secret
-    }
-    if (empty($secret)) {
-        exec("/usr/bin/sudo /sbin/e-smith/config getprop subscription Secret", $tmp);
-        $secret = $tmp[0];
-        unset($tmp);
-    }
+    $lk = $ENV['SUBSCRIPTION_SYSTEMID'];
+
+    //get secret
+    $lk = $ENV['SUBSCRIPTION_SECRET'];
 
     $queryUrl = "https://rps.nethesis.it/providers/${provider}/${mac}";
     $data = json_encode(array("url" => $provisioningUrl), JSON_UNESCAPED_SLASHES);
