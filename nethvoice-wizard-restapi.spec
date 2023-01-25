@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.16.4
+Version: 14.16.5
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -52,6 +52,9 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Wed Jan 25 2023 Stefano Fancello <stefano.fancello@nethesis.it> - 14.16.5-1
+- NethVoice: new outbound route has inconsistent configuration - Bug nethesis/dev#6191
+
 * Thu Jan 12 2023 Stefano Fancello <stefano.fancello@nethesis.it> - 14.16.4-1
 - NethVoice: if a queue name is changed profile configuration page is not updated - Bug nethesis/dev#6193
 
