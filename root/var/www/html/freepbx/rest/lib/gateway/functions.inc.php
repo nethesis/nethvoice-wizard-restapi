@@ -159,8 +159,20 @@ function gateway_generate_configuration_file($name,$mac = false){
         if (!empty($config['trunks_fxs'])){
             $i=0;
             foreach ($config['trunks_fxs'] as $trunk){
+                $gateway_ip = explode (".",$config['ipv4_new']);
+                $gateway_mask = explode (".",$config['netmask_green']);
+                $default_gateway_ip = explode (".",$config['gateway']);
+                $upper_mac = str_replace(":","",strtoupper($mac));
                 $output = preg_replace("/FXSEXTENSION{$i}([^0-9])/",$trunk['physical_extension'].'\1',$output);
                 $output = preg_replace("/FXSPASS{$i}([^0-9])/",$trunk['secret'].'\1',$output);
+                $output = str_replace("MAC",$upper_mac,$output);
+                $output = str_replace("UTIME",time(),$output);
+                for ($t = 1; $t <= 4; $t++) {
+                    $output = str_replace("IP{$t}",$gateway_ip[$t-1],$output);
+                    $output = str_replace("MASK{$t}",$gateway_mask[$t-1],$output);
+                    $output = str_replace("DNS{$t}",$default_gateway_ip[$t-1],$output);
+                    $output = str_replace("GATE{$t}",$default_gateway_ip[$t-1],$output);
+                }
                 $i++;
             }
         }
