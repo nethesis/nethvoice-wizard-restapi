@@ -44,6 +44,22 @@ INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_tru
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('M4401','Mediatrix','isdn',0,1,0,0, '4401 ISDN 1 Porta');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('M4402','Mediatrix','isdn',0,2,0,0, '4402 ISDN 2 Porte');
 INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('M4404','Mediatrix','isdn',0,4,0,0, '4404 ISDN 4 Porte');
+INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('ht801','Grandstream','fxs',0,0,0,1,'HT801 SIP 1 Porta FXS');
+INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('ht801TLS','Grandstream','fxs',0,0,0,1,'HT801 SIP TLS 1 Porta FXS');
+INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('ht802','Grandstream','fxs',0,0,0,2,'HT802 SIP 2 Porte FXS');
+INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('ht802TLS','Grandstream','fxs',0,0,0,2,'HT802 SIP TLS 2 Porte FXS');
+INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('ht812','Grandstream','fxs',0,0,0,2,'HT812 SIP 2 Porte FXS');
+INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('ht812TLS','Grandstream','fxs',0,0,0,2,'HT812 SIP TLS 2 Porte FXS');
+INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('ht814','Grandstream','fxs',0,0,0,4,'HT814 SIP 4 Porte FXS');
+INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('ht814TLS','Grandstream','fxs',0,0,0,4,'HT814 SIP TLS 4 Porte FXS');
+INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('gxw4216','Grandstream','fxs',0,0,0,16,'GXW4216 SIP 16 Porte FXS');
+INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('gxw4216TLS','Grandstream','fxs',0,0,0,16,'GXW4216 SIP TLS 16 Porte FXS');
+INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('gxw4224','Grandstream','fxs',0,0,0,24,'GXW4224 SIP 24 Porte FXS');
+INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('gxw4224TLS','Grandstream','fxs',0,0,0,24,'GXW4224 SIP TLS 24 Porte FXS');
+INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('gxw4232','Grandstream','fxs',0,0,0,32,'GXW4216 SIP 32 Porte FXS');
+INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('gxw4232TLS','Grandstream','fxs',0,0,0,32,'GXW4232 SIP TLS 32 Porte FXS');
+INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('gxw4248','Grandstream','fxs',0,0,0,48,'GXW4216 SIP 48 Porte FXS');
+INSERT IGNORE INTO `gateway_models` (`model`, `manufacturer`, `tech`, `n_pri_trunks`, `n_isdn_trunks`, `n_fxo_trunks`, `n_fxs_ext`, `description`) VALUES ('gxw4248TLS','Grandstream','fxs',0,0,0,48,'GXW4216 SIP TLS 48 Porte FXS');
 
 UNLOCK TABLES;
 
