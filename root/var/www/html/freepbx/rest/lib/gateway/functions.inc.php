@@ -157,7 +157,7 @@ function gateway_generate_configuration_file($name,$mac = false){
             }
         }
         if (!empty($config['trunks_fxs'])){
-            #START Split IP for Grandstream FXS configuration and put also MAC and DATE #6196
+            //Split IP address into octets for Grandstream configuration and set the MAC and DATE placeholders nethesis/dev#6196
             $octet_gateway_ip = explode(".",$config['ipv4_new']);
             $octet_gateway_mask = explode(".",$config['netmask_green']);
             $octet_default_gateway_ip = explode(".",$config['gateway']);
