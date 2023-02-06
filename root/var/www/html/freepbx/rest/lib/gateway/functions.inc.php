@@ -171,7 +171,6 @@ function gateway_generate_configuration_file($name,$mac = false){
                 $output = str_replace("DNS{$i}",$octet_default_gateway_ip[$i],$output);
                 $output = str_replace("GATE{$i}",$octet_default_gateway_ip[$i],$output);
             }
-            #END Split IP for Grandstream FXS configuration and put also MAC and DATE #6196
             $i=0;
             foreach ($config['trunks_fxs'] as $trunk){
                 $output = preg_replace("/FXSEXTENSION{$i}([^0-9])/",$trunk['physical_extension'].'\1',$output);
