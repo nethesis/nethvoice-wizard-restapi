@@ -165,7 +165,7 @@ function gateway_generate_configuration_file($name,$mac = false){
             $output = str_replace("MAC",$upper_mac,$output);
             $output = str_replace("UTIME",time(),$output);
             for ($i = 0; $i <= 3; $i++) {
-                #Put right IP octect on the config 
+                //Set IP octect in the config 
                 $output = str_replace("IP{$i}",$octet_gateway_ip[$i],$output);
                 $output = str_replace("MASK{$i}",$octet_gateway_mask[$i],$output);
                 $output = str_replace("DNS{$i}",$octet_default_gateway_ip[$i],$output);
