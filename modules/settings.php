@@ -22,10 +22,15 @@
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
+// TODO remove
+$app->post('/settings/language', function (Request $request, Response $response, $args) {
+	return $response->withStatus(200);
+});
+
 /*
 * POST /settings/language {"lang":"it"}
 */
-$app->post('/settings/language', function (Request $request, Response $response, $args) {
+$app->post('/settings/defaultlanguage', function (Request $request, Response $response, $args) {
     try {
         global $amp_conf;
         $data = $request->getParsedBody();
