@@ -2,6 +2,7 @@
 "2N":"phone",
 "Aastra":"phone",
 "AG":"phone",
+"Akuvox":"phone",
 "Alcatel Temporis":"phone",
 "Cisco/Linksys":"phone",
 "CloudTC":"phone",
@@ -22,5 +23,4 @@
 "Thomson":"phone",
 "Xorcom":"phone",
 "Yealink/Dreamwave":"phone",
-"Yealink/Wildix":"phone"
 }

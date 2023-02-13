@@ -73,6 +73,7 @@ while ($row = $sth->fetch(\PDO::FETCH_ASSOC)) {
         $notify_string = 'reboot-snom';
         break;
     case 'Fanvil':
+    case 'Akuvox':
     case 'Gigaset':
     case 'Nethesis':
     case 'Panasonic':
@@ -80,7 +81,6 @@ while ($row = $sth->fetch(\PDO::FETCH_ASSOC)) {
     case 'Thomson':
     case 'Xorcom':
     case 'Yealink/Dreamwave':
-    case 'Yealink/Wildix':
         $notify_string = 'reboot-yealink';
         break;
     default:
