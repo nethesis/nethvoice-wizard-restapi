@@ -1,5 +1,5 @@
 Name: nethvoice-wizard-restapi
-Version: 14.16.5
+Version: 14.17.0
 Release: 1%{?dist}
 Summary: Rest API for FreePBX
 Group: Network
@@ -52,6 +52,10 @@ rm -rf %{buildroot}
 %doc
 
 %changelog
+* Tue Mar 07 2023 Stefano Fancello <stefano.fancello@nethesis.it> - 14.17.0-1
+- NethVoice: add Grandstream HT80X HT81X GXW4200 Series - nethesis/dev#6196
+- Add Akuvox phone to tancredi - nethesis/dev#6198
+
 * Wed Jan 25 2023 Stefano Fancello <stefano.fancello@nethesis.it> - 14.16.5-1
 - NethVoice: new outbound route has inconsistent configuration - Bug nethesis/dev#6191
 
