@@ -118,31 +118,6 @@ $app->post('/phonebook/config[/{id}]', function (Request $request, Response $res
            throw new Exception("Error writing $file"); 
         }
 
-        if (!isset($data['interval']) || empty($data['interval']) || $data['interval'] < 1 || $data['interval'] >= 1440) {
-            $cron_time_interval = '0 0 * * *' ;
-        } elseif ($data['interval'] < 60) {
-            $cron_time_interval = '*/'.$data['interval'].' * * * *';
-        } elseif ($data['interval'] >= 60 || $data['interval'] < 1440 ) {
-            $cron_time_interval = '0 */'.intval($data['interval']/60).' * * *';
-        }
-
-        // Delete interval in cron if it exists
-        $res = delete_import_from_cron($id);
-        if (!$res) {
-            throw new Exception("Error deleting $file from crontab!");
-        }
-
-        if ($newsource['enabled']) {
-            // Write new configuration in cron
-            $res = write_import_in_cron($cron_time_interval, $id);
-            if (!$res) {
-                throw new Exception("Error adding $file to crontab!");
-            }
-        } else {
-            # launch nethserver-phonebook-mysql-save to clean and reload phonebook
-            exec("/usr/bin/sudo /sbin/e-smith/signal-event nethserver-phonebook-mysql-save $id");
-        }
-
         return $response->withStatus(200);
     } catch (Exception $e) {
         error_log($e->getMessage());
@@ -375,88 +350,6 @@ function unlink_local_csv($config)
         && substr($config['url'], 0, 55) == 'file:///var/lib/nethserver/nethvoice/phonebook/uploads/'
     ) {
         unlink(substr($config['url'], 7));
-    }
-}
-
-function delete_import_from_cron($id) {
-    try {
-        $file = '/etc/phonebook/sources.d/'.$id.'.json';
-
-        // Read crontab content
-        exec('/usr/bin/crontab -l 2>/dev/null', $output, $ret);
-        if ($ret != 0) {
-            throw new Exception("Error reading crontab");
-        }
-
-        // Open crontab in a pipe
-        if(!file_exists('/var/log/pbx/www-error.log')) {
-            touch('/var/log/pbx/www-error.log');
-        }
-
-        $descriptorspec = array(
-            0 => array("pipe", "r"),  // stdin
-            1 => array("pipe", "w"),  // stdout
-            2 => array("file", "/var/log/pbx/www-error.log", "a") // stderr
-        );
-
-        $process = proc_open('/usr/bin/crontab -', $descriptorspec, $pipes);
-        if (!is_resource($process)) {
-            throw new Exception("Error opening crontab pipe");
-        }
-
-        foreach ($output as $row) {
-            if (strpos( $row , '/usr/share/phonebooks/phonebook-import ') !== FALSE && strpos( $row , $file) !== FALSE ) {
-                continue;
-            }
-            fwrite($pipes[0], $row."\n");
-        }
-        fclose($pipes[0]);
-
-        # launch nethserver-phonebook-mysql-save to clean and reload phonebook
-        exec("/usr/bin/sudo /sbin/e-smith/signal-event nethserver-phonebook-mysql-save $id");
-
-        return true;
-    } catch (Exception $e) {
-        error_log($e->getMessage());
-        return false;
-    }
-}
-
-
-function write_import_in_cron($cron_time_interval, $id) {
-     try {
-        $file = '/etc/phonebook/sources.d/'.$id.'.json';
-
-        // Read crontab content
-        exec('/usr/bin/crontab -l 2>/dev/null', $output, $ret);
-        if ($ret != 0) {
-            throw new Exception("Error reading crontab");
-        }
-
-        // Open crontab in a pipe
-        if(!file_exists('/var/log/pbx/www-error.log')) {
-            touch('/var/log/pbx/www-error.log');
-        }
-
-        $descriptorspec = array(
-            0 => array("pipe", "r"),  // stdin
-            1 => array("pipe", "w"),  // stdout
-            2 => array("file", "/var/log/pbx/www-error.log", "a") // stderr
-        );
-
-        $process = proc_open('/usr/bin/crontab -', $descriptorspec, $pipes);
-        if (!is_resource($process)) {
-            throw new Exception("Error opening crontab pipe");
-        }
-
-        $output[] = $cron_time_interval.' '.'/usr/share/phonebooks/phonebook-import '.escapeshellarg($file);
-
-        fwrite($pipes[0], join("\n", $output)."\n");
-        fclose($pipes[0]);
-        return true;
-    } catch (Exception $e) {
-        error_log($e->getMessage());
-        return false;
     }
 }
 
