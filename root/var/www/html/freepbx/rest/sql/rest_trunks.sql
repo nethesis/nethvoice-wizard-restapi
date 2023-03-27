@@ -643,7 +643,7 @@ INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`)
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (12,"fax_detect","no");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (12,"forbidden_retry_interval","10");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (12,"force_rport","yes");
-INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (12,"from_domain","sbc.voipvox.it");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (12,"from_domain","voce.voipvox.it");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (12,"hcid","on");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (12,"identify_by","default");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (12,"inband_progress","no");
@@ -665,7 +665,7 @@ INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`)
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (12,"rtp_symmetric","yes");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (12,"sendrpid","no");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (12,"server_uri","");
-INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (12,"sip_server","sbc.voipvox.it");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (12,"sip_server","voce.voipvox.it");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (12,"sip_server_port","5060");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (12,"support_path","no");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (12,"sv_usercontext","");
