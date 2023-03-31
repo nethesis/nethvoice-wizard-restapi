@@ -69,11 +69,11 @@ else
 fi
 
 trap "{ rm -f $LOCKFILE; rmdir $LOCKDIR 2>/dev/null; rm -f $LOCKFILE2; rmdir $LOCKDIR2 2>/dev/null;}" INT TERM EXIT
-/usr/bin/scl enable rh-php56 '/var/lib/asterisk/bin/fwconsole r' | /usr/bin/logger -t FreePBX
+fwconsole reload | /usr/bin/logger -t FreePBX
 sleep 10
 while [[ -f $LOCKFILE2 ]]; do
     rm -f $LOCKFILE2
     rmdir $LOCKDIR2 2>/dev/null
-    fwconsole r > /dev/stderr
+    fwconsole reload | /usr/bin/logger -t FreePBX
     sleep 10
 done
