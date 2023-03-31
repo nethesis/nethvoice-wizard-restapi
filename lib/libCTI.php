@@ -490,7 +490,7 @@ function postCTIProfile($profile, $id=false){
                 $values = [];
                 foreach ($profile['outbound_routes_permissions'] as $outbound_route) {
                     $qm[] = '(?,?,?)';
-                    $values = array_merge($values,[$id,$outbound_route['route_id'],$outbound_route['permission']]);
+                    $values = array_merge($values,[$id,$outbound_route['route_id'],(int) $outbound_route['permission']]);
                 }
                 $sql .= implode(',',$qm);
                 $sth = $dbh->prepare($sql);
