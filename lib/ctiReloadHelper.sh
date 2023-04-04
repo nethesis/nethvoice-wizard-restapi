@@ -4,4 +4,4 @@ while (ps aux | grep -q [r]etrieve_conf); do
 done
 sleep 2
 
-touch /notify
+touch /notify/restart
