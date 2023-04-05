@@ -5,3 +5,4 @@ done
 sleep 2
 
 touch /notify/restart
+chmod a+rw /notify/restart
