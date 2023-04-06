@@ -164,7 +164,13 @@ $app->get('/configuration/localnetworks', function (Request $request, Response $
 * POST /configuration/localnetworks
 */
 $app->post('/configuration/localnetworks', function (Request $request, Response $response, $args) {
-    //TODO remove this API
+    // Notify nethcti-server restart
+    $file = fopen("/notify/restart_nethcti-server", 'w');
+    fclose($file);
+    // Restart asterisk
+    include '/etc/freepbx.conf';
+    global $astman;
+    $astman->Command('core restart when convenient');
     return $response->withStatus(200);
 });
 
