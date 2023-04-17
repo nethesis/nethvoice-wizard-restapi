@@ -215,8 +215,8 @@ $app->post('/phonebook/syncnow/{id}', function (Request $request, Response $resp
         $route = $request->getAttribute('route');
         $id = $route->getArgument('id');
 
-        # launch nethserver-phonebook-mysql-save to clean and reload phonebook
-        exec("/usr/bin/sudo /sbin/e-smith/signal-event nethserver-phonebook-mysql-save $id",$output,$return);
+        # launch import of the source now
+        exec("/usr/share/phonebooks/phonebook-import /etc/phonebook/sources.d/$id.json",$output,$return);
 
         if ($return!=0) {
             return $response->withJson(array("status"=>false),500);
