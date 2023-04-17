@@ -135,12 +135,14 @@ $app->delete('/phonebook/config/{id}', function (Request $request, Response $res
             throw new Exception("Error deleting $file from crontab!");
         }
 
-        // delete from phonebook
-        $cmd = "/usr/share/phonebooks/phonebook-import --deleteonly ".escapeshellarg($file);
-        exec($cmd,$output,$return);
-        if ($return !== 0 ) {
-            throw new Exception("Error deleting $id entries from phonebook");
-        }
+        // Delete from phonebook db contacts imported from this source
+        $phonebookdb = new PDO(
+            'mysql:host='.$ENV['PHONEBOOK_DB_HOST'].';port='.$ENV['PHONEBOOK_DB_PORT'].';dbname='.$ENV['PHONEBOOK_DB_NAME'],
+            $ENV['PHONEBOOK_DB_USER'],
+            $ENV['PHONEBOOK_DB_PASS']);
+
+        $sth = $phonebookdb->prepare('DELETE FROM phonebook WHERE sid_imported = ?');
+        $sth->execute([$id]);
 
         // Erase related local CSV file, if necessary:
         $config = json_decode(file_get_contents($file), true);
@@ -213,8 +215,8 @@ $app->post('/phonebook/syncnow/{id}', function (Request $request, Response $resp
         $route = $request->getAttribute('route');
         $id = $route->getArgument('id');
 
-        # launch nethserver-phonebook-mysql-save to clean and reload phonebook
-        exec("/usr/bin/sudo /sbin/e-smith/signal-event nethserver-phonebook-mysql-save $id",$output,$return);
+        # launch import of the source now
+        exec("/usr/share/phonebooks/phonebook-import /etc/phonebook/sources.d/$id.json",$output,$return);
 
         if ($return!=0) {
             return $response->withJson(array("status"=>false),500);
@@ -253,30 +255,11 @@ $app->post('/phonebook/uploadfile', function (Request $request, Response $respon
 $app->get('/phonebook/ldap', function (Request $request, Response $response, $args) {
     try {
         $configuration = array();
-        exec("/usr/bin/sudo /sbin/e-smith/config getjson phonebookjs", $out);
-        $tmp = json_decode($out[0]);
-        $configuration['ldap'] = array();
-        $configuration['ldap']['enabled'] = ($tmp->props->status == 'enabled') ? true : false;
-        $configuration['ldap']['port'] = $tmp->props->TCPPort;
-        $configuration['ldap']['user'] = '';
-        $configuration['ldap']['password'] = '';
-        $configuration['ldap']['tls'] = 'none';
-        $configuration['ldap']['base'] = 'dc=phonebook,dc=nh';
-        $configuration['ldap']['name_display'] = '%cn %o';
-        $configuration['ldap']['mainphone_number_attr'] = 'telephoneNumber';
-        $configuration['ldap']['mobilephone_number_attr'] = 'mobile';
-        $configuration['ldap']['otherphone_number_attr'] = 'homePhone';
-        $configuration['ldap']['name_attr'] = 'cn o';
-        $configuration['ldap']['number_filter'] = '(|(telephoneNumber=%)(mobile=%)(homePhone=%))';
-        $configuration['ldap']['name_filter'] = '(|(cn=%)(o=%))';
-        unset ($out);
-        exec("/usr/bin/sudo /sbin/e-smith/config getjson phonebookjss", $out);
-        $tmp = json_decode($out[0]);
         $configuration['ldaps'] = array();
-        $configuration['ldaps']['enabled'] = ($tmp->props->status == 'enabled') ? true : false;
-        $configuration['ldaps']['port'] = $tmp->props->TCPPort;
-        $configuration['ldaps']['user'] = 'cn=ldapuser,dc=phonebook,dc=nh';
-        $configuration['ldaps']['password'] = exec('/usr/bin/sudo /usr/bin/cat /var/lib/nethserver/secrets/LDAPPhonebookPasswd');
+        $configuration['ldaps']['enabled'] = true;
+        $configuration['ldaps']['port'] = $ENV['PHONEBOOK_LDAP_PORT'];
+        $configuration['ldaps']['user'] = 'cn='.$ENV['PHONEBOOK_LDAP_USER'].',dc=phonebook,dc=nh';
+        $configuration['ldaps']['password'] = $ENV['PHONEBOOK_LDAP_PASS'];
         $configuration['ldaps']['tls'] = 'ldaps';
         $configuration['ldaps']['base'] = 'dc=phonebook,dc=nh';
         $configuration['ldaps']['name_display'] = '%cn %o';
@@ -299,14 +282,12 @@ $app->get('/phonebook/ldap', function (Request $request, Response $response, $ar
 * Get additional sources configuration of system phonebooks
 */
 $app->get('/phonebook/sources', function (Request $request, Response $response, $args) {
+	// TODO remove this API
     try {
         $sources = array();
-        exec("/usr/bin/sudo /sbin/e-smith/config getjson phonebook", $out);
-        $tmp = json_decode($out[0]);
-        $sources['extensions'] = ($tmp->props->extensions == 'enabled') ? true : false;
-        $sources['nethcti'] = ($tmp->props->nethcti == 'enabled') ? true : false;
-        $sources['speeddial'] = ($tmp->props->speeddial == 'enabled') ? true : false;
-        unset($out);
+        $sources['extensions'] = true;
+        $sources['nethcti'] = true;
+        $sources['speeddial'] = true;
 
         return $response->withJson($sources, 200);
     } catch (Exception $e) {
@@ -320,26 +301,7 @@ $app->get('/phonebook/sources', function (Request $request, Response $response, 
 * Set phonebook additional sources status [enabled|disabled]
 */
 $app->post('/phonebook/sources/{prop:speeddial|extensions|nethcti}/{status:enabled|disabled}', function (Request $request, Response $response, $args) {
-    $route = $request->getAttribute('route');
-    $status = $route->getArgument('status');
-    $prop = $route->getArgument('prop');
-    exec("/usr/bin/sudo /sbin/e-smith/config setprop phonebook $prop $status", $out, $ret);
-
-    if ( $ret === 0 ) {
-        exec("/usr/bin/sudo /sbin/e-smith/signal-event nethserver-phonebook-mysql-save", $out, $ret);
-        if ( $ret === 0 ) {
-            return $response->withStatus(200);
-        }
-    }
-    return $response->withStatus(500);
-});
-
-/*
-* POST /phonebook/[ldap|ldaps]/status/[enabled|disabled]
-* Set phonebookjs(s) service status [enabled|disabled]
-*/
-$app->post('/phonebook/{service:ldap|ldaps}/status/{status:enabled|disabled}', function (Request $request, Response $response, $args) {
-    // TODO remove
+	// TODO remove this API
     return $response->withStatus(200);
 });
 
