@@ -40,7 +40,7 @@ INSERT IGNORE INTO `rest_pjsip_providers` (`id`,`provider`,`description`) VALUES
 INSERT IGNORE INTO `rest_pjsip_providers` (`id`,`provider`,`description`) VALUES (14,'viatek','Viatek');
 INSERT IGNORE INTO `rest_pjsip_providers` (`id`,`provider`,`description`) VALUES (15,'vivavox','VivaVox');
 INSERT IGNORE INTO `rest_pjsip_providers` (`id`,`provider`,`description`) VALUES (16,'voipeasy','VoipEasy');
-INSERT IGNORE INTO `rest_pjsip_providers` (`id`,`provider`,`description`) VALUES (17,'voiptel','VoipTel');
+INSERT IGNORE INTO `rest_pjsip_providers` (`id`,`provider`,`description`) VALUES (17,'voiptel','VoipTel Mono Numero');
 INSERT IGNORE INTO `rest_pjsip_providers` (`id`,`provider`,`description`) VALUES (18,'voipvoice-sip','VoipVoice (sip.voipvoice.it)');
 INSERT IGNORE INTO `rest_pjsip_providers` (`id`,`provider`,`description`) VALUES (19,'voipvoice-trunk','VoipVoice (trunk.voipvoice.it)');
 INSERT IGNORE INTO `rest_pjsip_providers` (`id`,`provider`,`description`) VALUES (20,'voipvoice-user','VoipVoice (user.voipvoice.it)');
@@ -48,6 +48,7 @@ INSERT IGNORE INTO `rest_pjsip_providers` (`id`,`provider`,`description`) VALUES
 INSERT IGNORE INTO `rest_pjsip_providers` (`id`,`provider`,`description`) VALUES (22,'wic','WiC');
 INSERT IGNORE INTO `rest_pjsip_providers` (`id`,`provider`,`description`) VALUES (23,'xstream','XStream');
 INSERT IGNORE INTO `rest_pjsip_providers` (`id`,`provider`,`description`) VALUES (24,'digitalia','Digitalia ICT');
+INSERT IGNORE INTO `rest_pjsip_providers` (`id`,`provider`,`description`) VALUES (25,'voiptel','VoipTel Multi Numero');
 
 /*Active Network*/
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (1,"aor_contact","");
@@ -889,7 +890,7 @@ INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`)
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (16,"trust_rpid","no");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (16,"userconfig","");
 
-/* VoipTel */
+/* VoipTel Mono Numero*/
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (17,"aor_contact","");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (17,"aors","");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (17,"auth_rejection_permanent","off");
@@ -1312,6 +1313,60 @@ INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`)
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (24,"transport","0.0.0.0-udp");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (24,"trust_rpid","no");
 INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (24,"userconfig","");
+
+/* VoipTel Multi Numero */
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"aor_contact","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"aors","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"auth_rejection_permanent","off");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"authentication","outbound");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"client_uri","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"codecs","g729,ulaw,alaw");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"context","from-pstn");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"dialopts","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"dialoutopts_cb","sys");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"direct_media","no");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"disabletrunk","off");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"dtmfmode","auto");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"expiration","300");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"failtrunk_enable","0");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"fatal_retry_interval","0");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"fax_detect","no");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"forbidden_retry_interval","10");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"force_rport","yes");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"from_domain","voip.voiptelitalia.it");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"hcid","on");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"identify_by","default");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"inband_progress","no");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"language","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"match","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"max_retries","10000");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"maxchans","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"media_address","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"media_encryption","no");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"message_context","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"npanxx","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"outbound_proxy","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"peerdetails","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"qualify_frequency","60");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"register","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"registration","send");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"retry_interval","60");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"rewrite_contact","yes");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"rtp_symmetric","yes");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"sendrpid","no");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"server_uri","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"sip_server","voip.voiptelitalia.it");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"sip_server_port","5060");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"support_path","no");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"sv_usercontext","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"t38_udptl","no");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"t38_udptl_ec","none");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"t38_udptl_maxdatagram","");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"t38_udptl_nat","no");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"transport","0.0.0.0-udp");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"trust_rpid","no");
+INSERT IGNORE INTO `rest_pjsip_trunks_defaults` (`provider_id`,`keyword`,`data`) VALUES (25,"userconfig","");
+
 /* secret for Opensolution GNR*/
 INSERT IGNORE INTO `rest_pjsip_trunks_specialopts` (`provider_id`,`keyword`,`data`) VALUES (6,'username','');
 
@@ -1324,3 +1379,6 @@ INSERT IGNORE INTO `rest_pjsip_trunks_specialopts` (`provider_id`,`keyword`,`dat
 
 /* Special client_uri for XStream*/
 INSERT IGNORE INTO `rest_pjsip_trunks_specialopts` (`provider_id`,`keyword`,`data`) VALUES (23,'client_uri','sip:$USERNAME@nomecliente.site:5083');
+
+/*Empty from_user fro VoipTel Multi Numero*/
+INSERT IGNORE INTO `rest_pjsip_trunks_specialopts` (`provider_id`,`keyword`,`data`) VALUES (25,'from_user','');
