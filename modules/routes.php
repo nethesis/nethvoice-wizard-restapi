@@ -23,7 +23,6 @@ use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
 require_once(__DIR__. '/../../admin/modules/core/functions.inc.php');
-require_once(__DIR__. '/../lib/freepbxFwConsole.php');
 
 /**
  * @api {get} /inboundroutes/count  Retrieve inbound routes (incoming) count
