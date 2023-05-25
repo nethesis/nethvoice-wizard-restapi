@@ -25,8 +25,6 @@ use \Psr\Http\Message\ResponseInterface as Response;
 require_once(__DIR__. '/../lib/modelRetrieve.php');
 require_once(__DIR__. '/../../admin/modules/core/functions.inc.php');
 include_once(__DIR__. '/../lib/gateway/functions.inc.php');
-require_once(__DIR__. '/../lib/freepbxFwConsole.php');
-require_once(__DIR__. '/../../admin/modules/endpointman/includes/functions.inc');
 include_once(__DIR__. '/../lib/libExtensions.php');
 
 /*
