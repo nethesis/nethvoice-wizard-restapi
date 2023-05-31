@@ -511,9 +511,9 @@ $app->delete('/devices/gateways/{id}', function (Request $request, Response $res
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($id,$id,$id,$id));
         while ($row = $sth->fetch(\PDO::FETCH_ASSOC)) {
-            core_trunks_del($row['trunk']);
-            core_trunks_delete_dialrules($row['trunk']);
-            core_routing_trunk_delbyid($row['trunk']);
+            \FreePBX::Core()->deleteTrunk($row['trunk']);
+            \FreePBX::Core()->deleteTrunkDialRulesByID($row['trunk']);
+            \FreePBX\Core\Components::Outboundrouting()->deleteTrunkRouteById($row['trunk']);
             deletePhysicalExtension($row['trunk']);
             deleteExtension($row['trunk']);
         }
