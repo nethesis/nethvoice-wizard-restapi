@@ -117,7 +117,8 @@ $app->get('/outboundroutes/count', function (Request $request, Response $respons
      try {
        $allRoutes = FreePBX::Core()->getAllRoutes();
        foreach($allRoutes as $route) {
-           $route_trunks = \FreePBX\Core\Components::Outboundrouting()->getRouteTrunksById($route['route_id']);
+           $routing = new \FreePBX\modules\Core\Components\Outboundrouting();
+	   $route_trunks = $routing->getRouteTrunksById($route['route_id']);
            $route['trunks'] = [];
            foreach($route_trunks as $trunkID) {
                $trunk = core_trunks_getDetails($trunkID);
@@ -194,15 +195,16 @@ $app->get('/outboundroutes/count', function (Request $request, Response $respons
             }
         }
 
+        $routing = new \FreePBX\modules\Core\Components\Outboundrouting();
         if ($created) {
             // update data into the freepbx db tables
             foreach($params[$locale] as $index => $route) {
                 $trunks = array();
                 foreach($route["trunks"] as $tr) {
                     array_push($trunks, $tr["trunkid"]);
-                }
-                \FreePBX\Core\Components::Outboundrouting()->setOrder($route["route_id"], strval($index));
-                \FreePBX\Core\Components::Outboundrouting()->updateTrunks($route["route_id"], $trunks, true);
+		}
+		$routing->setOrder($route["route_id"], strval($index));
+		$routing->updateTrunks($route["route_id"], $trunks, true);
             }
         } else {
             // initialize data into the freepbx db tables using data of table "outbound_routes_locales"
@@ -228,8 +230,7 @@ $app->get('/outboundroutes/count', function (Request $request, Response $respons
                         ));
                     }
                 }
-
-                \FreePBX\Core\Components::Outboundrouting()->add(
+                $routing->add(
                     $route["name"], // name
                     "", // outcid
                     "", // outcid_mode

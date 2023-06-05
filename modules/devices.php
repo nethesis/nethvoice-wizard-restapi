@@ -512,8 +512,9 @@ $app->delete('/devices/gateways/{id}', function (Request $request, Response $res
         $sth->execute(array($id,$id,$id,$id));
         while ($row = $sth->fetch(\PDO::FETCH_ASSOC)) {
             \FreePBX::Core()->deleteTrunk($row['trunk']);
-            \FreePBX::Core()->deleteTrunkDialRulesByID($row['trunk']);
-            \FreePBX\Core\Components::Outboundrouting()->deleteTrunkRouteById($row['trunk']);
+	    \FreePBX::Core()->deleteTrunkDialRulesByID($row['trunk']);
+	    $routing = new \FreePBX\modules\Core\Components\Outboundrouting();
+	    $routing->deleteTrunkRouteById($row['trunk']);
             deletePhysicalExtension($row['trunk']);
             deleteExtension($row['trunk']);
         }
