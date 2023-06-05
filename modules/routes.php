@@ -241,7 +241,7 @@ $app->get('/outboundroutes/count', function (Request $request, Response $respons
                     NULL, //time_group_id
                     $patterns, // array of patterns
                     $trunks, // array of trunks id
-                    NULL, // seq
+                    "new", // seq
                     "" // dest
                 );
             }
