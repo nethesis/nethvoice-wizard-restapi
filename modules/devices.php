@@ -25,8 +25,6 @@ use \Psr\Http\Message\ResponseInterface as Response;
 require_once(__DIR__. '/../lib/modelRetrieve.php');
 require_once(__DIR__. '/../../admin/modules/core/functions.inc.php');
 include_once(__DIR__. '/../lib/gateway/functions.inc.php');
-require_once(__DIR__. '/../lib/freepbxFwConsole.php');
-require_once(__DIR__. '/../../admin/modules/endpointman/includes/functions.inc');
 include_once(__DIR__. '/../lib/libExtensions.php');
 
 /*
@@ -513,9 +511,10 @@ $app->delete('/devices/gateways/{id}', function (Request $request, Response $res
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($id,$id,$id,$id));
         while ($row = $sth->fetch(\PDO::FETCH_ASSOC)) {
-            core_trunks_del($row['trunk']);
-            core_trunks_delete_dialrules($row['trunk']);
-            core_routing_trunk_delbyid($row['trunk']);
+            \FreePBX::Core()->deleteTrunk($row['trunk']);
+	    \FreePBX::Core()->deleteTrunkDialRulesByID($row['trunk']);
+	    $routing = new \FreePBX\modules\Core\Components\Outboundrouting();
+	    $routing->deleteTrunkRouteById($row['trunk']);
             deletePhysicalExtension($row['trunk']);
             deleteExtension($row['trunk']);
         }

@@ -23,7 +23,6 @@ use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
 require_once(__DIR__. '/../../admin/modules/core/functions.inc.php');
-require_once(__DIR__. '/../lib/freepbxFwConsole.php');
 
 /**
  * @api {get} /inboundroutes/count  Retrieve inbound routes (incoming) count
@@ -118,7 +117,8 @@ $app->get('/outboundroutes/count', function (Request $request, Response $respons
      try {
        $allRoutes = FreePBX::Core()->getAllRoutes();
        foreach($allRoutes as $route) {
-           $route_trunks = core_routing_getroutetrunksbyid($route['route_id']);
+           $routing = new \FreePBX\modules\Core\Components\Outboundrouting();
+	   $route_trunks = $routing->getRouteTrunksById($route['route_id']);
            $route['trunks'] = [];
            foreach($route_trunks as $trunkID) {
                $trunk = core_trunks_getDetails($trunkID);
@@ -195,15 +195,16 @@ $app->get('/outboundroutes/count', function (Request $request, Response $respons
             }
         }
 
+        $routing = new \FreePBX\modules\Core\Components\Outboundrouting();
         if ($created) {
             // update data into the freepbx db tables
             foreach($params[$locale] as $index => $route) {
                 $trunks = array();
                 foreach($route["trunks"] as $tr) {
                     array_push($trunks, $tr["trunkid"]);
-                }
-                core_routing_setrouteorder($route["route_id"], strval($index));
-                core_routing_updatetrunks($route["route_id"], $trunks, true);
+		}
+		$routing->setOrder($route["route_id"], strval($index));
+		$routing->updateTrunks($route["route_id"], $trunks, true);
             }
         } else {
             // initialize data into the freepbx db tables using data of table "outbound_routes_locales"
@@ -229,8 +230,7 @@ $app->get('/outboundroutes/count', function (Request $request, Response $respons
                         ));
                     }
                 }
-
-                core_routing_addbyid(
+                $routing->add(
                     $route["name"], // name
                     "", // outcid
                     "", // outcid_mode
@@ -241,7 +241,7 @@ $app->get('/outboundroutes/count', function (Request $request, Response $respons
                     NULL, //time_group_id
                     $patterns, // array of patterns
                     $trunks, // array of trunks id
-                    NULL, // seq
+                    "new", // seq
                     "" // dest
                 );
             }

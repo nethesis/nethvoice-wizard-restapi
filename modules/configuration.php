@@ -83,6 +83,12 @@ $app->post('/configuration/wizard', function (Request $request, Response $respon
         $params = $request->getParsedBody();
         $step = $params['step'];
         $status = $params['status'];
+        // Restart nethcti-server if wizard is completed
+        if ($step == 13) {
+            // Notify nethcti-server restart
+            $file = fopen("/notify/restart_nethcti-server", 'w');
+            fclose($file);
+        }
         // clean table
         sql('TRUNCATE `rest_wizard`');
         // insert wizard data
@@ -164,9 +170,6 @@ $app->get('/configuration/localnetworks', function (Request $request, Response $
 * POST /configuration/localnetworks
 */
 $app->post('/configuration/localnetworks', function (Request $request, Response $response, $args) {
-    // Notify nethcti-server restart
-    $file = fopen("/notify/restart_nethcti-server", 'w');
-    fclose($file);
     // Restart asterisk
     include '/etc/freepbx.conf';
     global $astman;

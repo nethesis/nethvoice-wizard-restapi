@@ -91,7 +91,7 @@ try {
     }
 
     # sync users
-    system("/usr/bin/scl enable rh-php56 '/usr/sbin/fwconsole userman --syncall --force' &> /dev/null");
+    system("/usr/sbin/fwconsole userman --syncall --force &> /dev/null");
 
     foreach ($csv as $k => $row) {
         $progress += $step;

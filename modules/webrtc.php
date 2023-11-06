@@ -19,9 +19,6 @@
 # along with NethServer.  If not, see COPYING.
 #
 
-require_once(__DIR__. '/../../admin/modules/endpointman/includes/functions.inc');
-require_once(__DIR__. '/../lib/freepbxFwConsole.php');
-
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 

@@ -19,8 +19,6 @@
 # along with NethServer.  If not, see COPYING.
 #
 
-require_once(__DIR__. '/../lib/freepbxFwConsole.php');
-
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
@@ -292,7 +290,7 @@ $app->post('/trunks', function (Request $request, Response $response, $args) {
             if ($data['keyword'] !== "codecs") {
                 continue;
             } else {
-                $default_codecs = $data;
+                $default_codecs = $data['keyword'];
                 unset($pjsip_data[$index]);
             }
         }

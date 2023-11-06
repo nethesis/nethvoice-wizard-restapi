@@ -19,7 +19,6 @@
 # along with NethServer.  If not, see COPYING.
 #
 
-require_once(__DIR__. '/../lib/freepbxFwConsole.php');
 include_once('lib/libUsers.php');
 include_once('lib/libExtensions.php');
 
