@@ -157,6 +157,20 @@ function gateway_generate_configuration_file($name,$mac = false){
             }
         }
         if (!empty($config['trunks_fxs'])){
+            //Split IP address into octets for Grandstream configuration and set the MAC and DATE placeholders nethesis/dev#6196
+            $octet_gateway_ip = explode(".",$config['ipv4_new']);
+            $octet_gateway_mask = explode(".",$config['netmask_green']);
+            $octet_default_gateway_ip = explode(".",$config['gateway']);
+            $upper_mac = str_replace(":","",strtoupper($mac));
+            $output = str_replace("MAC",$upper_mac,$output);
+            $output = str_replace("UTIME",time(),$output);
+            for ($i = 0; $i <= 3; $i++) {
+                //Set IP octect in the config 
+                $output = str_replace("IP{$i}",$octet_gateway_ip[$i],$output);
+                $output = str_replace("MASK{$i}",$octet_gateway_mask[$i],$output);
+                $output = str_replace("DNS{$i}",$octet_default_gateway_ip[$i],$output);
+                $output = str_replace("GATE{$i}",$octet_default_gateway_ip[$i],$output);
+            }
             $i=0;
             foreach ($config['trunks_fxs'] as $trunk){
                 $output = preg_replace("/FXSEXTENSION{$i}([^0-9])/",$trunk['physical_extension'].'\1',$output);
