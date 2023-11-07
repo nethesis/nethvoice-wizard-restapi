@@ -232,6 +232,14 @@ function useExtensionAsCustomPhysical($extension, $secret = false, $type = 'phys
         if (!$res) {
             throw new Exception("Error creating custom device");
         }
+
+        // Set rewrite contact = no
+        setSipData($extension,'rewrite_contact','no');
+        // disable SRTP
+        setSipData($extension,'media_encryption','no');
+        // Set outbound proxy
+        setSipData($extension,'outbound_proxy','sip:'.$ENV['PUBLIC_IP'];.':5060');
+
         return true;
      } catch (Exception $e) {
         error_log($e->getMessage());
@@ -376,6 +384,12 @@ function tancredi_useExtensionAsPhysical($extension,$mac,$model,$line=false,$web
     $stmt = $dbh->prepare($sql);
     $res = $stmt->execute(array(getMainExtension($extension),$extension,$extension_secret,$web_user,$web_password,$mac));
     if ($res) {
+        // Set rewrite contact = no
+        setSipData($extension,'rewrite_contact','no');
+        // disable SRTP
+        setSipData($extension,'media_encryption','no');
+        // Set outbound proxy
+        setSipData($extension,'outbound_proxy','sip:'.$ENV['PUBLIC_IP'];.':5060');
         return true;
     }
     return false;
