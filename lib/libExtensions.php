@@ -176,6 +176,20 @@ function useExtensionAsWebRTC($extension) {
         $stmt = $dbh->prepare($sql);
         $stmt->execute(array('ulaw,alaw,gsm,g726,h264,vp8',$extension,'allow'));
 
+        //Set SIP options
+        // Set rewrite contact = no
+        setSipData($extension,'rewrite_contact','yes');
+        // disable SRTP
+        setSipData($extension,'media_encryption','no');
+        // Set outbound proxy
+        setSipData($extension,'outbound_proxy','');
+        // Set force_rport to yes
+        setSipData($extension,'force_rport','yes');
+        // Set rtp_symmetric to yes
+        setSipData($extension,'rtp_symmetric','yes');
+        // Set transport to udp
+        setSipData($extension,'transport','0.0.0.0-udp');
+
         // insert WebRTC extension in password table
         $extension_secret = sql('SELECT data FROM `sip` WHERE id = "' . $extension . '" AND keyword="secret"', "getOne");
         $sql = 'SELECT id FROM rest_devices_phones WHERE extension = ?';
@@ -238,7 +252,13 @@ function useExtensionAsCustomPhysical($extension, $secret = false, $type = 'phys
         // disable SRTP
         setSipData($extension,'media_encryption','no');
         // Set outbound proxy
-        setSipData($extension,'outbound_proxy','sip:'.$ENV['PUBLIC_IP'].':5060');
+        setSipData($extension,'outbound_proxy','sip:'.$_ENV['PUBLIC_IP'].':5060');
+        // Set force_rport to no
+        setSipData($extension,'force_rport','no');
+        // Set rtp_symmetric to no
+        setSipData($extension,'rtp_symmetric','no');
+        // Set transport to udp
+        setSipData($extension,'transport','0.0.0.0-udp');
 
         return true;
      } catch (Exception $e) {
@@ -389,7 +409,14 @@ function tancredi_useExtensionAsPhysical($extension,$mac,$model,$line=false,$web
         // disable SRTP
         setSipData($extension,'media_encryption','no');
         // Set outbound proxy
-        setSipData($extension,'outbound_proxy','sip:'.$ENV['PUBLIC_IP'].':5060');
+        setSipData($extension,'outbound_proxy','sip:'.$_ENV['PUBLIC_IP'].':5060');
+        // Set force_rport to no
+        setSipData($extension,'force_rport','no');
+        // Set rtp_symmetric to no
+        setSipData($extension,'rtp_symmetric','no');
+        // Set transport to udp
+        setSipData($extension,'transport','0.0.0.0-udp');
+
         return true;
     }
     return false;
