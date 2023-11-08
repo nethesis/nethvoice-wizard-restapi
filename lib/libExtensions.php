@@ -238,7 +238,7 @@ function useExtensionAsCustomPhysical($extension, $secret = false, $type = 'phys
         // disable SRTP
         setSipData($extension,'media_encryption','no');
         // Set outbound proxy
-        setSipData($extension,'outbound_proxy','sip:'.$ENV['PUBLIC_IP'];.':5060');
+        setSipData($extension,'outbound_proxy','sip:'.$ENV['PUBLIC_IP'].':5060');
 
         return true;
      } catch (Exception $e) {
@@ -389,7 +389,7 @@ function tancredi_useExtensionAsPhysical($extension,$mac,$model,$line=false,$web
         // disable SRTP
         setSipData($extension,'media_encryption','no');
         // Set outbound proxy
-        setSipData($extension,'outbound_proxy','sip:'.$ENV['PUBLIC_IP'];.':5060');
+        setSipData($extension,'outbound_proxy','sip:'.$ENV['PUBLIC_IP'].':5060');
         return true;
     }
     return false;
