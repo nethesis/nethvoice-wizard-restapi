@@ -252,7 +252,7 @@ function useExtensionAsCustomPhysical($extension, $secret = false, $type = 'phys
         // disable SRTP
         setSipData($extension,'media_encryption','no');
         // Set outbound proxy
-        setSipData($extension,'outbound_proxy','sip:'.$_ENV['PUBLIC_IP'].':5060');
+        setSipData($extension,'outbound_proxy','sip:'.$_ENV['PROXY_IP'].':5060');
         // Set force_rport to no
         setSipData($extension,'force_rport','no');
         // Set rtp_symmetric to no
@@ -291,7 +291,7 @@ function useExtensionAsMobileApp($extension) {
         // disable SRTP
         setSipData($extension,'media_encryption','no');
         // Set outbound proxy
-        setSipData($extension,'outbound_proxy','sip:'.$_ENV['PUBLIC_IP'].':5060');
+        setSipData($extension,'outbound_proxy','sip:'.$_ENV['PROXY_IP'].':5060');
         // Set force_rport to no
         setSipData($extension,'force_rport','no');
         // Set rtp_symmetric to no
@@ -411,7 +411,7 @@ function tancredi_useExtensionAsPhysical($extension,$mac,$model,$line=false,$web
         // disable SRTP
         setSipData($extension,'media_encryption','no');
         // Set outbound proxy
-        setSipData($extension,'outbound_proxy','sip:'.$_ENV['PUBLIC_IP'].':5060');
+        setSipData($extension,'outbound_proxy','sip:'.$_ENV['PROXY_IP'].':5060');
         // Set force_rport to no
         setSipData($extension,'force_rport','no');
         // Set rtp_symmetric to no
