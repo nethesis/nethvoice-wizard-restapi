@@ -86,27 +86,24 @@ $app->get('/phones/state', function (Request $request, Response $response, $args
 });
 
 $app->get('/extensions/{extension}/srtp', function (Request $request, Response $response, $args) {
-    $sip = getSipData();
-    if (array_key_exists($args['extension'], $sip) && array_key_exists('media_encryption',$sip[$args['extension']])) {
-        $media_encryption = $sip[$args['extension']]['media_encryption'];
-        if ($media_encryption == 'sdes' || $media_encryption == 'dtls') {
-            return $response->withJson(TRUE, 200, JSON_FLAGS);
-        }
+    $dbh = FreePBX::Database();
+    $sql = 'SELECT srtp FROM rest_devices_phones WHERE extension = ?';
+    $stmt = $dbh->prepare($sql);
+    $stmt->execute(array($args['extension']));
+    $res = $stmt->fetch(\PDO::FETCH_ASSOC);
+    if ($res['srtp'] == '1') {
+        return $response->withJson(TRUE, 200, JSON_FLAGS);
     }
     return $response->withJson(FALSE, 200, JSON_FLAGS);
 });
 
 $app->post('/extensions/{extension}/srtp/{enabled}', function (Request $request, Response $response, $args) {
-    $media_encryption = ($args['enabled'] == 'true') ? 'sdes' : 'no';
-    if (extensionExists($args['extension'],FreePBX::Core()->getAllUsersByDeviceType())) {
-        if (setSipData($args['extension'],'media_encryption',$media_encryption)) {
-            system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
-            return $response->withStatus(200);
-        }
-    } else {
-        error_log('Warning: trying to change srtp to a non existing extension '.$args['extension']);
-    }
-    return $response->withStatus(500);
+    $media_encryption = ($args['enabled'] == 'true') ? 1 : 0;
+    $dbh = FreePBX::Database();
+    $sql = 'UPDATE rest_devices_phones SET srtp = ? WHERE extension = ?';
+    $stmt = $dbh->prepare($sql);
+    $stmt->execute(array($media_encryption,$args['extension']));
+    return $response->withStatus(200);
 });
 
 $app->post('/provisioning/connectivitycheck', function (Request $request, Response $response, $args) {
