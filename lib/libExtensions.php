@@ -286,16 +286,18 @@ function useExtensionAsMobileApp($extension) {
             throw new Exception("Error creating custom device");
         }
 
-        // Set qualify to 0
-        setSipData($extension,'qualifyfreq','0');
         // Set rewrite contact = no
         setSipData($extension,'rewrite_contact','no');
-        // Set SRTP enabled
-        setSipData($extension,'media_encryption','sdes');
-        // Set TCP transport
-        setSipData($extension,'transport','0.0.0.0-tcp');
-        // Set sip maximum expiration to 1 month
-        setSipData($extension,'maximum_expiration','2678400');
+        // disable SRTP
+        setSipData($extension,'media_encryption','no');
+        // Set outbound proxy
+        setSipData($extension,'outbound_proxy','sip:'.$_ENV['PUBLIC_IP'].':5060');
+        // Set force_rport to no
+        setSipData($extension,'force_rport','no');
+        // Set rtp_symmetric to no
+        setSipData($extension,'rtp_symmetric','no');
+        // Set transport to udp
+        setSipData($extension,'transport','0.0.0.0-udp');
 
         return true;
      } catch (Exception $e) {
