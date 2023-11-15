@@ -91,15 +91,14 @@ while ($row = $sth->fetch(\PDO::FETCH_ASSOC)) {
         break;
     }
 
-    $cmd = "/usr/sbin/asterisk -rx 'pjsip send notify $notify_string endpoint ".$row['extension']."'";
-    $out = system($cmd);
-    if (preg_match('/failed.$/', $out) || preg_match('/^Unable/', $out)) {
-         $emsg = $argv[0].': '.'ERROR rebooting phone '.$mac.': '.$out;
+    $res = $astman->send_request('Command',array('Command'=>"pjsip send notify $notify_string endpoint {$row['extension']}"));
+    if ($res['Response'] !== 'Success' || preg_match('/failed.$/m', $res['data']) || preg_match('/^Unable/m', $res['data'])) {
+         $emsg = $argv[0].': '.'ERROR rebooting phone '.$mac.': '.$res['data'];
          error_log($emsg);
          echo($emsg."\n");
          exit(126);
     }
-    echo $argv[0].': '.$row['vendor']." phone $mac rebooted!: " . $out . "\n";
+    echo $argv[0].': '.$row['vendor']." phone $mac rebooted!: " . $res['data'] . "\n";
     CronHelper::deleteSameTime($mac);
     exit(0);
 }

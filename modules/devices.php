@@ -421,11 +421,8 @@ $app->post('/devices/phones/reload/{extension:[0-9]+}', function (Request $reque
     if (empty($vendor)) {
         return $response->withStatus(403);
     }
-    $notify_string = 'generic-reload';
-    $cmd = "/usr/sbin/asterisk -rx 'pjsip send notify $notify_string endpoint $extension'";
-    $out = system($cmd);
-    error_log($out);
-    if (preg_match('/failed.$/', $out) || preg_match('/^Unable/', $out)) {
+    $res = $astman->send_request('Command',array('Command'=>"pjsip send notify generic-reload endpoint $extension"));
+    if ($res['Response'] !== 'Success' || preg_match('/failed.$/m', $res['data']) || preg_match('/^Unable/m', $res['data'])) {
         return $response->withStatus(500);
     }
     return $response->withStatus(202);
