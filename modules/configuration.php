@@ -86,6 +86,8 @@ $app->post('/configuration/wizard', function (Request $request, Response $respon
         // Restart nethcti-server if wizard is completed
         if ($step == 13) {
             // Notify nethcti-server restart
+            $file = fopen("/notify/restart_asterisk", 'w');
+            fclose($file);
             $file = fopen("/notify/restart_nethcti-server", 'w');
             fclose($file);
         }
