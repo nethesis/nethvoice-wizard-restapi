@@ -480,7 +480,7 @@ $app->post('/devices/gateways/push', function (Request $request, Response $respo
         $mac = $params['mac'];
 
         #Launch configuration push
-        system("/usr/bin/sudo /usr/bin/scl enable rh-php56 -- php /var/www/html/freepbx/rest/lib/tftpPushConfig.php ".escapeshellarg($name)." ".escapeshellarg(strtoupper($mac)));
+        system("php /var/www/html/freepbx/rest/lib/tftpPushConfig.php ".escapeshellarg($name)." ".escapeshellarg(strtoupper($mac)));
         return $response->withJson(array('status'=>true), 200);
     } catch (Exception $e) {
         error_log($e->getMessage());
@@ -502,7 +502,7 @@ $app->delete('/devices/gateways/{id}', function (Request $request, Response $res
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($id));
         $res = $sth->fetch(\PDO::FETCH_ASSOC);
-        system("/usr/bin/sudo /usr/bin/scl enable rh-php56 -- php /var/www/html/freepbx/rest/lib/tftpDeleteConfig.php ".escapeshellarg($res['name'])." ".escapeshellarg($res['mac']), $ret);
+        system("php /var/www/html/freepbx/rest/lib/tftpDeleteConfig.php ".escapeshellarg($res['name'])." ".escapeshellarg($res['mac']), $ret);
         //get all trunks for this gateway
         $sql = "SELECT `trunk` FROM `gateway_config_fxo` WHERE `config_id` = ? UNION SELECT `physical_extension` FROM `gateway_config_fxs` WHERE `config_id` = ? UNION SELECT `trunk` FROM `gateway_config_isdn` WHERE `config_id` = ? UNION SELECT `trunk` FROM `gateway_config_pri` WHERE `config_id` = ?";
         $sth = FreePBX::Database()->prepare($sql);

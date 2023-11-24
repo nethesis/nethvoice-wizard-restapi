@@ -396,13 +396,8 @@ function addEditGateway($params){
                 }
             }
         }
-        system("/usr/bin/sudo /usr/bin/scl enable rh-php56 -- php /var/www/html/freepbx/rest/lib/tftpGenerateConfig.php ".escapeshellarg($params['name'])." ".escapeshellarg(strtoupper($params['mac'])), $ret);
-        if ($ret === 0) {
-            system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
-            return array('status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos, 'id'=>$configId);
-        } else {
-            throw new Exception('Error generating configuration');
-        }
+        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
+        return array('status' => true, 'errors' => $errors, 'warnings' => $warnings, 'infos' => $infos, 'id'=>$configId);
     } catch (Exception $e) {
         error_log($e->getMessage());
         $errors[] = $e->getMessage();
