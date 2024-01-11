@@ -33,8 +33,17 @@ function setLegacyMode($value) {
 
 
 $app->get('/configuration/userprovider', function (Request $request, Response $response, $args) {
-	# Dummy user provider response
-	return $response->withJson(json_decode('{"configured":1,"type":"ldap","local":1}'),200);
+    # Get domain
+    $provider_domain = getenv('NETHVOICE_LDAP_BASE');
+
+    # Parse domain
+    $dcs = explode("dc=", $provider_domain);
+    array_shift($dcs);
+    $domain_raw = implode(".", $dcs);
+    $domain = str_replace(',', '', $domain_raw);
+
+    # Dummy user provider response
+    return $response->withJson(json_decode('{ "configured":1, "type":"ldap", "local":1, "domain": "'.$domain.'" }'), 200);
 });
 
 # get enabled mode
