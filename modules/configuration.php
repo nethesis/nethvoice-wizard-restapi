@@ -42,7 +42,7 @@ $app->get('/configuration/userprovider', function (Request $request, Response $r
     $domain_raw = implode(".", $dcs);
     $domain = str_replace(',', '', $domain_raw);
 
-    # Dummy user provider response
+    # Return user provider object
     return $response->withJson(json_decode('{ "configured":1, "type":"ldap", "local":1, "domain": "'.$domain.'" }'), 200);
 });
 
