@@ -1103,3 +1103,14 @@ $config = [
 ];
 
 ```
+
+
+## Migrate mobile app extensions from old to new
+
+This helper change all mobile app extensions from old native version to the new Acrobit one
+
+```
+php /var/www/html/freepbx/rest/lib/appMigrationHelper.php
+```
+
+launch it with `--restore` option to convert back extensions to old app
