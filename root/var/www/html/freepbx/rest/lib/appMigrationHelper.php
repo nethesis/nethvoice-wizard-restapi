@@ -5,7 +5,10 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
+# Change mobile app extensions from old version to new Acrobit version
+
 include_once '/etc/freepbx_db.conf';
+
 $sql = "SELECT extension
         FROM `asterisk`.`rest_devices_phones`
         WHERE `type` = 'mobile' 
