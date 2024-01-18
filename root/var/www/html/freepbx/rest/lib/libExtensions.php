@@ -259,15 +259,15 @@ function useExtensionAsMobileApp($extension) {
         }
 
         // Set qualify to 0
-        setSipData($extension,'qualifyfreq','0');
+        setSipData($extension,'qualifyfreq','60');
         // Set rewrite contact = no
-        setSipData($extension,'rewrite_contact','no');
+        setSipData($extension,'rewrite_contact','yes');
         // Set SRTP enabled
         setSipData($extension,'media_encryption','sdes');
         // Set TCP transport
-        setSipData($extension,'transport','0.0.0.0-tcp');
+        setSipData($extension,'transport','0.0.0.0-udp');
         // Set sip maximum expiration to 1 month
-        setSipData($extension,'maximum_expiration','2678400');
+        setSipData($extension,'maximum_expiration','60');
 
         return true;
      } catch (Exception $e) {
