@@ -20,12 +20,12 @@ foreach ($res as $row) {
 }
 
 if (in_array('--restore', $argv)) {
-	$options=[
+	$sip_options=[
 		'transport' => '0.0.0.0-tcp',
 		'rewrite_contact' => 'no',
 	];
 } else {
-	$options=[
+	$sip_options=[
 		'transport' => '0.0.0.0-udp',
 		'rewrite_contact' => 'yes',
 	];
@@ -34,9 +34,9 @@ if (in_array('--restore', $argv)) {
 
 if (count($extensions) > 0) {
 	$qm_string = str_repeat('?, ',count($extensions) - 1) . '?';
-	foreach ($options as $option => $value)	{
+	foreach ($sip_options as $sip_option => $value)	{
 		$sql = "UPDATE `asterisk`.`sip` SET `data` = ? WHERE `keyword` = ? WHERE `id` IN ($qm_string)";
 		$stmt = $db->prepare($sql);
-		$stmt->execute(array_merge([$value,$option],$extensions));
+		$stmt->execute(array_merge([$value,$sip_option],$extensions));
 	}
 }
