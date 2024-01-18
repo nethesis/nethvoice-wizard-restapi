@@ -24,14 +24,14 @@ foreach ($res as $row) {
 
 if (in_array('--restore', $argv)) {
 	$sip_options=[
-		'maximum_expiration' = '2678400',
+		'maximum_expiration' => '2678400',
 		'qualifyfreq' => '0',
 		'rewrite_contact' => 'no',
 		'transport' => '0.0.0.0-tcp',
 	];
 } else {
 	$sip_options=[
-		'maximum_expiration' = '7200',
+		'maximum_expiration' => '7200',
 		'qualifyfreq' => '60',
 		'rewrite_contact' => 'yes',
 		'transport' => '0.0.0.0-udp',
