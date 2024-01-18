@@ -41,7 +41,7 @@ if (in_array('--restore', $argv)) {
 if (count($extensions) > 0) {
 	$qm_string = str_repeat('?, ',count($extensions) - 1) . '?';
 	foreach ($sip_options as $sip_option => $value)	{
-		$sql = "UPDATE `asterisk`.`sip` SET `data` = ? WHERE `keyword` = ? WHERE `id` IN ($qm_string)";
+		$sql = "UPDATE `asterisk`.`sip` SET `data` = ? WHERE `keyword` = ? AND `id` IN ($qm_string)";
 		$stmt = $db->prepare($sql);
 		$stmt->execute(array_merge([$value,$sip_option],$extensions));
 	}
