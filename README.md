@@ -1107,7 +1107,7 @@ $config = [
 
 ## Migrate mobile app extensions from old to new
 
-This helper change all mobile app extensions from old version to the new one
+This helper changes all mobile app extensions from old version to the new one
 
 ```
 php /var/www/html/freepbx/rest/lib/appMigrationHelper.php
