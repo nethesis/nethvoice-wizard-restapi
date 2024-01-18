@@ -34,7 +34,7 @@ if (in_array('--restore', $argv)) {
 		'maximum_expiration' => '7200',
 		'qualifyfreq' => '60',
 		'rewrite_contact' => 'yes',
-		'transport' => '0.0.0.0-udp',
+		'transport' => '0.0.0.0-tls',
 	];
 }
 
