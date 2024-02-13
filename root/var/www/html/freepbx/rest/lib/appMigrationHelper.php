@@ -11,7 +11,7 @@ include_once '/etc/freepbx_db.conf';
 
 $sql = "SELECT extension
         FROM `asterisk`.`rest_devices_phones`
-        WHERE `type` = 'mobile' 
+        WHERE `type` = 'mobile'
         AND extension IS NOT NULL";
 
 $stmt = $db->prepare($sql);
