@@ -409,6 +409,7 @@ $app->get('/devices/gateways/manufacturers', function (Request $request, Respons
 });
 
 $app->post('/devices/phones/reload/{extension:[0-9]+}', function (Request $request, Response $response, $args) {
+    global $astman;
     if (getProvisioningEngine() === 'freepbx') {
         return $response->withStatus(501);
     }

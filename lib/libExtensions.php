@@ -282,14 +282,18 @@ function useExtensionAsMobileApp($extension) {
             throw new Exception("Error creating custom device");
         }
 
-        // Set rewrite contact = no
-        setSipData($extension,'rewrite_contact','no');
+        // Set force_rport to no
+        setSipData($extension,'force_rport','no');
+        // Set maximum_expiration
+        setSipData($extension,'maximum_expiration','7200');
         // disable SRTP
         setSipData($extension,'media_encryption','no');
         // Set outbound proxy
         setSipData($extension,'outbound_proxy','sip:'.$_ENV['PROXY_IP'].':'.$_ENV['PROXY_PORT']);
-        // Set force_rport to no
-        setSipData($extension,'force_rport','no');
+        // Set qualifyfreq
+        setSipData($extension,'qualifyfreq','60');
+        // Set rewrite contact = no
+        setSipData($extension,'rewrite_contact','no');
         // Set rtp_symmetric to no
         setSipData($extension,'rtp_symmetric','no');
         // Set transport to udp
