@@ -102,6 +102,7 @@ function gateway_generate_configuration_file($name,$mac = false){
         $output = str_replace("DEFGATEWAY",$config['gateway'],$output);
         $output = str_replace("NETMASK",$config['netmask_green'],$output);
         $output = str_replace("DATE",date ('d/m/Y G:i:s'),$output);
+        $output = str_replace("PROXY",$config['proxy'],$output);
 
         #Generate trunks config
         if (!empty($config['trunks_fxo'])){
@@ -220,6 +221,7 @@ function getPjSipDefaults() {
         "qualify_frequency"=> 60,
         "registration"=> "none",
         "retry_interval"=> 60,
+        "rewrite_contact"=> "no",
         "secret"=> "",
         "sendrpid"=> "no",
         "server_uri"=> "",
@@ -264,9 +266,9 @@ function addEditGateway($params){
             }
         }
         /*Create configuration*/
-        $sql = "INSERT INTO `gateway_config` (`model_id`,`name`,`ipv4`,`ipv4_new`,`gateway`,`ipv4_green`,`netmask_green`,`mac`) VALUES (?,?,?,?,?,?,?,?)";
+        $sql = "INSERT INTO `gateway_config` (`model_id`,`name`,`ipv4`,`ipv4_new`,`gateway`,`ipv4_green`,`netmask_green`,`mac`,`proxy`) VALUES (?,?,?,?,?,?,?,?,?)";
         $sth = FreePBX::Database()->prepare($sql);
-        $sth->execute(array($params['model'],$params['name'],$params['ipv4'],$params['ipv4_new'],$params['gateway'],$params['ipv4_green'],$params['netmask_green'],strtoupper($params['mac'])));
+        $sth->execute(array($params['model'],$params['name'],$params['ipv4'],$params['ipv4_new'],$params['gateway'],$params['ipv4_green'],$params['netmask_green'],strtoupper($params['mac']),$params['proxy']));
         /*get id*/
         $sql = "SELECT `id` FROM `gateway_config` WHERE `name` = ? ORDER BY `id` DESC LIMIT 1";
         $sth = FreePBX::Database()->prepare($sql);
@@ -306,7 +308,7 @@ function addEditGateway($params){
                         $nextTrunkId = count(core_trunks_list());
 
                         $trunk['trunknumber'] = intval('20'. str_pad(++$nextTrunkId, 3, '0', STR_PAD_LEFT));
-                        $srvip = sql('SELECT `value` FROM `endpointman_global_vars` WHERE `var_name` = "srvip"', "getOne");
+                        $srvip = $_ENV['NETHVOICE_HOST'];
                         $secret = substr(md5(uniqid(rand(), true)),0,8);
                         $defaults = getPjSipDefaults();
                         $defaults['secret'] = $secret;
@@ -318,6 +320,7 @@ function addEditGateway($params){
                         $defaults['transport'] = '0.0.0.0-udp';
                         $defaults['trunk_name'] = $trunkName;
                         $defaults['dialoutprefix'] = $trunk['trunknumber'];
+                        $defaults['outbound_proxy'] = $params['proxy'];
 
                         // set $_REQUEST and $_POST params for pjsip
                         foreach ($defaults as $k => $v) {
