@@ -278,6 +278,7 @@ $app->post('/trunks', function (Request $request, Response $response, $args) {
     $pjsip_data[] = array( "keyword" => "contact_user", "data" => $params['username']);
     $pjsip_data[] = array( "keyword" => "extdisplay", "data" => "OUT_".$trunkid);
     $pjsip_data[] = array( "keyword" => "from_user", "data" => $params['username']);
+    $pjsip_data[] = array( "keyword" => "outbound_proxy", "data" => "sip:".$_ENV['PROXY_IP'].":".$_ENV['PROXY_PORT']);
     $pjsip_data[] = array( "keyword" => "sv_channelid", "data" => $params['name']);
     $pjsip_data[] = array( "keyword" => "sv_trunk_name", "data" => $params['name']);
     $pjsip_data[] = array( "keyword" => "trunk_name", "data" => $params['name']);
@@ -326,7 +327,7 @@ $app->post('/trunks', function (Request $request, Response $response, $args) {
         $insert_data = array_merge($insert_data,[$trunkid,$data['keyword'],$data['data'],0]);
         $insert_qm[] = '(?,?,?,?)';
     }
-    $sql = 'INSERT INTO `pjsip` (`id`,`keyword`,`data`,`flags`) VALUES '.implode(',',$insert_qm);
+    $sql = 'INSERT INTO `pjsip` (`id`,`keyword`,`data`,`flags`) VALUES '.implode(',',$insert_qm).' ON DUPLICATE KEY UPDATE `keyword`=VALUES(`keyword`), `data`=VALUES(`data`)';
     $sth = $dbh->prepare($sql);
     $res = $sth->execute($insert_data);
     if (!$res) {
