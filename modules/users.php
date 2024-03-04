@@ -180,7 +180,7 @@ $app->post('/csv/csvimport', function (Request $request, Response $response, $ar
         if (file_exists($statusfile)) {
             unlink($statusfile);
         }
-        system("/usr/bin/scl enable rh-php56 -- php /var/www/html/freepbx/rest/lib/csvimport.php ".escapeshellarg($base64csv)." &> /dev/null &");
+        system("/usr/local/bin/php /var/www/html/freepbx/rest/lib/csvimport.php ".escapeshellarg($base64csv)." &> /dev/null &");
         return $response->withStatus(200);
     } catch (Exception $e) {
         error_log($e->getMessage());

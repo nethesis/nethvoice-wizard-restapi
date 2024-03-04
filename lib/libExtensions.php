@@ -204,13 +204,13 @@ function useExtensionAsWebRTC($extension) {
                 return true;
             }
         } else {
-            $sql = 'UPDATE `rest_devices_phones`'. 
+            $sql = 'UPDATE `rest_devices_phones`'.
                 ' SET user_id = ('. $uidquery. '), secret= ?, type = "webrtc"' .
                 ' WHERE extension = ?';
             if ($stmt->execute(array(getMainExtension($extension),$extension_secret,$extension))) {
                 return true;
             }
-        } 
+        }
     } catch (Exception $e) {
        error_log($e->getMessage());
        return false;

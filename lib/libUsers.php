@@ -22,6 +22,44 @@
 
 require_once('/etc/freepbx.conf');
 
+function getUserPortalUrl() {
+    $host = getenv('NETHVOICE_HOST');
+
+    # get domain
+    $provider_domain = strtolower(getenv('NETHVOICE_LDAP_BASE'));
+
+    # parse domain
+    $dcs = explode("dc=", $provider_domain);
+    array_shift($dcs);
+    $domain_raw = implode(".", $dcs);
+    $domain = str_replace(',', '', $domain_raw);
+
+    return 'https://'. $host .'/users-admin/' . $domain . '/api';
+}
+
+function getToken() {
+    $post = [
+        "username" => getenv('NETHVOICE_USER_PORTAL_USERNAME'),
+        "password" => getenv('NETHVOICE_USER_PORTAL_PASSWORD'),
+    ];
+
+    $ch = curl_init(getUserPortalUrl() . '/login');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post));
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+    // execute!
+    $response = curl_exec($ch);
+    $resJSON = json_decode($response);
+
+    // close the connection, release resources used
+    curl_close($ch);
+
+    // return token
+    return $resJSON->token;
+}
+
 function getUser($username) {
     # add domain part if needed
     if (strpos($username, '@') === false && !empty($ENV['NETHVOICE_LDAP_HOST'])) {
@@ -31,9 +69,26 @@ function getUser($username) {
 }
 
 function userExists($username) {
-    $users = shell_exec("/usr/bin/sudo /usr/libexec/nethserver/list-users");
-    foreach (json_decode($users) as $user => $props) {
-        if ($user == $username) {
+    $header = array();
+    $header[] = 'Content-type: application/json';
+    $header[] = 'Authorization: Bearer '. getToken();
+
+    $ch = curl_init(getUserPortalUrl() . '/list-users');
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array()));
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+    // execute!
+    $response = curl_exec($ch);
+    $resJson = json_decode($response);
+
+    // close the connection, release resources used
+    curl_close($ch);
+
+    foreach ($resJson->users as $user => $props) {
+        if ($props->user == $username) {
             return true;
         }
     }
