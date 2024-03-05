@@ -73,25 +73,48 @@ try {
 
         # create user
         if (!userExists($row[0])) {
-            exec("/usr/bin/sudo /sbin/e-smith/signal-event user-create ".escapeshellarg($row[0])." ".escapeshellarg($row[1])." '/bin/false'", $out, $ret);
-            $result += $ret;
-
-            if ($ret > 0 ) {
-                $err .= "Error creating user ".$row[0].": ".$out."\n";
-                unset($csv[$k]);
-                continue;
-            }
+            $header = array();
+            $header[] = 'Content-type: application/json';
+            $header[] = 'Authorization: Bearer '. getToken();
 
             # Set password
             if ( ! isset($row[3]) || empty($row[3]) ){
                 $row[3] = generateRandomPassword();
+            }
+
+            $post = [
+                "user" => $row[0],
+                "display_name" => $row[1],
+                "password" => $row[3],
+                "locked" => false,
+                "groups" => []
+            ];
+
+            $ch = curl_init(getUserPortalUrl() . '/add-user');
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post));
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+            // execute!
+            $response = curl_exec($ch);
+            $resJSON = json_decode($response);
+
+            // close the connection, release resources used
+            curl_close($ch);
+
+            if ($resJSON->status == "failure") {
+                $err .= "Error creating user ".$row[0].": ".$resJSON->error[0]->error."\n";
+                unset($csv[$k]);
+                continue;
             }
         }
         $csv[$k] = $row;
     }
 
     # sync users
-    system("/usr/sbin/fwconsole userman --syncall --force &> /dev/null");
+    system("/usr/bin/fwconsole userman --syncall --force &> /dev/null");
 
     foreach ($csv as $k => $row) {
         $progress += $step;
@@ -101,20 +124,7 @@ try {
         $user_id = getUserID($row[0]);
         $username = $row[0];
 
-        // Set password
-        if ( isset($row[3]) && ! empty($row[3]) ){
-            $tmp = tempnam("/tmp","ASTPWD");
-            file_put_contents($tmp, $row[3]);
-            exec("/usr/bin/sudo /sbin/e-smith/signal-event password-modify '".$row[0]."' $tmp", $out, $ret);
-            $result += $ret;
-            if ($ret > 0 ) {
-                $err .= "Error setting password for user ".$row[0].": ".$out['message']."\n";
-            } else {
-                setPassword($username, $row[3]);
-            }
-        }
-
-        #create extension
+        # create extension
         if (isset($row[2]) && preg_match('/^[0-9]+$/',$row[2])) {
             if (checkUsermanIsUnlocked()) {
                 $create = createMainExtensionForUser($username,$row[2]);
