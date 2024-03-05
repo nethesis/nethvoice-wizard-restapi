@@ -175,7 +175,7 @@ function getUserID($username) {
 
 function getAllUsers() {
     global $astman;
-    $blacklist = ['admin', 'administrator', 'guest', 'krbtgt','ldapservice'];
+    $blacklist = ['admin', 'administrator', 'guest', 'krbtgt','ldapservice', getenv('NETHVOICE_USER_PORTAL_USERNAME')];
     $users = FreePBX::create()->Userman->getAllUsers();
     $dbh = FreePBX::Database();
     $i = 0;
