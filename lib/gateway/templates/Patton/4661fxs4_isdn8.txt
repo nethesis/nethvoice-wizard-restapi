@@ -285,6 +285,10 @@ location-service LOC_SERV_TRAIN
     authentication outbound
       authenticate 1 authentication-service AUTH_TRAIN username TRUNKNUMBER1
 
+    registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
+
 location-service LOC_SERV_TRAIN2
   domain 1 ASTERISKIP
 
@@ -292,6 +296,10 @@ location-service LOC_SERV_TRAIN2
 
     authentication outbound
       authenticate 1 authentication-service AUTH_TRAIN username TRUNKNUMBER2
+
+    registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
 
 location-service LOC_SERV_TRAIN3
   domain 1 ASTERISKIP
@@ -301,6 +309,10 @@ location-service LOC_SERV_TRAIN3
     authentication outbound
       authenticate 1 authentication-service AUTH_TRAIN username TRUNKNUMBER3
 
+    registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
+
 location-service LOC_SERV_TRAIN4
   domain 1 ASTERISKIP
 
@@ -308,6 +320,10 @@ location-service LOC_SERV_TRAIN4
 
     authentication outbound
       authenticate 1 authentication-service AUTH_TRAIN username TRUNKNUMBER4
+
+    registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
 
 location-service LOC_SERV_TRAIN5
   domain 1 ASTERISKIP
@@ -317,6 +333,10 @@ location-service LOC_SERV_TRAIN5
     authentication outbound
       authenticate 1 authentication-service AUTH_TRAIN username TRUNKNUMBER5
 
+    registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
+
 location-service LOC_SERV_TRAIN6
   domain 1 ASTERISKIP
 
@@ -324,6 +344,10 @@ location-service LOC_SERV_TRAIN6
 
     authentication outbound
       authenticate 1 authentication-service AUTH_TRAIN username TRUNKNUMBER6
+
+    registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
 
 location-service LOC_SERV_TRAIN7
   domain 1 ASTERISKIP
@@ -333,6 +357,10 @@ location-service LOC_SERV_TRAIN7
     authentication outbound
       authenticate 1 authentication-service AUTH_TRAIN username TRUNKNUMBER7
 
+    registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
+
 location-service LOC_SERV_TRAIN8
   domain 1 ASTERISKIP
 
@@ -340,6 +368,10 @@ location-service LOC_SERV_TRAIN8
 
     authentication outbound
       authenticate 1 authentication-service AUTH_TRAIN username TRUNKNUMBER8
+
+    registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
 
 location-service LOC_SERV_TRAIN9
   domain 1 ASTERISKIP
@@ -351,6 +383,8 @@ location-service LOC_SERV_TRAIN9
 
 
     registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
       register auto
 
   identity FXSEXTENSION1
@@ -359,6 +393,8 @@ location-service LOC_SERV_TRAIN9
       authenticate 1 authentication-service AUTH_TRAIN username FXSEXTENSION1
 
     registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
       register auto
 
 
@@ -368,6 +404,8 @@ location-service LOC_SERV_TRAIN9
       authenticate 1 authentication-service AUTH_TRAIN username FXSEXTENSION2
 
     registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
       register auto
 
   identity FXSEXTENSION3
@@ -376,6 +414,8 @@ location-service LOC_SERV_TRAIN9
       authenticate 1 authentication-service AUTH_TRAIN username FXSEXTENSION3
 
     registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
       register auto
 
 context sip-gateway ASTERISK
