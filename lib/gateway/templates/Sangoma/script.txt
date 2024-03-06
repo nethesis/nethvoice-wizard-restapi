@@ -1,2 +1,0 @@
-get %mconfig.txt ifdiff save rebootifneededwhenidle apply
-
