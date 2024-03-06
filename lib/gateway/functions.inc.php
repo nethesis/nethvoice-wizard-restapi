@@ -24,7 +24,7 @@ function gateway_get_configuration($name, $mac=false){
     try{
         $dbh = FreePBX::Database();
         /*Check if config exists*/
-        $sql = "SELECT `id`,`model_id`,`ipv4`,`ipv4_new`,`gateway`,`ipv4_green`,`netmask_green`,`mac` FROM `gateway_config` WHERE `name` = ?";
+        $sql = "SELECT * FROM `gateway_config` WHERE `name` = ?";
         $prep = array($name);
         if ($mac) {
             $sql .= " AND `mac` = ?";
