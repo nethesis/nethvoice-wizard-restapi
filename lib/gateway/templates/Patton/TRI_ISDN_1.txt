@@ -110,6 +110,10 @@ location-service SER_LOC_00
     authentication outbound
       authenticate 1 authentication-service AUTH_SRV username TRUNKNUMBER1
 
+    registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
+
 context sip-gateway ASTERISK_00
 
   interface IF_GW_SIP_TRAIN_00
