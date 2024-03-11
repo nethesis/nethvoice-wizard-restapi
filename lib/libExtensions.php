@@ -217,6 +217,64 @@ function useExtensionAsWebRTC($extension) {
     }
 }
 
+function useExtensionAsNethLink($extension) {
+    try {
+        $dbh = FreePBX::Database();
+
+        //disable call waiting
+        global $astman;
+        $astman->database_del("CW",$extension);
+
+        //enable default codecs and video codecs
+        $sql = 'UPDATE IGNORE `sip` SET `data` = ? WHERE `id` = ? AND `keyword` = ?';
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute(array('ulaw,alaw,gsm,g726,h264,vp8',$extension,'allow'));
+
+        //Set SIP options
+        // Set rewrite contact = no
+        setSipData($extension,'rewrite_contact','yes');
+        // disable SRTP
+        setSipData($extension,'media_encryption','no');
+        // Set outbound proxy
+        setSipData($extension,'outbound_proxy','');
+        // Set force_rport to yes
+        setSipData($extension,'force_rport','yes');
+        // Set rtp_symmetric to yes
+        setSipData($extension,'rtp_symmetric','yes');
+        // Set transport to udp
+        setSipData($extension,'transport','0.0.0.0-udp');
+
+        // insert NethLink extension in password table
+        $extension_secret = sql('SELECT data FROM `sip` WHERE id = "' . $extension . '" AND keyword="secret"', "getOne");
+        $sql = 'SELECT id FROM rest_devices_phones WHERE extension = ?';
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute(array($extension));
+        $res = $stmt->fetchAll();
+        $uidquery = 'SELECT userman_users.id'.
+                ' FROM userman_users'.
+                ' WHERE userman_users.default_extension = ? LIMIT 1';
+        if (empty($res)) {
+            $sql = 'INSERT INTO `rest_devices_phones`'.
+                ' SET user_id = ('. $uidquery. '), extension = ?, secret= ?, type = "nethlink", mac = NULL, line = NULL';
+            $stmt = $dbh->prepare($sql);
+
+            if ($stmt->execute(array(getMainExtension($extension),$extension,$extension_secret))) {
+                return true;
+            }
+        } else {
+            $sql = 'UPDATE `rest_devices_phones`'.
+                ' SET user_id = ('. $uidquery. '), secret= ?, type = "nethlink"' .
+                ' WHERE extension = ?';
+            if ($stmt->execute(array(getMainExtension($extension),$extension_secret,$extension))) {
+                return true;
+            }
+        }
+    } catch (Exception $e) {
+       error_log($e->getMessage());
+       return false;
+    }
+}
+
 function useExtensionAsCustomPhysical($extension, $secret = false, $type = 'physical', $web_user = null ,$web_password = null) {
     try {
         //disable call waiting
@@ -638,8 +696,16 @@ function getWebRTCExtension($mainextension) {
     return _getTypeExtension($mainextension,"webrtc");
 }
 
+function getNethLinkExtension($mainextension) {
+    return _getTypeExtension($mainextension,"nethlink");
+}
+
 function getWebRTCMobileExtension($mainextension) {
     return _getTypeExtension($mainextension,"webrtc_mobile");
+}
+
+function getNethLinkMobileExtension($mainextension) {
+    return _getTypeExtension($mainextension,"nethlink_mobile");
 }
 
 function _getTypeExtension($mainextension,$type) {
