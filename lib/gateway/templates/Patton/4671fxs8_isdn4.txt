@@ -253,6 +253,10 @@ location-service LOC_SERV_TRAIN
     authentication outbound
       authenticate 1 authentication-service AUTH_TRAIN username TRUNKNUMBER1
 
+    registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
+
 location-service LOC_SERV_TRAIN2
   domain 1 ASTERISKIP
 
@@ -260,6 +264,10 @@ location-service LOC_SERV_TRAIN2
 
     authentication outbound
       authenticate 1 authentication-service AUTH_TRAIN username TRUNKNUMBER2
+
+    registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
 
 location-service LOC_SERV_TRAIN3
   domain 1 ASTERISKIP
@@ -269,6 +277,10 @@ location-service LOC_SERV_TRAIN3
     authentication outbound
       authenticate 1 authentication-service AUTH_TRAIN username TRUNKNUMBER3
 
+    registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
+
 location-service LOC_SERV_TRAIN4
   domain 1 ASTERISKIP
 
@@ -276,6 +288,10 @@ location-service LOC_SERV_TRAIN4
 
     authentication outbound
       authenticate 1 authentication-service AUTH_TRAIN username TRUNKNUMBER4
+
+    registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
 
 location-service LOC_SERV_TRAIN5
   domain 1 ASTERISKIP
@@ -286,6 +302,8 @@ location-service LOC_SERV_TRAIN5
       authenticate 1 authentication-service AUTH_TRAIN username FXSEXTENSION0
 
     registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
       register auto
 
   identity FXSEXTENSION1
@@ -294,6 +312,8 @@ location-service LOC_SERV_TRAIN5
       authenticate 1 authentication-service AUTH_TRAIN username FXSEXTENSION1
 
     registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
       register auto
 
   identity FXSEXTENSION2
@@ -302,6 +322,8 @@ location-service LOC_SERV_TRAIN5
       authenticate 1 authentication-service AUTH_TRAIN username FXSEXTENSION2
 
     registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
       register auto
 
   identity FXSEXTENSION3
@@ -310,6 +332,8 @@ location-service LOC_SERV_TRAIN5
       authenticate 1 authentication-service AUTH_TRAIN username FXSEXTENSION3
 
     registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
       register auto
 
   identity FXSEXTENSION4
@@ -318,6 +342,8 @@ location-service LOC_SERV_TRAIN5
       authenticate 1 authentication-service AUTH_TRAIN username FXSEXTENSION4
 
     registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
       register auto
 
   identity FXSEXTENSION5
@@ -326,6 +352,8 @@ location-service LOC_SERV_TRAIN5
       authenticate 1 authentication-service AUTH_TRAIN username FXSEXTENSION5
 
     registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
       register auto
 
   identity FXSEXTENSION6
@@ -334,6 +362,8 @@ location-service LOC_SERV_TRAIN5
       authenticate 1 authentication-service AUTH_TRAIN username FXSEXTENSION6
 
     registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
       register auto
 
   identity FXSEXTENSION7
@@ -342,6 +372,8 @@ location-service LOC_SERV_TRAIN5
       authenticate 1 authentication-service AUTH_TRAIN username FXSEXTENSION7
 
     registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
       register auto
 
 context sip-gateway ASTERISK

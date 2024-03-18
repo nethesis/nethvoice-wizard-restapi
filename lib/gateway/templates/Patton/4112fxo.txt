@@ -159,6 +159,10 @@ location-service LOC_SERV_TRAIN
     authentication outbound
       authenticate 1 authentication-service AUTH_TRAIN username TRUNKNUMBER1
 
+    registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
+
 location-service LOC_SERV_TRAIN2
   domain 1 ASTERISKIP
 
@@ -166,6 +170,10 @@ location-service LOC_SERV_TRAIN2
 
     authentication outbound
       authenticate 1 authentication-service AUTH_TRAIN username TRUNKNUMBER2
+
+    registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
 
 context sip-gateway ASTERISK
 

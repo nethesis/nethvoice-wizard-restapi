@@ -178,6 +178,10 @@ location-service SER_LOC_00
     authentication outbound
       authenticate 1 authentication-service AUTH_SRV username TRUNKNUMBER1
 
+    registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
+
 location-service SER_LOC_01
   domain 1 ASTERISKIP
 
@@ -185,6 +189,10 @@ location-service SER_LOC_01
 
     authentication outbound
       authenticate 1 authentication-service AUTH_SRV username TRUNKNUMBER2
+
+    registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
 
 location-service SER_LOC_02
   domain 1 ASTERISKIP
@@ -194,6 +202,10 @@ location-service SER_LOC_02
     authentication outbound
       authenticate 1 authentication-service AUTH_SRV username TRUNKNUMBER3
 
+    registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
+
 location-service SER_LOC_03
   domain 1 ASTERISKIP
 
@@ -201,6 +213,10 @@ location-service SER_LOC_03
 
     authentication outbound
       authenticate 1 authentication-service AUTH_SRV username TRUNKNUMBER4
+
+    registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
 
 context sip-gateway ASTERISK_00
 

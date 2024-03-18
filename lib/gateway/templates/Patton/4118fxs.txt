@@ -192,6 +192,8 @@ location-service LOC_SERV_TRAIN5
       authenticate 1 authentication-service AUTH_TRAIN username FXSEXTENSION0
 
     registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
       register auto
 
   identity FXSEXTENSION1
@@ -200,6 +202,8 @@ location-service LOC_SERV_TRAIN5
       authenticate 1 authentication-service AUTH_TRAIN username FXSEXTENSION1
 
     registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
       register auto
 
 
@@ -209,6 +213,8 @@ location-service LOC_SERV_TRAIN5
       authenticate 1 authentication-service AUTH_TRAIN username FXSEXTENSION2
 
     registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
       register auto
 
   identity FXSEXTENSION3
@@ -217,6 +223,8 @@ location-service LOC_SERV_TRAIN5
       authenticate 1 authentication-service AUTH_TRAIN username FXSEXTENSION3
 
     registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
       register auto
 
   identity FXSEXTENSION4
@@ -225,6 +233,8 @@ location-service LOC_SERV_TRAIN5
       authenticate 1 authentication-service AUTH_TRAIN username FXSEXTENSION4
 
     registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
       register auto
 
   identity FXSEXTENSION5
@@ -233,6 +243,8 @@ location-service LOC_SERV_TRAIN5
       authenticate 1 authentication-service AUTH_TRAIN username FXSEXTENSION5
 
     registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
       register auto
 
   identity FXSEXTENSION6
@@ -241,6 +253,8 @@ location-service LOC_SERV_TRAIN5
       authenticate 1 authentication-service AUTH_TRAIN username FXSEXTENSION6
 
     registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
       register auto
 
   identity FXSEXTENSION7
@@ -249,6 +263,8 @@ location-service LOC_SERV_TRAIN5
       authenticate 1 authentication-service AUTH_TRAIN username FXSEXTENSION7
 
     registration outbound
+      registrar ASTERISKIP 5060
+      proxy 1 PROXY tls-port 5061
       register auto
 
 context sip-gateway ASTERISK5
