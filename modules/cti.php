@@ -177,6 +177,7 @@ $app->delete('/cti/profiles/{id}', function (Request $request, Response $respons
     $route = $request->getAttribute('route');
     $id = $route->getArgument('id');
     if (deleteCTIProfile($id)) {
+        system('/var/www/html/freepbx/rest/lib/retrieveHelper.sh > /dev/null &');
         return $response->withJson(array('status' => true), 200);
     } else {
         return $response->withStatus(500);
