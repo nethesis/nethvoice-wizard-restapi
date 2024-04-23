@@ -196,7 +196,7 @@ function getPjSipDefaults() {
         "aor_contact"=> "",
         "auth_rejection_permanent"=> "on",
         "authentication"=> "inbound",
-        "auth_rejection_permanent"=> "on",
+        "auth_rejection_permanent"=> "off",
         "client_uri"=> "",
         "codecs"=> "g729,alaw,ulaw",
         "contact_user"=> "",
@@ -211,7 +211,7 @@ function getPjSipDefaults() {
         "extdisplay"=> "",
         "fax_detect"=> "no",
         "forbidden_retry_interval"=> 10,
-        "force_rport"=> "yes",
+        "force_rport"=> "no",
         "from_domain"=> "",
         "from_user"=> "",
         "hcid"=> "on",
@@ -251,7 +251,7 @@ function getPjSipDefaults() {
         "trunk_name"=> "",
         "trust_id_outbound"=> "no",
         "trust_rpid"=> "no",
-        "username"=> ""
+        "username"=> "",
         "user_eq_phone"=> "no",
     );
 }
