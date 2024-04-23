@@ -44,21 +44,21 @@ function gateway_get_configuration($name, $mac=false){
         $res = $sth->fetch(\PDO::FETCH_ASSOC);
         $config['model'] = $res['model'];
         $config['manufacturer'] = $res['manufacturer'];
-        $sql = "SELECT a.trunk,a.trunknumber AS trunknumber, secret, `protocol` FROM `gateway_config_isdn` AS a JOIN trunks AS b ON a.trunk=b.trunkid WHERE `config_id` = ?";
+        $sql = "SELECT a.trunk,a.trunknumber AS trunknumber, b.name as username, secret, `protocol` FROM `gateway_config_isdn` AS a JOIN trunks AS b ON a.trunk=b.trunkid WHERE `config_id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($config['id']));
         while ($row = $sth->fetch(\PDO::FETCH_ASSOC)){
             $config['trunks_isdn'][] = $row;
         }
 
-        $sql = "SELECT a.trunk as trunk,a.trunknumber AS trunknumber, secret  FROM `gateway_config_pri` AS a JOIN trunks AS b ON a.trunk=b.trunkid WHERE `config_id` = ?";
+        $sql = "SELECT a.trunk as trunk,a.trunknumber AS trunknumber, b.name as username, secret  FROM `gateway_config_pri` AS a JOIN trunks AS b ON a.trunk=b.trunkid WHERE `config_id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($config['id']));
         while ($row = $sth->fetch(\PDO::FETCH_ASSOC)){
             $config['trunks_pri'][] = $row;
         }
 
-        $sql = "SELECT a.trunk as trunk,a.trunknumber AS trunknumber,number, secret FROM `gateway_config_fxo` AS a JOIN trunks AS b ON a.trunk=b.trunkid WHERE `config_id` = ?";
+        $sql = "SELECT a.trunk as trunk,a.trunknumber AS trunknumber, number, b.name as username, secret FROM `gateway_config_fxo` AS a JOIN trunks AS b ON a.trunk=b.trunkid WHERE `config_id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($config['id']));
         while ($row = $sth->fetch(\PDO::FETCH_ASSOC)){
@@ -116,6 +116,7 @@ function gateway_generate_configuration_file($name,$mac = false){
             foreach ($config['trunks_fxo'] as $trunk){
                 $output = str_replace("LINENUMBER$i",$trunk['number'],$output);
                 $output = str_replace("TRUNKNUMBER$j",$trunk['trunknumber'],$output);
+                $output = str_replace("TRUNKUSERNAME$j",$trunk['username'],$output);
                 $output = str_replace("TRUNKSECRET$j",$trunk['secret'],$output);
                 $i++;
                 $j++;
@@ -125,6 +126,7 @@ function gateway_generate_configuration_file($name,$mac = false){
             $i = 1;
             foreach ($config['trunks_isdn'] as $trunk) {
                 $output = str_replace("TRUNKNUMBER$i",$trunk['trunknumber'],$output);
+                $output = str_replace("TRUNKUSERNAME$i",$trunk['username'],$output);
                 $output = str_replace("TRUNKSECRET$i",$trunk['secret'],$output);
 
                 if ($trunk['protocol']=="pp") {
@@ -153,6 +155,7 @@ function gateway_generate_configuration_file($name,$mac = false){
             $i = 1;
             foreach ($config['trunks_pri'] as $trunk){
                 $output = str_replace("TRUNKNUMBER$i",$trunk['trunknumber'],$output);
+                $output = str_replace("TRUNKUSERNAME$i",$trunk['username'],$output);
                 $output = str_replace("TRUNKSECRET$i",$trunk['secret'],$output);
                 $i++;
             }

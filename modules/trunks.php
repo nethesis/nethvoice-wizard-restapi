@@ -145,7 +145,7 @@ $app->patch('/trunks/{trunkid}', function (Request $request, Response $response,
             }
         }
 
-        // Change seccret
+        // Change secret
         if (isset($params['password'])) {
             $sql = 'UPDATE `pjsip` SET `data` = ? WHERE `id` = ? AND `keyword` = ?';
             $sth = $dbh->prepare($sql);
