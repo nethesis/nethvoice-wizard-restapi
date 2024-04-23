@@ -195,41 +195,51 @@ function getPjSipDefaults() {
     return array(
         "aor_contact"=> "",
         "auth_rejection_permanent"=> "on",
-        "authentication"=> "outbound",
+        "authentication"=> "inbound",
+        "auth_rejection_permanent"=> "on",
         "client_uri"=> "",
-        "codecs"=> "ulaw,alaw,gsm,g726",
+        "codecs"=> "g729,alaw,ulaw",
         "contact_user"=> "",
-        "context"=> "from-pstn",
+        "context"=> "from-pstn-identity",
         "continue"=> "off",
         "dialoutopts_cb"=> "sys",
         "dialoutprefix"=> "",
+        "direct_media"=> "no",
         "disabletrunk"=> "off",
         "dtmfmode"=> "rfc4733",
         "expiration"=> 3600,
         "extdisplay"=> "",
         "fax_detect"=> "no",
         "forbidden_retry_interval"=> 10,
+        "force_rport"=> "yes",
         "from_domain"=> "",
         "from_user"=> "",
         "hcid"=> "on",
+        "identify_by"=> "default",
+        "inband_progress"=> "no",
         "keepcid"=> "off",
         "language"=> "",
         "match"=> "",
         "max_retries"=> 10,
         "maxchans"=> "",
+        "media_encryption"=> "no",
         "npanxx"=> "",
         "outbound_proxy"=> "",
         "outcid"=> "",
+        "pjsip_line"=> "true",
         "provider"=> "",
         "qualify_frequency"=> 60,
-        "registration"=> "none",
+        "registration"=> "receive",
         "retry_interval"=> 60,
         "rewrite_contact"=> "no",
+        "rtp_symmetric"=> "no",
         "secret"=> "",
         "sendrpid"=> "no",
+        "send_connected_line"=> "false",
         "server_uri"=> "",
         "sip_server"=> "",
         "sip_server_port"=> 5060,
+        "support_path"=> "no",
         "sv_channelid"=> "",
         "sv_trunk_name"=> "",
         "sv_usercontext"=> "",
@@ -239,7 +249,10 @@ function getPjSipDefaults() {
         "tech"=> "pjsip",
         "transport"=> "0.0.0.0-udp",
         "trunk_name"=> "",
+        "trust_id_outbound"=> "no",
+        "trust_rpid"=> "no",
         "username"=> ""
+        "user_eq_phone"=> "no",
     );
 }
 
@@ -315,18 +328,13 @@ function addEditGateway($params){
                         $secret = substr(md5(uniqid(rand(), true)),0,8);
                         $defaults = getPjSipDefaults();
                         $defaults['aors'] = $trunkName;
-                        $defaults['authentication'] = 'inbound';
                         $defaults['dialoutprefix'] = $trunk['trunknumber'];
                         $defaults['extdisplay'] = 'OUT_'.$nextTrunkId;
                         $defaults['outbound_proxy'] = 'sip:'.$params['proxy'].'5060';
-                        $defaults['rewrite_contact'] = 'no';
                         $defaults['secret'] = $secret;
                         $defaults['sip_server'] = $params['ipv4_new'];
-                        $defaults['sip_server_port'] = '5060';
                         $defaults['sv_channelid'] = $trunkName;
                         $defaults['sv_trunk_name'] = $trunkName;
-                        $defaults['registration'] = 'receive';
-                        $defaults['transport'] = '0.0.0.0-udp';
                         $defaults['trunk_name'] = $trunkName;
                         $defaults['username'] = $trunkName;
 
