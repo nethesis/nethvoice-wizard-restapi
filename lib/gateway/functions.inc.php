@@ -314,16 +314,21 @@ function addEditGateway($params){
                         $srvip = $_ENV['NETHVOICE_HOST'];
                         $secret = substr(md5(uniqid(rand(), true)),0,8);
                         $defaults = getPjSipDefaults();
-                        $defaults['secret'] = $secret;
-                        $defaults['username'] = $trunk['trunknumber'];
+                        $defaults['aors'] = $trunkName;
+                        $defaults['authentication'] = 'inbound';
+                        $defaults['dialoutprefix'] = $trunk['trunknumber'];
                         $defaults['extdisplay'] = 'OUT_'.$nextTrunkId;
+                        $defaults['outbound_proxy'] = 'sip:'.$params['proxy'].'5060';
+                        $defaults['rewrite_contact'] = 'no';
+                        $defaults['secret'] = $secret;
                         $defaults['sip_server'] = $params['ipv4_new'];
+                        $defaults['sip_server_port'] = '5060';
                         $defaults['sv_channelid'] = $trunkName;
                         $defaults['sv_trunk_name'] = $trunkName;
+                        $defaults['registration'] = 'receive';
                         $defaults['transport'] = '0.0.0.0-udp';
                         $defaults['trunk_name'] = $trunkName;
-                        $defaults['dialoutprefix'] = $trunk['trunknumber'];
-                        $defaults['outbound_proxy'] = $params['proxy'];
+                        $defaults['username'] = $trunkName;
 
                         // set $_REQUEST and $_POST params for pjsip
                         foreach ($defaults as $k => $v) {
@@ -338,7 +343,7 @@ function addEditGateway($params){
                             null, // maxchans
                             null, // outcid
                             null, // peerdetails
-                            'from-pstn', // usercontext
+                            'from-pstn-identity', // usercontext
                             null, // userconfig
                             null, // register
                             'off', // keepcid
