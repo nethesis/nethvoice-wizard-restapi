@@ -325,7 +325,7 @@ function addEditGateway($params){
 
                         $trunk['trunknumber'] = intval('20'. str_pad(++$nextTrunkId, 3, '0', STR_PAD_LEFT));
                         $srvip = $_ENV['NETHVOICE_HOST'];
-                        $secret = substr(md5(uniqid(rand(), true)),0,8);
+                        $secret = substr(md5(uniqid(rand(), true)),0,13);
                         $defaults = getPjSipDefaults();
                         $defaults['aors'] = $trunkName;
                         $defaults['dialoutprefix'] = $trunk['trunknumber'];
