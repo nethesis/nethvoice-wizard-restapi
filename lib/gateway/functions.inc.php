@@ -24,7 +24,7 @@ function gateway_get_configuration($name, $mac=false){
     try{
         $dbh = FreePBX::Database();
         /*Check if config exists*/
-        $sql = "SELECT `id`,`model_id`,`ipv4`,`ipv4_new`,`gateway`,`ipv4_green`,`netmask_green`,`mac` FROM `gateway_config` WHERE `name` = ?";
+        $sql = "SELECT * FROM `gateway_config` WHERE `name` = ?";
         $prep = array($name);
         if ($mac) {
             $sql .= " AND `mac` = ?";
@@ -44,21 +44,21 @@ function gateway_get_configuration($name, $mac=false){
         $res = $sth->fetch(\PDO::FETCH_ASSOC);
         $config['model'] = $res['model'];
         $config['manufacturer'] = $res['manufacturer'];
-        $sql = "SELECT a.trunk,a.trunknumber AS trunknumber, secret, `protocol` FROM `gateway_config_isdn` AS a JOIN trunks AS b ON a.trunk=b.trunkid WHERE `config_id` = ?";
+        $sql = "SELECT a.trunk,a.trunknumber AS trunknumber, b.name as username, secret, `protocol` FROM `gateway_config_isdn` AS a JOIN trunks AS b ON a.trunk=b.trunkid WHERE `config_id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($config['id']));
         while ($row = $sth->fetch(\PDO::FETCH_ASSOC)){
             $config['trunks_isdn'][] = $row;
         }
 
-        $sql = "SELECT a.trunk as trunk,a.trunknumber AS trunknumber, secret  FROM `gateway_config_pri` AS a JOIN trunks AS b ON a.trunk=b.trunkid WHERE `config_id` = ?";
+        $sql = "SELECT a.trunk as trunk,a.trunknumber AS trunknumber, b.name as username, secret  FROM `gateway_config_pri` AS a JOIN trunks AS b ON a.trunk=b.trunkid WHERE `config_id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($config['id']));
         while ($row = $sth->fetch(\PDO::FETCH_ASSOC)){
             $config['trunks_pri'][] = $row;
         }
 
-        $sql = "SELECT a.trunk as trunk,a.trunknumber AS trunknumber,number, secret FROM `gateway_config_fxo` AS a JOIN trunks AS b ON a.trunk=b.trunkid WHERE `config_id` = ?";
+        $sql = "SELECT a.trunk as trunk,a.trunknumber AS trunknumber, number, b.name as username, secret FROM `gateway_config_fxo` AS a JOIN trunks AS b ON a.trunk=b.trunkid WHERE `config_id` = ?";
         $sth = FreePBX::Database()->prepare($sql);
         $sth->execute(array($config['id']));
         while ($row = $sth->fetch(\PDO::FETCH_ASSOC)){
@@ -102,6 +102,7 @@ function gateway_generate_configuration_file($name,$mac = false){
         $output = str_replace("DEFGATEWAY",$config['gateway'],$output);
         $output = str_replace("NETMASK",$config['netmask_green'],$output);
         $output = str_replace("DATE",date ('d/m/Y G:i:s'),$output);
+        $output = str_replace("PROXY",$config['proxy'],$output);
 
         #Generate trunks config
         if (!empty($config['trunks_fxo'])){
@@ -115,6 +116,7 @@ function gateway_generate_configuration_file($name,$mac = false){
             foreach ($config['trunks_fxo'] as $trunk){
                 $output = str_replace("LINENUMBER$i",$trunk['number'],$output);
                 $output = str_replace("TRUNKNUMBER$j",$trunk['trunknumber'],$output);
+                $output = str_replace("TRUNKUSERNAME$j",$trunk['username'],$output);
                 $output = str_replace("TRUNKSECRET$j",$trunk['secret'],$output);
                 $i++;
                 $j++;
@@ -124,6 +126,7 @@ function gateway_generate_configuration_file($name,$mac = false){
             $i = 1;
             foreach ($config['trunks_isdn'] as $trunk) {
                 $output = str_replace("TRUNKNUMBER$i",$trunk['trunknumber'],$output);
+                $output = str_replace("TRUNKUSERNAME$i",$trunk['username'],$output);
                 $output = str_replace("TRUNKSECRET$i",$trunk['secret'],$output);
 
                 if ($trunk['protocol']=="pp") {
@@ -152,6 +155,7 @@ function gateway_generate_configuration_file($name,$mac = false){
             $i = 1;
             foreach ($config['trunks_pri'] as $trunk){
                 $output = str_replace("TRUNKNUMBER$i",$trunk['trunknumber'],$output);
+                $output = str_replace("TRUNKUSERNAME$i",$trunk['username'],$output);
                 $output = str_replace("TRUNKSECRET$i",$trunk['secret'],$output);
                 $i++;
             }
@@ -191,40 +195,51 @@ function getPjSipDefaults() {
     return array(
         "aor_contact"=> "",
         "auth_rejection_permanent"=> "on",
-        "authentication"=> "outbound",
+        "authentication"=> "inbound",
+        "auth_rejection_permanent"=> "off",
         "client_uri"=> "",
-        "codecs"=> "ulaw,alaw,gsm,g726",
+        "codecs"=> "g729,alaw,ulaw",
         "contact_user"=> "",
-        "context"=> "from-pstn",
+        "context"=> "from-pstn-identity",
         "continue"=> "off",
         "dialoutopts_cb"=> "sys",
         "dialoutprefix"=> "",
+        "direct_media"=> "no",
         "disabletrunk"=> "off",
         "dtmfmode"=> "rfc4733",
         "expiration"=> 3600,
         "extdisplay"=> "",
         "fax_detect"=> "no",
         "forbidden_retry_interval"=> 10,
+        "force_rport"=> "no",
         "from_domain"=> "",
         "from_user"=> "",
         "hcid"=> "on",
+        "identify_by"=> "default",
+        "inband_progress"=> "no",
         "keepcid"=> "off",
         "language"=> "",
         "match"=> "",
         "max_retries"=> 10,
         "maxchans"=> "",
+        "media_encryption"=> "no",
         "npanxx"=> "",
         "outbound_proxy"=> "",
         "outcid"=> "",
+        "pjsip_line"=> "true",
         "provider"=> "",
         "qualify_frequency"=> 60,
-        "registration"=> "none",
+        "registration"=> "receive",
         "retry_interval"=> 60,
+        "rewrite_contact"=> "no",
+        "rtp_symmetric"=> "no",
         "secret"=> "",
         "sendrpid"=> "no",
+        "send_connected_line"=> "false",
         "server_uri"=> "",
         "sip_server"=> "",
         "sip_server_port"=> 5060,
+        "support_path"=> "no",
         "sv_channelid"=> "",
         "sv_trunk_name"=> "",
         "sv_usercontext"=> "",
@@ -234,7 +249,10 @@ function getPjSipDefaults() {
         "tech"=> "pjsip",
         "transport"=> "0.0.0.0-udp",
         "trunk_name"=> "",
-        "username"=> ""
+        "trust_id_outbound"=> "no",
+        "trust_rpid"=> "no",
+        "username"=> "",
+        "user_eq_phone"=> "no",
     );
 }
 
@@ -264,9 +282,9 @@ function addEditGateway($params){
             }
         }
         /*Create configuration*/
-        $sql = "INSERT INTO `gateway_config` (`model_id`,`name`,`ipv4`,`ipv4_new`,`gateway`,`ipv4_green`,`netmask_green`,`mac`) VALUES (?,?,?,?,?,?,?,?)";
+        $sql = "INSERT INTO `gateway_config` (`model_id`,`name`,`ipv4`,`ipv4_new`,`gateway`,`ipv4_green`,`netmask_green`,`mac`,`proxy`) VALUES (?,?,?,?,?,?,?,?,?)";
         $sth = FreePBX::Database()->prepare($sql);
-        $sth->execute(array($params['model'],$params['name'],$params['ipv4'],$params['ipv4_new'],$params['gateway'],$params['ipv4_green'],$params['netmask_green'],strtoupper($params['mac'])));
+        $sth->execute(array($params['model'],$params['name'],$params['ipv4'],$params['ipv4_new'],$params['gateway'],$params['ipv4_green'],$params['netmask_green'],strtoupper($params['mac']),$params['proxy']));
         /*get id*/
         $sql = "SELECT `id` FROM `gateway_config` WHERE `name` = ? ORDER BY `id` DESC LIMIT 1";
         $sth = FreePBX::Database()->prepare($sql);
@@ -306,18 +324,19 @@ function addEditGateway($params){
                         $nextTrunkId = count(core_trunks_list());
 
                         $trunk['trunknumber'] = intval('20'. str_pad(++$nextTrunkId, 3, '0', STR_PAD_LEFT));
-                        $srvip = sql('SELECT `value` FROM `endpointman_global_vars` WHERE `var_name` = "srvip"', "getOne");
-                        $secret = substr(md5(uniqid(rand(), true)),0,8);
+                        $srvip = $_ENV['NETHVOICE_HOST'];
+                        $secret = substr(md5(uniqid(rand(), true)),0,13);
                         $defaults = getPjSipDefaults();
-                        $defaults['secret'] = $secret;
-                        $defaults['username'] = $trunk['trunknumber'];
+                        $defaults['aors'] = $trunkName;
+                        $defaults['dialoutprefix'] = $trunk['trunknumber'];
                         $defaults['extdisplay'] = 'OUT_'.$nextTrunkId;
+                        $defaults['outbound_proxy'] = 'sip:'.$params['proxy'].'5060';
+                        $defaults['secret'] = $secret;
                         $defaults['sip_server'] = $params['ipv4_new'];
                         $defaults['sv_channelid'] = $trunkName;
                         $defaults['sv_trunk_name'] = $trunkName;
-                        $defaults['transport'] = '0.0.0.0-udp';
                         $defaults['trunk_name'] = $trunkName;
-                        $defaults['dialoutprefix'] = $trunk['trunknumber'];
+                        $defaults['username'] = $trunkName;
 
                         // set $_REQUEST and $_POST params for pjsip
                         foreach ($defaults as $k => $v) {
@@ -332,7 +351,7 @@ function addEditGateway($params){
                             null, // maxchans
                             null, // outcid
                             null, // peerdetails
-                            'from-pstn', // usercontext
+                            'from-pstn-identity', // usercontext
                             null, // userconfig
                             null, // register
                             'off', // keepcid
