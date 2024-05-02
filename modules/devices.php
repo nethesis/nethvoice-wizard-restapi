@@ -403,7 +403,7 @@ $app->get('/devices/gateways/manufacturers', function (Request $request, Respons
         if (!array_key_exists($model['manufacturer'], $res)) {
             $res[$model['manufacturer']] = array();
         }
-        $model['proxy'] = 'sip:'.$_ENV['PROXY_IP'].':'.$_ENV['PROXY_PORT'];
+        $model['proxy'] = 'sip:'.$_ENV['PROXY_IP'].':'.$_ENV['PROXY_PORT'].';lr';
         $model['ipv4_green'] = $_ENV['NETHVOICE_HOST'];
         array_push($res[$model['manufacturer']], $model);
     }

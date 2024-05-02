@@ -330,7 +330,7 @@ function addEditGateway($params){
                         $defaults['aors'] = $trunkName;
                         $defaults['dialoutprefix'] = $trunk['trunknumber'];
                         $defaults['extdisplay'] = 'OUT_'.$nextTrunkId;
-                        $defaults['outbound_proxy'] = 'sip:'.$params['proxy'].'5060';
+                        $defaults['outbound_proxy'] = $params['proxy'];
                         $defaults['secret'] = $secret;
                         $defaults['sip_server'] = $params['ipv4_new'];
                         $defaults['sv_channelid'] = $trunkName;

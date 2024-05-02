@@ -278,7 +278,7 @@ $app->post('/trunks', function (Request $request, Response $response, $args) {
     $pjsip_data[] = array( "keyword" => "contact_user", "data" => $params['username']);
     $pjsip_data[] = array( "keyword" => "extdisplay", "data" => "OUT_".$trunkid);
     $pjsip_data[] = array( "keyword" => "from_user", "data" => $params['username']);
-    $pjsip_data[] = array( "keyword" => "outbound_proxy", "data" => "sip:".$_ENV['PROXY_IP'].":".$_ENV['PROXY_PORT']);
+    $pjsip_data[] = array( "keyword" => "outbound_proxy", "data" => 'sip:'.$_ENV['PROXY_IP'].':'.$_ENV['PROXY_PORT'].';lr');
     $pjsip_data[] = array( "keyword" => "sv_channelid", "data" => $params['name']);
     $pjsip_data[] = array( "keyword" => "sv_trunk_name", "data" => $params['name']);
     $pjsip_data[] = array( "keyword" => "trunk_name", "data" => $params['name']);
