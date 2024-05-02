@@ -107,7 +107,7 @@ function gateway_generate_configuration_file($name,$mac = false){
         #Generate trunks config
         if (!empty($config['trunks_fxo'])){
             $i = 1;
-            $n_trunks = count($config['trunks_isdn']);
+            $n_trunks = count($config['trunks_fxo']);
             if ($n_trunks>0) {
                 $j = $n_trunks+1;
             } else {
@@ -383,11 +383,6 @@ function addEditGateway($params){
                         $sql = "REPLACE INTO `gateway_config_fxo` (`config_id`,`trunk`,`trunknumber`,`number`,`secret`) VALUES (?,?,?,?,?)";
                         $sth = FreePBX::Database()->prepare($sql);
                         $sth->execute(array($configId,$trunkId,$trunk['trunknumber'],$trunk['number'],$secret));
-                        /* Add AOR */
-                        $trunk_pjsip_id = sql('SELECT id FROM `pjsip` WHERE keyword ="trunk_name" AND data = "' . $trunkName . '"' , "getOne");
-                        $sql = "INSERT INTO `pjsip` (`id`,`keyword`,`data`,`flags`) VALUES (?,?,?,?)";
-                        $sth = FreePBX::Database()->prepare($sql);
-                        $sth->execute(array($trunk_pjsip_id,'aors',$trunkName,'0'));
                     } elseif ($type === 'fxs' && isset($params['trunks_fxs'])) {
                         /* create physical extension */
                         $mainextensionnumber = $trunk['linked_extension'];
