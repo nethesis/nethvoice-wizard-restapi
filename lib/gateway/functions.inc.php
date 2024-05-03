@@ -284,7 +284,7 @@ function addEditGateway($params){
         /*Create configuration*/
         $sql = "INSERT INTO `gateway_config` (`model_id`,`name`,`ipv4`,`ipv4_new`,`gateway`,`ipv4_green`,`netmask_green`,`mac`,`proxy`) VALUES (?,?,?,?,?,?,?,?,?)";
         $sth = FreePBX::Database()->prepare($sql);
-        $sth->execute(array($params['model'],$params['name'],$params['ipv4'],$params['ipv4_new'],$params['gateway'],$params['ipv4_green'],$params['netmask_green'],strtoupper($params['mac']),$params['proxy']));
+        $sth->execute(array($params['model'],$params['name'],$params['ipv4'],$params['ipv4_new'],$params['gateway'],$params['ipv4_green'],$params['netmask_green'],strtoupper($params['mac']),$_ENV['NETHVOICE_PROXY_FQDN']));
         /*get id*/
         $sql = "SELECT `id` FROM `gateway_config` WHERE `name` = ? ORDER BY `id` DESC LIMIT 1";
         $sth = FreePBX::Database()->prepare($sql);
@@ -330,7 +330,7 @@ function addEditGateway($params){
                         $defaults['aors'] = $trunkName;
                         $defaults['dialoutprefix'] = $trunk['trunknumber'];
                         $defaults['extdisplay'] = 'OUT_'.$nextTrunkId;
-                        $defaults['outbound_proxy'] = $params['proxy'];
+                        $defaults['outbound_proxy'] = 'sip:' . $_ENV['PROXY_IP'] . ':' . $_ENV['PROXY_PORT'] . ';lr';
                         $defaults['secret'] = $secret;
                         $defaults['sip_server'] = $params['ipv4_new'];
                         $defaults['sv_channelid'] = $trunkName;
